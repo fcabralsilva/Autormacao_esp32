@@ -1,5 +1,5 @@
 
-String VERSAO = "V08.00 - 21/02/2020";
+String VERSAO = "V08.01 - 22/02/2020";
 
 #include <ArduinoOTA.h>
 #include <Alarme.h>
@@ -78,7 +78,7 @@ struct botao5 {
 
 long milis = 0;        	// último momento que o LED foi atualizado
 long interval = 250;    // tempo de transição entre estados (milisegundos)
-String ipLocalString, buff, URL, linha, GLP, FUMACA, retorno, serv, logtxt = "sim", hora_ntp, hora_rtc,  LIMITE_MQ2, buf, IP_FIXO, GATEWAY, MASCARA_IP;
+String ipLocalString, buff, URL, linha, GLP, FUMACA, retorno, serv, logtxt = "sim",hora_rtc,  LIMITE_MQ2, buf, IP_FIXO, GATEWAY, MASCARA_IP;
 const char *json;
 const char *ssid, *password, *servidor, *conslog, *nivelLog = "4", *verao, *s_senha_alarme = "123456";
 const int PIN_AP = 0, i_sensor_alarme = 17, i_sirene_alarme = 18;
@@ -107,9 +107,7 @@ float SmokeCurve[3] = {2.3, 0.53, -0.44}; //curva LPG aproximada baseada na sens
 //vetor={x, y, inclinacao}
 float Ro = 10;
 // Variables to save date and time
-String formattedDate;
-String dayStamp;
-String timeStamp;
+
 boolean b_status_alarme = 0;
 boolean MV_DETC = false;
 int MV_DETC_CONTAR = 0;
@@ -120,6 +118,7 @@ Alarme alarme;
 RCSwitch mySwitch = RCSwitch();
 
 void setup() {
+  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
   Serial.begin(115200);
   EEPROM.begin(64);
   dht.begin();
@@ -268,7 +267,7 @@ void loop()
 	
   pisca_led(LED_VERDE, true);
 	
-  relogio();
+  relogio_ntp(1);
 	
   while (cont_ip_banco < 1)
   {
@@ -280,49 +279,49 @@ void loop()
     DeserializationError error = deserializeJson(doc, json);
     if (error)
     {
-      gravaLog(" " + hora_ntp + " - ERRO 0101 - Arquivo json: ", logtxt, 1);
+      gravaLog(" " + relogio_ntp(1) + " - ERRO 0101 - Arquivo json: ", logtxt, 1);
       Serial.println(error.c_str());
       cont_ip_banco++;
       return;
     }
     JsonObject root = doc.as<JsonObject>();
-    gravaLog(" " + hora_ntp + " - Configurações da Central ", logtxt, 2);
+    gravaLog(" " + relogio_ntp(1) + " - Configurações da Central ", logtxt, 2);
     servidor      = root["servidor"];
     serv = String(servidor);
-    gravaLog(" " + hora_ntp + "   BD:   " + String(servidor), logtxt, 2);
+    gravaLog(" " + relogio_ntp(1) + "   BD:   " + String(servidor), logtxt, 2);
 
     botao1.nomeInter  = root["int_1"];
     botao1.tipo     = root["tipo_1"];
     botao1.modelo     = root["sinal_1"];
-    gravaLog(" " + hora_ntp + "   Int 1: " + String(botao1.nomeInter) + " / " + String(botao1.tipo) + " / " + String(botao1.modelo), logtxt, 2);
+    gravaLog(" " + relogio_ntp(1) + "   Int 1: " + String(botao1.nomeInter) + " / " + String(botao1.tipo) + " / " + String(botao1.modelo), logtxt, 2);
 
     botao2.nomeInter  = root["int_2"];
     botao2.tipo     = root["tipo_2"];
     botao2.modelo     = root["sinal_2"];
-    gravaLog(" " + hora_ntp + "   Int 2: " + String(botao2.nomeInter) + " / " + String(botao2.tipo) + " / " + String(botao2.modelo), logtxt, 2);
+    gravaLog(" " + relogio_ntp(1) + "   Int 2: " + String(botao2.nomeInter) + " / " + String(botao2.tipo) + " / " + String(botao2.modelo), logtxt, 2);
 
     botao3.nomeInter  = root["int_3"];
     botao3.tipo     = root["tipo_3"];
     botao3.modelo     = root["sinal_3"];
-    gravaLog(" " + hora_ntp + "   Int 3: " + String(botao3.nomeInter) + " / " + String(botao3.tipo) + " / " + String(botao3.modelo), logtxt, 2);
+    gravaLog(" " + relogio_ntp(1) + "   Int 3: " + String(botao3.nomeInter) + " / " + String(botao3.tipo) + " / " + String(botao3.modelo), logtxt, 2);
 
     botao4.nomeInter  = root["int_4"];
     botao4.tipo     = root["tipo_4"];
     botao4.modelo     = root["sinal_4"];
-    gravaLog(" " + hora_ntp + "   Int 4: " + String(botao4.nomeInter) + " / " + String(botao4.tipo) + " / " + String(botao4.modelo), logtxt, 2);
+    gravaLog(" " + relogio_ntp(1) + "   Int 4: " + String(botao4.nomeInter) + " / " + String(botao4.tipo) + " / " + String(botao4.modelo), logtxt, 2);
 
     botao5.nomeInter  = root["int_5"];
     botao5.tipo     = root["tipo_5"];
     botao5.modelo     = root["sinal_5"];
-    gravaLog(" " + hora_ntp + "   Int 5: " + String(botao5.nomeInter) + " / " + String(botao5.tipo) + " / " + String(botao5.modelo), logtxt, 2);
+    gravaLog(" " + relogio_ntp(1) + "   Int 5: " + String(botao5.nomeInter) + " / " + String(botao5.tipo) + " / " + String(botao5.modelo), logtxt, 2);
 
     conslog   = root["log"];
     logtxt = String(conslog);
     nivelLog = root["nivel"];
     verao = root["verao"];
     s_senha_alarme = root["senha_alarme"];
-    gravaLog(" " + hora_ntp + "   Log ?: " + String(conslog) + " N: " + String(nivelLog), logtxt, 1);
-    //gravaLog(" " + hora_ntp + "   Senha Alarme : " + String(s_senha_alarme), logtxt, 1);
+    gravaLog(" " + relogio_ntp(1) + "   Log ?: " + String(conslog) + " N: " + String(nivelLog), logtxt, 1);
+    //gravaLog(" " + relogio_ntp(1) + "   Senha Alarme : " + String(s_senha_alarme), logtxt, 1);
     Serial.println("");
     cont_ip_banco++;
   }
@@ -338,12 +337,12 @@ void loop()
   /*
 	VERIFICA SE TEM COMANDOS BLUETOOAPH SENDO TRANSMITIDO
   */
-    if (ESP_BLUT.available())
-  {
-    char incoming = ESP_BLUT.read(); //Read what we recevive
-    Serial.print(" RF:"); Serial.println(incoming);
-	gravaLog(" " + hora_ntp + " - RF:  "+incoming, logtxt, 1);
-  }
+//    if (ESP_BLUT.available())
+//  {
+//    char incoming = ESP_BLUT.read(); //Read what we recevive
+//    Serial.print(" RF:"); Serial.println(incoming);
+//	gravaLog(" " + relogio_ntp(1) + " - RF:  "+incoming, logtxt, 1);
+//  }
   
   /*
   	SE FOR PRESSIONADO BOTÃO PIN_AP, TODAS AS CONFIGURAÇÕES DA CENTRAL 
@@ -352,7 +351,7 @@ void loop()
   if ( digitalRead(PIN_AP) == LOW )
   {
 
-    gravaLog(" " + hora_ntp + " - Modo AP apagando configurações WIFI ", logtxt, 1);
+    gravaLog(" " + relogio_ntp(1) + " - Modo AP apagando configurações WIFI ", logtxt, 1);
     /*
     	Apagando dados de conexão WIFI da central
     */
@@ -361,7 +360,7 @@ void loop()
     delay(2000);
     if (!wifiManager.startConfigPortal(" WIFI_AUT", "12345678") )
     {
-      gravaLog(" " + hora_ntp + " - ERRO 0102 - Falha ao conectar no WIFI modo AP (Access Poin)", logtxt, 1);
+      gravaLog(" " + relogio_ntp(1) + " - ERRO 0102 - Falha ao conectar no WIFI modo AP (Access Poin)", logtxt, 1);
       delay(2000);
       ESP.restart();
       delay(1000);
@@ -454,6 +453,7 @@ void loop()
           //Gravando log de erro na central.
           if ((nivel_log >= 1) || (logtxt == "sim")) gravarArquivo( ERRO_ENTRADA, "log.txt");
           n = 1;
+          ESP.restart();
         }
       }
     } else
@@ -484,7 +484,7 @@ void loop()
   {
     if (digitalRead(botao2.entrada) == s_tipo_2.toInt())
     {
-      if (nContar == 0)Serial.println(" E2 Pulso");
+      if (nContar == 0)Serial.println("\n"); Serial.println(" E2 Pulso");
       while ((digitalRead(botao2.entrada) == s_tipo_2.toInt()) && (nContar <= 300) )
       {
         if (millis() >= tempo + paramTempo)
@@ -501,7 +501,7 @@ void loop()
     botao2.estado_atual = digitalRead(botao2.entrada);
     if (botao2.estado_atual != botao2.estado_antes )
     {
-      if (nContar == 0)Serial.println(" E2 Inter ");
+      if (nContar == 0)Serial.println("\n"); Serial.println(" E2 Inter ");
       botao2.estado_antes = botao2.estado_atual;
       botao2.contador = 3;
       //Serial.print(botao2.contador, DEC);
@@ -516,6 +516,7 @@ void loop()
         String ERRO_ENTRADA = " ERRO 0107 - Botão 2 com erro de execução, reiniciar central";
         //Gravando log de erro na central.
         if ((nivel_log >= 1) || (logtxt == "sim")) gravarArquivo( hora_rtc + " - ERRO 0107 - Botão 2 com erro de execução, reiniciar central", "log.txt");
+        ESP.restart();       
       }
     } else
     {
@@ -545,7 +546,7 @@ void loop()
   {
     if (digitalRead(botao3.entrada) == s_tipo_3.toInt())
     {
-      if (nContar == 0)Serial.println(" E3 Pulso");
+      if (nContar == 0)Serial.println("\n"); Serial.println(" E3 Pulso");
       while ((digitalRead(botao3.entrada) == s_tipo_3.toInt()) && (nContar <= 300) )
       {
         if (millis() >= tempo + paramTempo)
@@ -562,7 +563,7 @@ void loop()
     botao3.estado_atual = digitalRead(botao3.entrada);
     if (botao3.estado_atual != botao3.estado_antes )
     {
-      if (nContar == 0)Serial.print(" E3 Inter");
+      if (nContar == 0)Serial.println("\n"); Serial.print(" E3 Inter");
       botao3.estado_antes = botao3.estado_atual;
       botao3.contador = 3;
       //Serial.print(botao3.contador, DEC);
@@ -577,6 +578,7 @@ void loop()
         String ERRO_ENTRADA = " ERRO 0107 - Botão 3 com erro de execução, reiniciar central";
         //Gravando log de erro na central.
         if ((nivel_log >= 1) || (logtxt == "sim")) gravarArquivo( hora_rtc + " - ERRO 0107 - Botão 3 com erro de execução, reiniciar central", "log.txt");
+        ESP.restart();
       }
     } else
     {
@@ -637,6 +639,7 @@ void loop()
       {
         String ERRO_ENTRADA = " ERRO 0107 - Botão 4 com erro de execução, reiniciar central";
         if ((nivel_log >= 1) || (logtxt == "sim")) gravarArquivo( hora_rtc + " - ERRO 0107 - Botão 4 com erro de execução, reiniciar central", "log.txt");
+        ESP.restart();
       }
     } else
     {
@@ -696,6 +699,7 @@ void loop()
       {
         String ERRO_ENTRADA = " ERRO 0107 - Botão 5 com erro de execução, reiniciar central";
         if ((nivel_log >= 1) || (logtxt == "sim")) gravarArquivo( hora_rtc + " - ERRO 0107 - Botão 5 com erro de execução, reiniciar central", "log.txt");
+        ESP.restart();
       }
     } else
     {
@@ -717,13 +721,19 @@ void loop()
   //---------------------------------------
   //    LIGAR E DESLIGAR TODOS RELES
   //---------------------------------------
-  if (((botao1.contador >= 30) && (botao1.contador <= 50))
-      || ((botao2.contador >= 30) && (botao2.contador <= 50))
-      || ((botao3.contador >= 30) && (botao3.contador <= 50))
-      || ((botao4.contador >= 30) && (botao4.contador <= 50)) 
-      || ((botao5.contador >= 30) && (botao5.contador <= 50)) )
+//  if (((botao1.contador >= 30) && (botao1.contador <= 50))
+//      || ((botao2.contador >= 30) && (botao2.contador <= 50))
+//      || ((botao3.contador >= 30) && (botao3.contador <= 50))
+//      || ((botao4.contador >= 30) && (botao4.contador <= 50)) 
+//      || ((botao5.contador >= 30) && (botao5.contador <= 50)) )
+//  {
+  if ((botao1.contador >= 10)
+      || (botao2.contador >= 10)
+      || (botao3.contador >= 10)
+      || (botao4.contador >= 10)
+      || (botao5.contador >= 10))
   {
-    gravaLog(" " + hora_ntp + "\n - DESL. RELES", logtxt, 2);
+    gravaLog(" " + relogio_ntp(1) + "\n - DESL. RELES", logtxt, 2);
     acionaPorta(botao1.rele, "", "desl");
     botao1.estado = false;
     acionaPorta(botao2.rele, "", "desl");
@@ -758,7 +768,7 @@ void loop()
     	EXEMPLO NA CHAMADA WEB DESLIGAR LAMPADA - CHAMADA HTTP EX: HTTP://IP_HOST/?porta=20&acao=desligar&central=IP_HOST
     */
     String stringUrl = URL;
-    gravaLog(" " + hora_ntp + " - " + String(URL), logtxt, 4);
+    gravaLog(" " + relogio_ntp(1) + " - " + String(URL), logtxt, 4);
     URL = "";
     String requisicao = stringUrl.substring(6, 11);
     if (requisicao == "porta") {
@@ -813,7 +823,7 @@ void loop()
     */
     if (requisicao == "00000")
     {
-      gravaLog(" " + hora_ntp + " - Central reiniciada p/ WEB", logtxt, 1);
+      gravaLog(" " + relogio_ntp(1) + " - Central reiniciada p/ WEB", logtxt, 1);
       delay(1000);
       ESP.restart();
     }
@@ -823,7 +833,7 @@ void loop()
     */
     if (requisicao == "00010")
     {
-      gravaLog(" " + hora_ntp + " - Recalibrando sensor MQ-X", logtxt, 2);
+      gravaLog(" " + relogio_ntp(1) + " - Recalibrando sensor MQ-X", logtxt, 2);
       calibrarSensor();
     }
 		
@@ -834,7 +844,7 @@ void loop()
     int valorMQ_Novo = stringUrl.substring(22, 24).toInt();
     if (codidoExec == "00011")
     {
-      gravaLog(" " + hora_ntp + " - Valor MQ-2: " + String(valorMQ_Novo), logtxt, 2);
+      gravaLog(" " + relogio_ntp(1) + " - Valor MQ-2: " + String(valorMQ_Novo), logtxt, 2);
       EEPROM.begin(64);
       EEPROM.write(MEM_EEPROM_MQ2, byte(valorMQ_Novo));
       EEPROM.commit();
@@ -855,7 +865,7 @@ void loop()
       stringUrl = "";
       int final_s = i.indexOf("HTTP/1.1");
       stringUrl = i.substring(0, final_s - 1);
-      gravaLog(" " + hora_ntp + " - Novos parâmetros da Central", logtxt, 2);
+      gravaLog(" " + relogio_ntp(1) + " - Novos parâmetros da Central", logtxt, 2);
       gravarArquivo("{\"servidor\":\"" + quebraString("servidor", stringUrl) + "\",\"int_1\":\"" + quebraString("int_1", stringUrl) + "\",\"int_2\":\"" + quebraString("int_2", stringUrl) + "\",\"int_3\":\"" + quebraString("int_3", stringUrl) + "\",\"int_4\":\"" + quebraString("int_4", stringUrl) + 
 	  "\",\"int_5\":\"" + quebraString("int_5", stringUrl) +"\",\"tipo_1\":\"" + quebraString("tipo_1", stringUrl) + "\",\"tipo_2\":\"" + quebraString("tipo_2", stringUrl) + "\",\"tipo_3\":\"" + quebraString("tipo_3", stringUrl) + "\",\"tipo_4\":\"" + quebraString("tipo_4", stringUrl) +"\",\"tipo_5\":\"" + quebraString("tipo_5", stringUrl) + "\",\"sinal_1\":\"" + quebraString("sinal_1", stringUrl) + "\",\"sinal_2\":\"" + quebraString("sinal_2", stringUrl) + "\",\"sinal_3\":\"" + quebraString("sinal_3", stringUrl) + "\",\"sinal_4\":\"" + quebraString("sinal_4", stringUrl) +"\",\"sinal_5\":\"" + quebraString("sinal_5", stringUrl) + "\",\"log\":\"" + quebraString("log", stringUrl) + "\",\"verao\":\"" + quebraString("verao", stringUrl) + "\",\"nivel\":\"" + quebraString("nivel", stringUrl) + "\",\"senha_alarme\":\"" + quebraString("senhaAlarme", stringUrl) + "\"}", "param.txt");
       cont_ip_banco = 0;
@@ -882,7 +892,7 @@ void loop()
       //SPIFFS.remove("/param.txt");
       deletarArquivo("/param.txt");
       criarArquivo("/param.txt");
-      gravaLog(" " + hora_ntp + " - Configuração minima ", logtxt, 3);
+      gravaLog(" " + relogio_ntp(1) + " - Configuração minima ", logtxt, 3);
       gravarArquivo("{\"servidor\":\""+String(ipHost)+"\",\"int_1\":\"P1\",\"int_2\":\"P2\",\"int_3\":\"P3\",\"int_4\":\"P4\",\"int_5\":\"P5\",\"tipo_1\":\"0\",\"tipo_2\":\"0\",\"tipo_3\":\"0\",\"tipo_4\":\"0\",\"tipo_5\":\"0\",\"sinal_1\":\"interruptor\",\"sinal_2\":\"interruptor\",\"sinal_3\":\"interruptor\",\"sinal_4\":\"interruptor\",\"sinal_5\":\"interruptor\",\"log\":\"sim\",\"verao\":\"nao\",\"nivel\":\"4\",\"senha_alarme\":\"4\"}", "param.txt");
       closeFS();
     }
@@ -1050,17 +1060,14 @@ void loop()
   //---------------------------------------
   if (millis() >= timeMq2 + (timeMq2Param * 1)) {
     sensorMq2 = analogRead(PIN_MQ2);
-   // if (sensorMq2 < 5000) {
-      GLP = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, GAS_LPG) );
-      //if (GLP == "2147483647") GLP = "0";
-      FUMACA = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, SMOKE));
-      //if (FUMACA == "2147483647") FUMACA = "0";
-      String CO = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, GAS_CO)  );
-      //if (CO == "2147483647") CO = "0";
-      contarParaGravar1++;
-      gravaLog(" " + hora_ntp + " - MQ2 A: " + String(sensorMq2) + " GLP:" + GLP + " " + "CO:" + CO + " " + "FU:" + FUMACA + " " + "L:" + contarParaGravar1, logtxt, 4);
-
-			
+    GLP = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, GAS_LPG) );
+    if (GLP == "2147483647") GLP = "0";
+    FUMACA = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, SMOKE));
+    if (FUMACA == "2147483647") FUMACA = "0";
+    String CO = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, GAS_CO)  );
+    if (CO == "2147483647") CO = "0";
+    contarParaGravar1++;
+    gravaLog(" " + relogio_ntp(1) + " - MQ2 A: " + String(sensorMq2) + " GLP:" + GLP + " " + "CO:" + CO + " " + "FU:" + FUMACA + " " + "L:" + contarParaGravar1, logtxt, 4);
     timeMq2 = millis();
     buff = "sensor=mq-2&valor=mq-2;" + String(GLP) + ";&central=" + String(ipLocalString) + "&p=" + String(PIN_MQ2);
     if (GLP > LIMITE_MQ2)
@@ -1096,7 +1103,7 @@ void loop()
       buff = "sensor=dht11&valor=dht11;" + String(temperatura) + ";" + String(umidade) + ";&central=" + String(ipLocalString) + "&p=" + String(DHTPIN);
       gravarBanco(buff);
     } else {
-      gravaLog(" " + hora_ntp + " - ERRO 0109 - Sensor DHT", logtxt, 1);
+      gravaLog(" " + relogio_ntp(1) + " - ERRO 0109 - Sensor DHT", logtxt, 1);
       t = 0;
       temperatura = 0;
       umidade = 0;

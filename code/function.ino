@@ -1,10 +1,20 @@
-void relogio()
+String relogio_ntp(int retorno)
 {
+  String FORMATO_DATA;
+  String DIA_;
+  String timeStamp;
+  String DIA_MES_HORA;
+  int DATA_HORA;
   timeClient.update();
-  formattedDate = timeClient.getFormattedDate();
-  int splitT = formattedDate.indexOf("T");
-  dayStamp = formattedDate.substring(5, splitT);
-  hora_ntp   = dayStamp + " " + timeClient.getFormattedTime();  
+  FORMATO_DATA  = timeClient.getFormattedDate();
+  DATA_HORA     = FORMATO_DATA.indexOf("T");
+  DIA_          = FORMATO_DATA.substring(5, DATA_HORA);
+  if(retorno == 1)
+  {
+    return DIA_MES_HORA      = DIA_ + " " + timeClient.getFormattedTime();  
+  }else{
+      return "ERRO NA FUNÇÃO 'relogio_ntp(int retorno)' O VALOR DECLARADO NÃO ESTA NO ESCOPO ";
+    }
 }
 
 void pisca_led(int LED,boolean estado)
@@ -66,7 +76,7 @@ String quebraString(String txtMsg,String string)
 //    GPIO
 //---------------------------------------  
 void acionaPorta(int numeroF, String portaF, String acaoF) {
-  gravaLog(" "+hora_ntp + " - Comando:"+String(numeroF)+"/"+acaoF, logtxt, 4);
+  gravaLog(" "+relogio_ntp(1) + " - Comando:"+String(numeroF)+"/"+acaoF, logtxt, 4);
   if (acaoF == "liga") {
     digitalWrite(numeroF, HIGH );
     linha = "porta="+String(numeroF)+"&acao=liga&central="+ipLocalString;
@@ -95,7 +105,7 @@ String teste_conexao(){
     int r = client.connect(servidor, portaServidor);
     if(r == 0)
     {
-      gravaLog(" "+hora_ntp + " - ERRO 0104 - Servidor Desconectado", logtxt, 1);
+      gravaLog(" "+relogio_ntp(1) + " - ERRO 0104 - Servidor Desconectado", logtxt, 1);
       retorno = "ERRO_SERVIDOR_DESC";
     }else if(r == 1)
     {
@@ -113,12 +123,12 @@ void gravarBanco (String buffer){
   WiFiClient client = server.available();
   if(WiFi.status() != WL_CONNECTED)
   {
-    gravaLog(" "+hora_ntp + " - ERRO 0105 - Impossivel conectar ao servidor, reiniciando a central!", logtxt, 1);
+    gravaLog(" "+relogio_ntp(1) + " - ERRO 0105 - Impossivel conectar ao servidor, reiniciando a central!", logtxt, 1);
     WiFi.reconnect();
     if(WiFi.status() != WL_CONNECTED){
       pisca_led(LED_VERDE,false);
       pisca_led(LED_VERMELHO,true);
-      gravaLog(" "+hora_ntp + " - Falha no WIFI e atingir o tempo limite", logtxt, 1);
+      gravaLog(" "+relogio_ntp(1) + " - Falha no WIFI e atingir o tempo limite", logtxt, 1);
       //ESP.restart();
       delay(1000);
     } 
@@ -128,11 +138,11 @@ void gravarBanco (String buffer){
   {
     //if (client.connect(servidor, 80)) {
     client.println("GET /web/gravar.php?"+buffer);
-    gravaLog(" "+hora_ntp + " - BD: "+buffer, logtxt, 4);
+    gravaLog(" "+relogio_ntp(1) + " - BD: "+buffer, logtxt, 4);
     client.println();
     buffer = "";
   } else {
-    gravaLog(" "+hora_ntp + " - ERRO 0104 - Servidor Desconectado", logtxt, 1);
+    gravaLog(" "+relogio_ntp(1) + " - ERRO 0104 - Servidor Desconectado", logtxt, 1);
     buffer = "";
   }
   client.flush();
@@ -237,7 +247,7 @@ void criarArquivo(String nomeArquivo){
     wFile = SPIFFS.open(nomeArquivo,"w+");
     //Verifica a criação do arquivo
     if(!wFile){
-      gravaLog(" "+hora_ntp + " - ERRO 0109 - Erro ao criar arquivo "+nomeArquivo, logtxt, 1);
+      gravaLog(" "+relogio_ntp(1) + " - ERRO 0109 - Erro ao criar arquivo "+nomeArquivo, logtxt, 1);
     } else {
       Serial.println(" Arquivo "+nomeArquivo+" criado com sucesso!");
     }
@@ -249,7 +259,7 @@ void criarArquivo(String nomeArquivo){
 void deletarArquivo(String arquivo) {
   //Remove o arquivo
   if(!SPIFFS.remove(arquivo)){
-    gravaLog(" "+hora_ntp + " - ERRO 0105 - Erro ao remover arquivo "+arquivo, logtxt, 1);
+    gravaLog(" "+relogio_ntp(1) + " - ERRO 0105 - Erro ao remover arquivo "+arquivo, logtxt, 1);
   } else {
     Serial.println(" Arquivo "+arquivo+" removido com sucesso!");
   }
@@ -266,7 +276,7 @@ void gravarArquivo(String msg, String arq) {
       deletarArquivo("/log.txt");
       criarArquivo("/log.txt"); 
       delay(5);
-      gravaLog(" "+hora_ntp + " - Log deletado! ", logtxt, 1);
+      gravaLog(" "+relogio_ntp(1) + " - Log deletado! ", logtxt, 1);
     }
     if(!logg){
       //Gravando log de erro na central.
@@ -282,10 +292,10 @@ void gravarArquivo(String msg, String arq) {
   {
     File param1 = SPIFFS.open("/param.txt","a+");
     if(!param1){
-      gravaLog(" "+hora_ntp + " - ERRO 0106 - Erro ao abrir arquivo "+arq, logtxt, 1);
+      gravaLog(" "+relogio_ntp(1) + " - ERRO 0106 - Erro ao abrir arquivo "+arq, logtxt, 1);
     } else {
       param1.println(msg);
-      gravaLog(" "+hora_ntp + " - Gravando: "+msg, logtxt, 1);
+      gravaLog(" "+relogio_ntp(1) + " - Gravando: "+msg, logtxt, 1);
     }
     param1.close();
   }
@@ -321,9 +331,9 @@ void openFS(){
   //Abre o sistema de arquivos
   SPIFFS.begin(true);
   if(!SPIFFS.begin()){
-    gravaLog(" "+hora_ntp + " - ERRO 0107 - Erro ao abrir sistema de arquivo", logtxt, 1);
+    gravaLog(" "+relogio_ntp(1) + " - ERRO 0107 - Erro ao abrir sistema de arquivo", logtxt, 1);
   } else {
-    gravaLog(" "+hora_ntp + " - Sistema de arquivos iniciado!", logtxt, 4);
+    gravaLog(" "+relogio_ntp(1) + " - Sistema de arquivos iniciado!", logtxt, 4);
   }
 }
 
