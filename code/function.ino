@@ -1,25 +1,14 @@
 String relogio_ntp(int retorno)
 {
-  String FORMATO_DATA;
-  String DIA_NTP;
-  String MES_NTP;
+  String formattedDate;
+  String dayStamp;
   String timeStamp;
-  String DIA_MES_HORA;
-  int DATA_HORA;
   timeClient.update();
-  FORMATO_DATA  = timeClient.getFormattedTime();
-  DATA_HORA     = FORMATO_DATA.indexOf("T");
-  DIA_NTP       = FORMATO_DATA.substring(5, DATA_HORA);
-  MES_NTP       = FORMATO_DATA.substring(3,5);
-  if(retorno == 1)
-  {
-    return DIA_MES_HORA      = DIA_NTP + " " + timeClient.getFormattedTime();  
-  }else if(retorno == 9)
-  {
-    return MES_NTP + "mes";
-    }else{
-      return "ERRO NA FUNÇÃO 'relogio_ntp(int retorno)' O VALOR DECLARADO NÃO ESTA NO ESCOPO ";
-    }
+  formattedDate = timeClient.getFormattedDate();
+  int splitT = formattedDate.indexOf("T");
+  dayStamp = formattedDate.substring(5, splitT);
+  String hora_ntp   = dayStamp + " " + timeClient.getFormattedTime(); 
+  return hora_ntp;
 }
 
 void pisca_led(int LED,boolean estado)
