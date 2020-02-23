@@ -1,18 +1,23 @@
 String relogio_ntp(int retorno)
 {
   String FORMATO_DATA;
-  String DIA_;
+  String DIA_NTP;
+  String MES_NTP;
   String timeStamp;
   String DIA_MES_HORA;
   int DATA_HORA;
   timeClient.update();
-  FORMATO_DATA  = timeClient.getFormattedDate();
+  FORMATO_DATA  = timeClient.getFormattedTime();
   DATA_HORA     = FORMATO_DATA.indexOf("T");
-  DIA_          = FORMATO_DATA.substring(5, DATA_HORA);
+  DIA_NTP       = FORMATO_DATA.substring(5, DATA_HORA);
+  MES_NTP       = FORMATO_DATA.substring(3,5);
   if(retorno == 1)
   {
-    return DIA_MES_HORA      = DIA_ + " " + timeClient.getFormattedTime();  
-  }else{
+    return DIA_MES_HORA      = DIA_NTP + " " + timeClient.getFormattedTime();  
+  }else if(retorno == 9)
+  {
+    return MES_NTP + "mes";
+    }else{
       return "ERRO NA FUNÇÃO 'relogio_ntp(int retorno)' O VALOR DECLARADO NÃO ESTA NO ESCOPO ";
     }
 }
