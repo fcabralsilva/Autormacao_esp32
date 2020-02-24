@@ -20,7 +20,7 @@ String VERSAO = "V08.02 - 23/02/2020";
 
 #define BUZZER                5
 #define PIN_MQ2               34
-#define DHTPIN                35 
+#define DHTPIN                19
 #define DHTTYPE               DHT11
 #define VRL_VALOR             5       //resistência de carga
 #define RO_FATOR_AR_LIMPO     9.83    //resistência do sensor em ar limpo 9.83 de acordo com o datasheet
