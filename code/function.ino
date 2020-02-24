@@ -2,12 +2,25 @@ String relogio_ntp(int retorno)
 {
   String formattedDate;
   String dayStamp;
-  String timeStamp;
+  String hora_ntp;
+  String dia_;
+  String mes_;
+  String ano_;
   timeClient.update();
   formattedDate = timeClient.getFormattedDate();
   int splitT = formattedDate.indexOf("T");
   dayStamp = formattedDate.substring(5, splitT);
-  String hora_ntp   = dayStamp + " " + timeClient.getFormattedTime(); 
+  dia_ = formattedDate.substring(8, splitT);
+  mes_ = formattedDate.substring(5, splitT -3);
+  ano_ = formattedDate.substring(0, splitT -6);
+  if(retorno == 1)
+  {
+    hora_ntp   = dia_ +"/"+ mes_ +"/"+ ano_ + " " + timeClient.getFormattedTime(); 
+  }
+  if(retorno == 2)
+  {
+    hora_ntp = dia_ +"/"+ mes_ +"/"+ ano_;
+  }
   return hora_ntp;
 }
 

@@ -1,5 +1,5 @@
 
-String VERSAO = "V08.02 - 23/02/2020";
+String VERSAO = "V08.03 - 24/02/2020";
 
 #include <ArduinoOTA.h>
 #include <Alarme.h>
@@ -163,9 +163,10 @@ void setup() {
 	
   alarme.sensores(i_sensor_alarme);
   alarme.sirene(i_sirene_alarme);
-  //---------------------------------------
-  //    LOG
-  //---------------------------------------
+
+  timeClient.begin();
+  timeClient.forceUpdate();
+  
   openFS();
   criarArquivo("/param.txt");
   criarArquivo("/log.txt");
@@ -247,13 +248,11 @@ void setup() {
 	
   retorno = "SERVIDOR_CONECT";
 	
-  timeClient.begin();
-  timeClient.forceUpdate();
   //timeClient.setTimeOffset(-6200);
 	
   ledcSetup(channel, freq, resolution);
   ledcAttachPin(5, channel);
-	
+	Serial.println(" Data de hoje: " + relogio_ntp(2));
   gravarArquivo(" \n\n ******************************* \n *** INICIANDO SISTEMA *** \n *******************************\n " + VERSAO, "log.txt");
  
 }
