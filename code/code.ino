@@ -4,12 +4,10 @@ String VERSAO = "V08.03 - 24/02/2020";
 #include <ArduinoOTA.h>
 #include <Alarme.h>
 #include <ArduinoJson.h>
-//#include <BluetoothSerial.h>
 #include <DHT.h>
 #include <EEPROM.h>
 #include <FS.h>
 #include <NTPClient.h>
-//#include <RCSwitch.h>
 #include <SPIFFS.h>
 #include "soc/rtc_cntl_reg.h"
 #include <Wire.h>
@@ -78,14 +76,14 @@ struct botao4 {
 
 long milis = 0;        	// último momento que o LED foi atualizado
 long interval = 250;    // tempo de transição entre estados (milisegundos)
-String ipLocalString, buff, URL, linha, GLP, FUMACA, retorno, serv, logtxt = "sim",hora_rtc,  LIMITE_MQ2, buf, IP_FIXO, GATEWAY, MASCARA_IP;
+String ipLocalString, buff, URL, linha, GLP, FUMACA, retorno, serv, logtxt = "sim", hora_rtc,  LIMITE_MQ2, buf, IP_FIXO, GATEWAY, MASCARA_IP;
 const char *json;
 const char *ssid, *password, *servidor, *conslog, *nivelLog = "4", *verao, *s_senha_alarme = "123456";
 const int PIN_AP = 0, i_sensor_alarme = 17, i_sirene_alarme = 18;
 int portaServidor = 80, contarParaGravar2 = 0 ;
 int contarParaGravar1 = 0, nContar = 0, cont_ip_banco = 0, nivel_log = 4, estado_atual = 0, estado_antes = 0, freq = 2000, channel = 0, resolution = 8, n = 0, sensorMq2 = 0, contadorPorta = 0, T_WIFI = 50, MEM_EEPROM_MQ2 = 20;
 short paramTempo = 60;
-unsigned long time1sec, time3, TEMP_4,PIR_1_INTRVL =300, time3Param = 100000, timeDht, timeMq2 , tempo = 0, timeDhtParam = 300000, timeMq2Param = 30000;
+unsigned long time1sec, time3, TEMP_4, PIR_1_INTRVL = 300, time3Param = 100000, timeDht, timeMq2 , tempo = 0, timeDhtParam = 300000, timeMq2Param = 30000;
 IPAddress ipHost;
 WiFiUDP ntpUDP;
 int16_t utc = -3; //UTC -3:00 Brazil
@@ -123,9 +121,9 @@ void setup() {
   EEPROM.begin(64);
   dht.begin();
   //mySwitch.enableReceive(RF_RECEIVER);
-  
-	delay(2000);
-	
+
+  delay(2000);
+
   pinMode(PIN_AP, INPUT_PULLUP);
   pinMode(PIR_1, INPUT_PULLUP);
 
@@ -144,10 +142,10 @@ void setup() {
   pinMode(botao4.rele, OUTPUT);
   pinMode(botao4.entrada, INPUT_PULLUP);
   digitalWrite(botao4.rele, LOW);
-  
-//  pinMode(botao5.rele, OUTPUT);
-//  pinMode(botao5.entrada, INPUT_PULLUP);
-//  digitalWrite(botao5.rele, LOW);
+
+  //  pinMode(botao5.rele, OUTPUT);
+  //  pinMode(botao5.entrada, INPUT_PULLUP);
+  //  digitalWrite(botao5.rele, LOW);
 
   pinMode(0, INPUT);
 
@@ -160,17 +158,17 @@ void setup() {
   digitalWrite(LED_VERDE, LOW);
   pinMode(LED_VERMELHO, OUTPUT);
   digitalWrite(LED_VERMELHO, LOW);
-	
+
   alarme.sensores(i_sensor_alarme);
   alarme.sirene(i_sirene_alarme);
 
   timeClient.begin();
   timeClient.forceUpdate();
-  
+
   openFS();
   criarArquivo("/param.txt");
   criarArquivo("/log.txt");
-	
+
   //---------------------------------------
   //    CONECTANDO A REDE WIFI
   //---------------------------------------
@@ -179,10 +177,10 @@ void setup() {
   WiFiManager wifiManager;
   wifiManager.setAPCallback(configModeCallback);
   wifiManager.setSaveConfigCallback(saveConfigCallback);
-//  IPAddress _ip = IPAddress(192, 168, 0, 21);
-//  IPAddress _gw = IPAddress(192, 168, 0, 1);
-//  IPAddress _sn = IPAddress(255, 255, 255, 0);
-//  wifiManager.setSTAStaticIPConfig(_ip, _gw, _sn);
+  //  IPAddress _ip = IPAddress(192, 168, 0, 21);
+  //  IPAddress _gw = IPAddress(192, 168, 0, 1);
+  //  IPAddress _sn = IPAddress(255, 255, 255, 0);
+  //  wifiManager.setSTAStaticIPConfig(_ip, _gw, _sn);
   if (!wifiManager.autoConnect("WIFI_AUT", "12345678")) {
     Serial.println("Falha ao conectar e atingir o tempo limite");
     ESP.restart();
@@ -194,13 +192,13 @@ void setup() {
   Serial.println("----------------------------------");
   Serial.println(" *Configurações da Central:");
   Serial.println(" IP da Central: " + ipLocalString);
-	
+
   //---------------------------------------
   // PARAMETROS DA MEMORIA EEPROM
   //---------------------------------------
   LIMITE_MQ2 = byte(EEPROM.read(MEM_EEPROM_MQ2));
   Serial.println(" Valor sensor de Gás: " + String(LIMITE_MQ2));
-	
+
   //---------------------------------------
   //PRIMEIRA LEITURA DO SENSORES
   //---------------------------------------
@@ -211,68 +209,68 @@ void setup() {
   GLP = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, GAS_LPG) );
   FUMACA = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, SMOKE));
 
-	//---------------------------------------
+  //---------------------------------------
   //CALIBRAR LEITURA DO SENSOR DE GAS E FUMACA
   //---------------------------------------
   calibrarSensor();
 
   EEPROM.end();
-	
-//  ArduinoOTA
-//  .onStart([]() {
-//    String type;
-//    if (ArduinoOTA.getCommand() == U_FLASH)
-//      type = "sketch";
-//    else // U_SPIFFS
-//      type = "filesystem";
-//
-//    // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
-//    Serial.println("Start updating " + type);
-//  })
-//  .onEnd([]() {
-//    Serial.println("\nEnd");
-//  })
-//  .onProgress([](unsigned int progress, unsigned int total) {
-//    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-//  })
-//  .onError([](ota_error_t error) {
-//    Serial.printf("Error[%u]: ", error);
-//    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-//    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-//    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-//    else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-//    else if (error == OTA_END_ERROR) Serial.println("End Failed");
-//  });
-//	
-//  ArduinoOTA.begin();
-	
+
+  //  ArduinoOTA
+  //  .onStart([]() {
+  //    String type;
+  //    if (ArduinoOTA.getCommand() == U_FLASH)
+  //      type = "sketch";
+  //    else // U_SPIFFS
+  //      type = "filesystem";
+  //
+  //    // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+  //    Serial.println("Start updating " + type);
+  //  })
+  //  .onEnd([]() {
+  //    Serial.println("\nEnd");
+  //  })
+  //  .onProgress([](unsigned int progress, unsigned int total) {
+  //    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+  //  })
+  //  .onError([](ota_error_t error) {
+  //    Serial.printf("Error[%u]: ", error);
+  //    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+  //    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+  //    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+  //    else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+  //    else if (error == OTA_END_ERROR) Serial.println("End Failed");
+  //  });
+  //
+  //  ArduinoOTA.begin();
+
   retorno = "SERVIDOR_CONECT";
-	
+
   //timeClient.setTimeOffset(-6200);
-	
+
   ledcSetup(channel, freq, resolution);
   ledcAttachPin(5, channel);
-	Serial.println(" Data de hoje: " + relogio_ntp(2));
+  Serial.println(" Data de hoje: " + relogio_ntp(2));
   gravarArquivo(" \n\n ******************************* \n *** INICIANDO SISTEMA *** \n *******************************\n " + VERSAO, "log.txt");
- 
+
 }
 
-void loop() 
+void loop()
 {
   //ArduinoOTA.handle();
-	
+
   WiFiManager wifiManager;
   WiFiClient client = server.available();
-	
+
   pisca_led(LED_VERDE, true);
-	
+
   relogio_ntp(9);
-	
+
   while (cont_ip_banco < 1)
   {
-		// FAZENDO LEITURA DE PARAMETROS DO SISTEMA
+    // FAZENDO LEITURA DE PARAMETROS DO SISTEMA
     openFS();
-    
+
     StaticJsonDocument<600> doc;
     json = lerArquivoParam().c_str();
     DeserializationError error = deserializeJson(doc, json);
@@ -309,10 +307,10 @@ void loop()
     botao4.modelo     = root["sinal_4"];
     gravaLog(" " + relogio_ntp(1) + "   Int 4: " + String(botao4.nomeInter) + " / " + String(botao4.tipo) + " / " + String(botao4.modelo), logtxt, 2);
 
-//    botao5.nomeInter  = root["int_5"];
-//    botao5.tipo     = root["tipo_5"];
-//    botao5.modelo     = root["sinal_5"];
-//    gravaLog(" " + relogio_ntp(1) + "   Int 5: " + String(botao5.nomeInter) + " / " + String(botao5.tipo) + " / " + String(botao5.modelo), logtxt, 2);
+    //    botao5.nomeInter  = root["int_5"];
+    //    botao5.tipo     = root["tipo_5"];
+    //    botao5.modelo     = root["sinal_5"];
+    //    gravaLog(" " + relogio_ntp(1) + "   Int 5: " + String(botao5.nomeInter) + " / " + String(botao5.tipo) + " / " + String(botao5.modelo), logtxt, 2);
 
     conslog   = root["log"];
     logtxt = String(conslog);
@@ -325,27 +323,8 @@ void loop()
     cont_ip_banco++;
   }
   /*
-	VERIFICA SE TEM COMANDOS RF SENDO TRANSMITIDO
-  */
-//  if (mySwitch.available())
-//  {
-//    output(mySwitch.getReceivedValue(), mySwitch.getReceivedBitlength(), mySwitch.getReceivedDelay(), mySwitch.getReceivedRawdata(), mySwitch.getReceivedProtocol());
-//    mySwitch.resetAvailable();
-//  }
-	
-  /*
-	VERIFICA SE TEM COMANDOS BLUETOOAPH SENDO TRANSMITIDO
-  */
-//    if (ESP_BLUT.available())
-//  {
-//    char incoming = ESP_BLUT.read(); //Read what we recevive
-//    Serial.print(" RF:"); Serial.println(incoming);
-//	gravaLog(" " + relogio_ntp(1) + " - RF:  "+incoming, logtxt, 1);
-//  }
-  
-  /*
-  	SE FOR PRESSIONADO BOTÃO PIN_AP, TODAS AS CONFIGURAÇÕES DA CENTRAL 
-		 SERÃO DELETADAS(WIFI, PARAMETROS, ETC). VARIAVEL DO BOTÃO É PIN_AP.
+  	SE FOR PRESSIONADO BOTÃO PIN_AP, TODAS AS CONFIGURAÇÕES DA CENTRAL
+  	 SERÃO DELETADAS(WIFI, PARAMETROS, ETC). VARIAVEL DO BOTÃO É PIN_AP.
   */
   if ( digitalRead(PIN_AP) == LOW )
   {
@@ -367,7 +346,7 @@ void loop()
     Serial.println(" Central em modo de configuração do WIFI...");
 
   }
-	
+
   //---------------------------------------
   //    ENTRADA E SAIDA 1
   //---------------------------------------
@@ -401,43 +380,43 @@ void loop()
     }
     /*  SENSOR DE PRESENÇA  */
     boolean PIR_1_STATUS = digitalRead(PIR_1);
-    if(PIR_1_STATUS)
+    if (PIR_1_STATUS)
     {
       Serial.print(".");
-      digitalWrite(LED_AZUL, !digitalRead(LED_AZUL)); 
+      digitalWrite(LED_AZUL, !digitalRead(LED_AZUL));
       delay(80);
       MV_DETC = true;
-      MV_DETC_CONTAR = 0;     
+      MV_DETC_CONTAR = 0;
     }
-    if(MV_DETC == true)
+    if (MV_DETC == true)
+    {
+      if (millis() - TEMP_4 > 1000)
       {
-        if (millis() - TEMP_4 > 1000) 
+        TEMP_4 = millis();
+        MV_DETC_CONTAR++;
+        Serial.println( " " + String(MV_DETC_CONTAR) + "s");
+        if (MV_DETC_CONTAR == PIR_1_INTRVL)
         {
-          TEMP_4 = millis();
-          MV_DETC_CONTAR++;
-          Serial.println( " "+String(MV_DETC_CONTAR)+"s");
-          if(MV_DETC_CONTAR == PIR_1_INTRVL)
+          MV_DETC_CONTAR = 0;
+          MV_DETC = false;
+          if (botao1.estado_antes == true)
           {
-            MV_DETC_CONTAR = 0;
-            MV_DETC = false;
-            if(botao1.estado_antes == true)
-            {
-              //Desligar lampada
-              botao1.estado_antes = botao1.estado_atual;
-              botao1.contador = 3;
-            }
+            //Desligar lampada
+            botao1.estado_antes = botao1.estado_atual;
+            botao1.contador = 3;
           }
         }
-     }
+      }
+    }
   } else if (s_modelo_1 == "pir")
   {
-//    boolean PIR_1_STATUS = digitalRead(PIR_1);
-//    if(PIR_1_STATUS)
-//    {
-//      Serial.println(" Mov. Detec.");
-//      digitalWrite(LED_AZUL, !digitalRead(LED_AZUL)); 
-//      delay(80);     
-//    }
+    //    boolean PIR_1_STATUS = digitalRead(PIR_1);
+    //    if(PIR_1_STATUS)
+    //    {
+    //      Serial.println(" Mov. Detec.");
+    //      digitalWrite(LED_AZUL, !digitalRead(LED_AZUL));
+    //      delay(80);
+    //    }
   }
   if ((botao1.contador >= 1) && (botao1.contador <= 9))
   {
@@ -473,7 +452,7 @@ void loop()
     }
   }
 
-	
+
   //---------------------------------------
   //    ENTRADA E SAIDA 2
   //---------------------------------------
@@ -515,7 +494,7 @@ void loop()
         String ERRO_ENTRADA = " ERRO 0107 - Botão 2 com erro de execução, reiniciar central";
         //Gravando log de erro na central.
         if ((nivel_log >= 1) || (logtxt == "sim")) gravarArquivo( hora_rtc + " - ERRO 0107 - Botão 2 com erro de execução, reiniciar central", "log.txt");
-        ESP.restart();       
+        ESP.restart();
       }
     } else
     {
@@ -660,77 +639,77 @@ void loop()
   //---------------------------------------
   //    ENTRADA E SAIDA 5
   //---------------------------------------
-//  String s_tipo_5 = String(botao5.tipo);
-//  String s_modelo_5 = String(botao5.modelo);
-//  if (s_modelo_5 == "pulso")
-//  {
-//    if (digitalRead(botao5.entrada) == s_tipo_5.toInt())
-//    {
-//      if (nContar == 0)Serial.println("\n"); Serial.println("\n E5 Pulso");
-//      while ((digitalRead(botao5.entrada) == s_tipo_5.toInt()) && (nContar <= 300) )
-//      {
-//        if (millis() >= tempo + paramTempo)
-//        {
-//          botao4.contador++;
-//          nContar++;
-//          Serial.print(botao5.contador, DEC);
-//          tempo = millis();
-//        }
-//      }
-//    }
-//  } else if (s_modelo_5 == "interruptor")
-//  {
-//
-//    botao5.estado_atual = digitalRead(botao5.entrada);
-//    if (botao5.estado_atual != botao5.estado_antes )
-//    {
-//      if (nContar == 0)Serial.println(" E5 Interr");
-//      botao5.estado_antes = botao5.estado_atual;
-//      botao5.contador = 3;
-//      //Serial.print(botao4.contador, DEC);
-//    }
-//  }
-//  if ((botao5.contador >= 2) && (botao5.contador <= 9))
-//  {
-//    if (nContar >= 100)
-//    {
-//      for (int i = 0; i <= 0 ; i++ )
-//      {
-//        String ERRO_ENTRADA = " ERRO 0107 - Botão 5 com erro de execução, reiniciar central";
-//        if ((nivel_log >= 1) || (logtxt == "sim")) gravarArquivo( hora_rtc + " - ERRO 0107 - Botão 5 com erro de execução, reiniciar central", "log.txt");
-//        ESP.restart();
-//      }
-//    } else
-//    {
-//      String ERRO_ENTRADA = "0";
-//      nContar = 0;
-//      if (botao5.estado == false) {
-//        Serial.println("\n Ligando Porta (rele 5): " + String(botao5.rele));
-//        botao5.estado = true;
-//        botao5.contador = 0;
-//        acionaPorta(botao5.rele, "", "liga");
-//      } else {
-//        Serial.println("\n Desligar Porta (rele 5): " + String(botao4.rele));
-//        acionaPorta(botao5.rele, "", "desl");
-//        botao5.estado = false;
-//        botao5.contador = 0;
-//      }
-//    }
-//  }
+  //  String s_tipo_5 = String(botao5.tipo);
+  //  String s_modelo_5 = String(botao5.modelo);
+  //  if (s_modelo_5 == "pulso")
+  //  {
+  //    if (digitalRead(botao5.entrada) == s_tipo_5.toInt())
+  //    {
+  //      if (nContar == 0)Serial.println("\n"); Serial.println("\n E5 Pulso");
+  //      while ((digitalRead(botao5.entrada) == s_tipo_5.toInt()) && (nContar <= 300) )
+  //      {
+  //        if (millis() >= tempo + paramTempo)
+  //        {
+  //          botao4.contador++;
+  //          nContar++;
+  //          Serial.print(botao5.contador, DEC);
+  //          tempo = millis();
+  //        }
+  //      }
+  //    }
+  //  } else if (s_modelo_5 == "interruptor")
+  //  {
+  //
+  //    botao5.estado_atual = digitalRead(botao5.entrada);
+  //    if (botao5.estado_atual != botao5.estado_antes )
+  //    {
+  //      if (nContar == 0)Serial.println(" E5 Interr");
+  //      botao5.estado_antes = botao5.estado_atual;
+  //      botao5.contador = 3;
+  //      //Serial.print(botao4.contador, DEC);
+  //    }
+  //  }
+  //  if ((botao5.contador >= 2) && (botao5.contador <= 9))
+  //  {
+  //    if (nContar >= 100)
+  //    {
+  //      for (int i = 0; i <= 0 ; i++ )
+  //      {
+  //        String ERRO_ENTRADA = " ERRO 0107 - Botão 5 com erro de execução, reiniciar central";
+  //        if ((nivel_log >= 1) || (logtxt == "sim")) gravarArquivo( hora_rtc + " - ERRO 0107 - Botão 5 com erro de execução, reiniciar central", "log.txt");
+  //        ESP.restart();
+  //      }
+  //    } else
+  //    {
+  //      String ERRO_ENTRADA = "0";
+  //      nContar = 0;
+  //      if (botao5.estado == false) {
+  //        Serial.println("\n Ligando Porta (rele 5): " + String(botao5.rele));
+  //        botao5.estado = true;
+  //        botao5.contador = 0;
+  //        acionaPorta(botao5.rele, "", "liga");
+  //      } else {
+  //        Serial.println("\n Desligar Porta (rele 5): " + String(botao4.rele));
+  //        acionaPorta(botao5.rele, "", "desl");
+  //        botao5.estado = false;
+  //        botao5.contador = 0;
+  //      }
+  //    }
+  //  }
   //---------------------------------------
   //    LIGAR E DESLIGAR TODOS RELES
   //---------------------------------------
-//  if (((botao1.contador >= 30) && (botao1.contador <= 50))
-//      || ((botao2.contador >= 30) && (botao2.contador <= 50))
-//      || ((botao3.contador >= 30) && (botao3.contador <= 50))
-//      || ((botao4.contador >= 30) && (botao4.contador <= 50)) 
-//      || ((botao5.contador >= 30) && (botao5.contador <= 50)) )
-//  {
+  //  if (((botao1.contador >= 30) && (botao1.contador <= 50))
+  //      || ((botao2.contador >= 30) && (botao2.contador <= 50))
+  //      || ((botao3.contador >= 30) && (botao3.contador <= 50))
+  //      || ((botao4.contador >= 30) && (botao4.contador <= 50))
+  //      || ((botao5.contador >= 30) && (botao5.contador <= 50)) )
+  //  {
   if ((botao1.contador >= 10)
       || (botao2.contador >= 10)
       || (botao3.contador >= 10)
       || (botao4.contador >= 10))
-      //|| (botao5.contador >= 10))
+    //|| (botao5.contador >= 10))
   {
     gravaLog(" " + relogio_ntp(1) + "\n - DESL. RELES", logtxt, 2);
     acionaPorta(botao1.rele, "", "desl");
@@ -741,15 +720,15 @@ void loop()
     botao3.estado = false;
     acionaPorta(botao4.rele, "", "desl");
     botao4.estado = false;
-//	  acionaPorta(botao5.rele, "", "desl");
-//    botao5.estado = false;
-//    botao5.contador = 0;
-	  botao4.contador = 0;
+    //	  acionaPorta(botao5.rele, "", "desl");
+    //    botao5.estado = false;
+    //    botao5.contador = 0;
+    botao4.contador = 0;
     botao3.contador = 0;
     botao2.contador = 0;
     botao1.contador = 0;
   }
-	
+
   /*
     LEITURA DA REQUISIÇÃO DE CHAMADAS GET
   */
@@ -760,7 +739,7 @@ void loop()
   } else {
     URL = "vazio";
   }
-	
+
   if (URL != "vazio")
   {
     /*
@@ -803,14 +782,14 @@ void loop()
           botao4.estado = false;
         }
       }
-      
-//      else if (numeroInt == botao5.rele) {
-//        if (acao == "liga") {
-//          botao5.estado = true;
-//        } else {
-//          botao5.estado = false;
-//        }
-//      }
+
+      //      else if (numeroInt == botao5.rele) {
+      //        if (acao == "liga") {
+      //          botao5.estado = true;
+      //        } else {
+      //          botao5.estado = false;
+      //        }
+      //      }
       /*
         String buff;
         buff += "HTTP/1.1 200 OK\r\nAccess-Control-Allow-Origin: http://"+String(servidor[0])+"."+String(servidor[1])+"."+String(servidor[2])+"."+String(servidor[3])+"\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n";
@@ -818,7 +797,7 @@ void loop()
         buff = "";
       */
     }
-		
+
     /*
     			REINCIAR CENTRAL POR COMANDA HTTP - CHAMADA HTTP EX: HTTP://IP_HOST/?00000
     */
@@ -828,7 +807,7 @@ void loop()
       delay(1000);
       ESP.restart();
     }
-		
+
     /*
     			CALIBRAR SENSOR MQ2 - CHAMADA HTTP EX: HTTP://IP_HOST/?00010
     */
@@ -837,7 +816,7 @@ void loop()
       gravaLog(" " + relogio_ntp(1) + " - Recalibrando sensor MQ-X", logtxt, 2);
       calibrarSensor();
     }
-		
+
     /*
     			GRAVAR VALOR DE LEITURA DO SENSOR DE GAS NA EEPROM - CHAMADA HTTP EX: HTTP://IP_HOST/?00011
     */
@@ -853,7 +832,7 @@ void loop()
       EEPROM.end();
 
     }
-		
+
     /*
     			GRAVA PARAMETROS NO SPIFFS(SISTEMA DE ARQUIVO) DA CENTRAL, ARQUIVO "param.txt"
     */
@@ -867,12 +846,12 @@ void loop()
       int final_s = i.indexOf("HTTP/1.1");
       stringUrl = i.substring(0, final_s - 1);
       gravaLog(" " + relogio_ntp(1) + " - Novos parâmetros da Central", logtxt, 2);
-      gravarArquivo("{\"servidor\":\"" + quebraString("servidor", stringUrl) + "\",\"int_1\":\"" + quebraString("int_1", stringUrl) + "\",\"int_2\":\"" + quebraString("int_2", stringUrl) + "\",\"int_3\":\"" + quebraString("int_3", stringUrl) + "\",\"int_4\":\"" + quebraString("int_4", stringUrl) + 
-	  "\",\"int_5\":\"" + quebraString("int_5", stringUrl) +"\",\"tipo_1\":\"" + quebraString("tipo_1", stringUrl) + "\",\"tipo_2\":\"" + quebraString("tipo_2", stringUrl) + "\",\"tipo_3\":\"" + quebraString("tipo_3", stringUrl) + "\",\"tipo_4\":\"" + quebraString("tipo_4", stringUrl) +"\",\"tipo_5\":\"" + quebraString("tipo_5", stringUrl) + "\",\"sinal_1\":\"" + quebraString("sinal_1", stringUrl) + "\",\"sinal_2\":\"" + quebraString("sinal_2", stringUrl) + "\",\"sinal_3\":\"" + quebraString("sinal_3", stringUrl) + "\",\"sinal_4\":\"" + quebraString("sinal_4", stringUrl) +"\",\"sinal_5\":\"" + quebraString("sinal_5", stringUrl) + "\",\"log\":\"" + quebraString("log", stringUrl) + "\",\"verao\":\"" + quebraString("verao", stringUrl) + "\",\"nivel\":\"" + quebraString("nivel", stringUrl) + "\",\"senha_alarme\":\"" + quebraString("senhaAlarme", stringUrl) + "\"}", "param.txt");
+      gravarArquivo("{\"servidor\":\"" + quebraString("servidor", stringUrl) + "\",\"int_1\":\"" + quebraString("int_1", stringUrl) + "\",\"int_2\":\"" + quebraString("int_2", stringUrl) + "\",\"int_3\":\"" + quebraString("int_3", stringUrl) + "\",\"int_4\":\"" + quebraString("int_4", stringUrl) +
+                    "\",\"int_5\":\"" + quebraString("int_5", stringUrl) + "\",\"tipo_1\":\"" + quebraString("tipo_1", stringUrl) + "\",\"tipo_2\":\"" + quebraString("tipo_2", stringUrl) + "\",\"tipo_3\":\"" + quebraString("tipo_3", stringUrl) + "\",\"tipo_4\":\"" + quebraString("tipo_4", stringUrl) + "\",\"tipo_5\":\"" + quebraString("tipo_5", stringUrl) + "\",\"sinal_1\":\"" + quebraString("sinal_1", stringUrl) + "\",\"sinal_2\":\"" + quebraString("sinal_2", stringUrl) + "\",\"sinal_3\":\"" + quebraString("sinal_3", stringUrl) + "\",\"sinal_4\":\"" + quebraString("sinal_4", stringUrl) + "\",\"sinal_5\":\"" + quebraString("sinal_5", stringUrl) + "\",\"log\":\"" + quebraString("log", stringUrl) + "\",\"verao\":\"" + quebraString("verao", stringUrl) + "\",\"nivel\":\"" + quebraString("nivel", stringUrl) + "\",\"senha_alarme\":\"" + quebraString("senhaAlarme", stringUrl) + "\"}", "param.txt");
       cont_ip_banco = 0;
       closeFS();
     }
-		
+
     /*
     			 APAGAR ARQUIVO DE LOG MANUALMENTE - CHAMADA HTTP EX: HTTP://IP_HOST/?00013
     */
@@ -881,7 +860,7 @@ void loop()
       deletarArquivo("/log.txt");
       criarArquivo("/log.txt");
     }
-		
+
     /*
     			APLICAR CONFIGURAÇÕES MINIMAS PARA FUNCIONAMENTO DA CENTRAL - CHAMADA HTTP EX: HTTP://IP_HOST/?00014
     */
@@ -894,7 +873,7 @@ void loop()
       deletarArquivo("/param.txt");
       criarArquivo("/param.txt");
       gravaLog(" " + relogio_ntp(1) + " - Configuração minima ", logtxt, 3);
-      gravarArquivo("{\"servidor\":\""+String(ipHost)+"\",\"int_1\":\"P1\",\"int_2\":\"P2\",\"int_3\":\"P3\",\"int_4\":\"P4\",\"int_5\":\"P5\",\"tipo_1\":\"0\",\"tipo_2\":\"0\",\"tipo_3\":\"0\",\"tipo_4\":\"0\",\"tipo_5\":\"0\",\"sinal_1\":\"interruptor\",\"sinal_2\":\"interruptor\",\"sinal_3\":\"interruptor\",\"sinal_4\":\"interruptor\",\"sinal_5\":\"interruptor\",\"log\":\"sim\",\"verao\":\"nao\",\"nivel\":\"4\",\"senha_alarme\":\"4\"}", "param.txt");
+      gravarArquivo("{\"servidor\":\"" + String(ipHost) + "\",\"int_1\":\"P1\",\"int_2\":\"P2\",\"int_3\":\"P3\",\"int_4\":\"P4\",\"int_5\":\"P5\",\"tipo_1\":\"0\",\"tipo_2\":\"0\",\"tipo_3\":\"0\",\"tipo_4\":\"0\",\"tipo_5\":\"0\",\"sinal_1\":\"interruptor\",\"sinal_2\":\"interruptor\",\"sinal_3\":\"interruptor\",\"sinal_4\":\"interruptor\",\"sinal_5\":\"interruptor\",\"log\":\"sim\",\"verao\":\"nao\",\"nivel\":\"4\",\"senha_alarme\":\"4\"}", "param.txt");
       closeFS();
     }
     /*
@@ -976,11 +955,11 @@ void loop()
     } else {
       buf += "  <a href=\"?porta=" + String(botao4.rele) + "&acao=liga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao4.rele) + " Botão:" + botao4.entrada + "\"><button type=\"button\"  class=\"btn btn-danger\">" + String(botao4.nomeInter) + "</button></a>";
     }
-//	if (botao5.estado == true) {
-//      buf += "  <a href=\"?porta=" + String(botao5.rele) + "&acao=desliga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao5.rele) + " Botão:" + botao5.entrada + "\"><button type=\"button\"  class=\"btn btn-success\">" + String(botao5.nomeInter) + "</button></a>";
-//    } else {
-//      buf += "  <a href=\"?porta=" + String(botao5.rele) + "&acao=liga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao5.rele) + " Botão:" + botao5.entrada + "\"><button type=\"button\"  class=\"btn btn-danger\">" + String(botao5.nomeInter) + "</button></a>";
-//    }
+    //	if (botao5.estado == true) {
+    //      buf += "  <a href=\"?porta=" + String(botao5.rele) + "&acao=desliga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao5.rele) + " Botão:" + botao5.entrada + "\"><button type=\"button\"  class=\"btn btn-success\">" + String(botao5.nomeInter) + "</button></a>";
+    //    } else {
+    //      buf += "  <a href=\"?porta=" + String(botao5.rele) + "&acao=liga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao5.rele) + " Botão:" + botao5.entrada + "\"><button type=\"button\"  class=\"btn btn-danger\">" + String(botao5.nomeInter) + "</button></a>";
+    //    }
     buf += "<a href=\"?00015\" title=\"Desligar\"><button type=\"button\"  class=\"btn btn-danger\">Desli. Tudo</button></a>";
     buf += "</p>";
     /* BOTOES_ALARME */
@@ -998,11 +977,11 @@ void loop()
     buf += "<form class=\"form-group\" action=\"?00012\"><table class=\"table-responsive\"><input type=\"hidden\" name=\"cod\" value=\"00012\">";
     buf += "<tr><td ><label for=\"inputEmail4\">Servidor</label> </td><td colspan=\"3\"><input class=\"form-control mb-2\" style=\"width:130px\" type=\"text\" placeholder=\"\" name=\"servidor\" value=\"" + serv + "\"></td></tr>";
     buf += "<tr><td ><label for=\"inputEmail4\">IP Fixo</label> </td><td colspan=\"3\"><input class=\"form-control mb-2\" style=\"width:130px\" type=\"text\" placeholder=\"\" name=\"ipFixo\" value=\"" + IP_FIXO + "\"></td></tr>";
-    
+
     buf += "<tr><td ><label for=\"inputEmail4\">Gateway</label> </td><td colspan=\"3\"><input class=\"form-control mb-2\" style=\"width:130px\" type=\"text\" placeholder=\"\" name=\"servidor\" value=\"" + GATEWAY + "\"></td></tr>";
     buf += "<tr><td ><label for=\"inputEmail4\">Mascara</label> </td><td colspan=\"3\"><input class=\"form-control mb-2\" style=\"width:130px\" type=\"text\" placeholder=\"\" name=\"servidor\" value=\"" + MASCARA_IP + "\"></td></tr>";
     buf += "<tr>";
-    
+
     buf += "<td><label for=\"inputEmail4\">Interruptor 1</label></td><td><input class=\"form-control mb-2\" style=\"width:100%x\" type=\"text\" placeholder=\"\" name=\"int_1\" value=\"" + String(botao1.nomeInter) + "\"></td>";
     buf += "<td><select class=\"form-control mb-2\" style=\"width:100%x\"  name=\"tipo_1\"><option value=\"0\" " + selectedHTNL(botao1.tipo, "0") + "> Negativo</option><option value=\"1\" " + selectedHTNL(botao1.tipo, "1") + "> Positivo</option></select></td>";
     buf += "<td><select class=\"form-control mb-2\" style=\"width:100%x\" name=\"sinal_1\"><option value=\"pulso\" " + selectedHTNL(botao1.modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao1.modelo, "interruptor") + ">Interruptor</option><option value=\"pir\" " + selectedHTNL(botao1.modelo, "pir") + ">PIR</option></select></td>";
@@ -1010,24 +989,24 @@ void loop()
     buf += "<tr><td colspan='4'><div class='collapse' id='collapse1'> <div class='card card-body'> ";
     buf += "<br><br><br>";
     buf += "</div> </div><td></tr>";
-    
+
     buf += "<tr><td><label for=\"inputEmail4\">Interruptor 2</label></td><td><input class=\"form-control mb-2\" style=\"width:100%x\" type=\"text\" placeholder=\"\" name=\"int_2\" value=\"" + String(botao2.nomeInter) + "\"></td>";
     buf += "<td><select class=\"form-control mb-2\" style=\"width:100%x\"  name=\"tipo_2\"><option value=\"0\" " + selectedHTNL(botao2.tipo, "0") + " > Negativo</option><option value=\"1\" " + selectedHTNL(botao2.tipo, "1") + "> Positivo</option></select></td>";
     buf += "<td><select class=\"form-control mb-2\" style=\"width:100%x\" name=\"sinal_2\"><option value=\"pulso\" " + selectedHTNL(botao2.modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao2.modelo, "interruptor") + ">Interruptor</option><option value=\"pir\" " + selectedHTNL(botao2.modelo, "pir") + ">PIR</option></select></td></tr>";
-    
+
     buf += "<tr><td><label for=\"inputEmail4\">Interruptor 3</label></td><td><input class=\"form-control mb-2\" style=\"width:100%x\" type=\"text\" placeholder=\"\" name=\"int_3\" value=\"" + String(botao3.nomeInter) + "\"></td>";
     buf += "<td><select class=\"form-control mb-2\" style=\"width:100%x\"  name=\"tipo_3\"><option value=\"0\" " + selectedHTNL(botao3.tipo, "0") + "> Negativo</option><option value=\"1\" " + selectedHTNL(botao3.tipo, "1") + "> Positivo</option></select></td>";
     buf += "<td><select class=\"form-control mb-2\" style=\"width:100%x\" name=\"sinal_3\"><option value=\"pulso\" " + selectedHTNL(botao3.modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao3.modelo, "interruptor") + ">Interruptor</option><option value=\"pir\" " + selectedHTNL(botao3.modelo, "pir") + ">PIR</option></select></td></tr>";
-    
+
     buf += "<tr><td><label for=\"inputEmail4\">Interruptor 4</label></td><td><input class=\"form-control mb-2\" style=\"width:100%x\" type=\"text\" placeholder=\"\" name=\"int_4\" value=\"" + String(botao4.nomeInter) + "\"></td>";
     buf += "<td><select class=\"form-control mb-2\" style=\"width:100%x\"  name=\"tipo_4\"><option value=\"0\" " + selectedHTNL(botao4.tipo, "0") + "> Negativo</option><option value=\"1\" " + selectedHTNL(botao4.tipo, "1") + "> Positivo</option></select></td>";
     buf += "<td><select class=\"form-control mb-2\" style=\"width:100%x\" name=\"sinal_4\"><option value=\"pulso\" " + selectedHTNL(botao4.modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao4.modelo, "interruptor") + ">Interruptor</option><option value=\"pir\" " + selectedHTNL(botao4.modelo, "pir") + ">PIR</option></select></td></tr>";
-    
-//    buf += "<tr><td><label for=\"inputEmail4\">Interruptor 5</label></td><td><input class=\"form-control mb-2\" style=\"width:100%x\" type=\"text\" placeholder=\"\" name=\"int_5\" value=\"" + String(botao5.nomeInter) + "\"></td>";
-//    buf += "<td><select class=\"form-control mb-2\" style=\"width:100%x\"  name=\"tipo_5\"><option value=\"0\" " + selectedHTNL(botao5.tipo, "0") + "> Negativo</option><option value=\"1\" " + selectedHTNL(botao5.tipo, "1") + "> Positivo</option></select></td>";
-//    buf += "<td><select class=\"form-control mb-2\" style=\"width:100%x\" name=\"sinal_5\"><option value=\"pulso\" " + selectedHTNL(botao5.modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao5.modelo, "interruptor") + ">Interruptor</option><option value=\"pir\" " + selectedHTNL(botao5.modelo, "pir") + ">PIR</option></select></td></tr>";
-//	
-	// Config de log
+
+    //    buf += "<tr><td><label for=\"inputEmail4\">Interruptor 5</label></td><td><input class=\"form-control mb-2\" style=\"width:100%x\" type=\"text\" placeholder=\"\" name=\"int_5\" value=\"" + String(botao5.nomeInter) + "\"></td>";
+    //    buf += "<td><select class=\"form-control mb-2\" style=\"width:100%x\"  name=\"tipo_5\"><option value=\"0\" " + selectedHTNL(botao5.tipo, "0") + "> Negativo</option><option value=\"1\" " + selectedHTNL(botao5.tipo, "1") + "> Positivo</option></select></td>";
+    //    buf += "<td><select class=\"form-control mb-2\" style=\"width:100%x\" name=\"sinal_5\"><option value=\"pulso\" " + selectedHTNL(botao5.modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao5.modelo, "interruptor") + ">Interruptor</option><option value=\"pir\" " + selectedHTNL(botao5.modelo, "pir") + ">PIR</option></select></td></tr>";
+    //
+    // Config de log
     buf += "<tr> <td> <label for='inputEmail4'>Registro de log</label> </td> ";
     buf += "<td> <select class='form-control mb-2' style='width:100%x' name='log'> <option value='sim' " + selectedHTNL(conslog, "sim ") + "> Sim</option> <option value='nao' " + selectedHTNL(conslog, "nao ") + ">Não</option> </select> </td> <td> <select class='form-control mb-2' style='width:100%x' name='nivel' title='Nível do log'> <option value='1' " + selectedHTNL(nivelLog, "1") + ">1</option> <option value='2' " + selectedHTNL(nivelLog, "2") + ">2</option> <option value='3' " + selectedHTNL(nivelLog, "3") + ">3</option> <option value='4' " + selectedHTNL(nivelLog, "4") + ">4</option> </select> </td> </tr> ";
     /*
@@ -1050,7 +1029,7 @@ void loop()
     client.flush();
     client.stop();
   }
-	
+
   /*
     ALARME
   */

@@ -137,7 +137,7 @@ void gravarBanco (String buffer){
       pisca_led(LED_VERMELHO,true);
       gravaLog(" "+relogio_ntp(1) + " - Falha no WIFI e atingir o tempo limite", logtxt, 1);
       //ESP.restart();
-      delay(1000);
+      //delay(1000);
     } 
   }
   pisca_led(LED_VERMELHO,false);
