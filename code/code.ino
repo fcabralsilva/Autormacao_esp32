@@ -83,7 +83,7 @@ const int PIN_AP = 0, i_sensor_alarme = 17, i_sirene_alarme = 18;
 int portaServidor = 80, contarParaGravar2 = 0 ;
 int contarParaGravar1 = 0, nContar = 0, cont_ip_banco = 0, nivel_log = 4, estado_atual = 0, estado_antes = 0, freq = 2000, channel = 0, resolution = 8, n = 0, sensorMq2 = 0, contadorPorta = 0, T_WIFI = 50, MEM_EEPROM_MQ2 = 20;
 short paramTempo = 60;
-unsigned long time1sec, time3, TEMP_4, PIR_1_INTRVL = 300, time3Param = 100000, timeDht, timeMq2 , tempo = 0, timeDhtParam = 300000, timeMq2Param = 30000;
+unsigned long time1sec, time3, TEMP_4, PIR_1_INTRVL = 300, time3Param = 100000, timeDht, timeMq2 , tempo = 0, timeDhtParam = 300000, timeMq2Param = 30000,time_sirene;
 IPAddress ipHost;
 WiFiUDP ntpUDP;
 int16_t utc = -3; //UTC -3:00 Brazil

@@ -163,15 +163,14 @@ void gravarBanco (String buffer){
 //--------------------------------------- 
 void sirene(boolean valor){
   if(valor == true){
-//    ledcWriteTone(channel, 2000);
-//    delay(400);
-    ledcWriteTone(channel, 1800);
-//    delay(400);
-//    ledcWriteTone(channel, 1000);
-//    delay(300);
+    if(millis() - time_sirene >= 2000)
+    {
+      digitalWrite(BUZZER, !digitalRead(BUZZER));
+      time_sirene = millis();
+    }
     
   }else{
-    ledcWriteTone(channel, 0);
+    digitalWrite(BUZZER, false);
   }
 }
 
