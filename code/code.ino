@@ -1,6 +1,3 @@
-
-String VERSAO = "V08.03 - 24/02/2020";
-
 #include <ArduinoOTA.h>
 #include <Alarme.h>
 #include <ArduinoJson.h>
@@ -15,6 +12,8 @@ String VERSAO = "V08.03 - 24/02/2020";
 #include <WiFiUDP.h>
 #include <WebServer.h>
 #include <WiFiManager.h>
+
+String VERSAO = "V08.03 - 24/02/2020";
 
 #define BUZZER                5
 #define PIN_MQ2               34
@@ -204,52 +203,23 @@ void setup() {
   //---------------------------------------
   umidade = dht.readHumidity() * 1;
   temperatura = dht.readTemperature() * 1;
-  //MQ2
+  
+  //MQ2 - CALIBRAR LEITURA DO SENSOR DE GAS E FUMACA
   sensorMq2 = analogRead(PIN_MQ2);
   GLP = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, GAS_LPG) );
   FUMACA = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, SMOKE));
-
-  //---------------------------------------
-  //CALIBRAR LEITURA DO SENSOR DE GAS E FUMACA
-  //---------------------------------------
   calibrarSensor();
 
   EEPROM.end();
-
-  //  ArduinoOTA
-  //  .onStart([]() {
-  //    String type;
-  //    if (ArduinoOTA.getCommand() == U_FLASH)
-  //      type = "sketch";
-  //    else // U_SPIFFS
-  //      type = "filesystem";
-  //
-  //    // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
-  //    Serial.println("Start updating " + type);
-  //  })
-  //  .onEnd([]() {
-  //    Serial.println("\nEnd");
-  //  })
-  //  .onProgress([](unsigned int progress, unsigned int total) {
-  //    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-  //  })
-  //  .onError([](ota_error_t error) {
-  //    Serial.printf("Error[%u]: ", error);
-  //    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-  //    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-  //    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-  //    else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-  //    else if (error == OTA_END_ERROR) Serial.println("End Failed");
-  //  });
-  //
-  //  ArduinoOTA.begin();
+  
+  arduino_ota(); 
+  ArduinoOTA.begin();
 
   retorno = "SERVIDOR_CONECT";
 
-  //timeClient.setTimeOffset(-6200);
-
   ledcSetup(channel, freq, resolution);
   ledcAttachPin(5, channel);
+  
   Serial.println(" Data de hoje: " + relogio_ntp(2));
   gravarArquivo(" \n\n ******************************* \n *** INICIANDO SISTEMA *** \n *******************************\n " + VERSAO, "log.txt");
 
@@ -257,7 +227,7 @@ void setup() {
 
 void loop()
 {
-  //ArduinoOTA.handle();
+  ArduinoOTA.handle();
 
   WiFiManager wifiManager;
   WiFiClient client = server.available();
