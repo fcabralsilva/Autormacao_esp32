@@ -13,7 +13,7 @@
 #include <WebServer.h>
 #include <WiFiManager.h>
 
-String VERSAO = "V08.03 - 24/02/2020";
+String VERSAO = "V08.04 - 03/03/2020";
 
 #define BUZZER                5
 #define PIN_MQ2               34
