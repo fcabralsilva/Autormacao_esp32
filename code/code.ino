@@ -39,6 +39,7 @@ struct botao1 {
   const char* modelo = "interruptor";
   const char* nomeInter = "Com1";
   const char* tipo = "0";
+	char agenda[2][8] = {"21:04:00", "21:05:00"};
 } botao1;
 struct botao2 {
   int entrada = 25, rele = 26;
@@ -64,14 +65,6 @@ struct botao4 {
   const char* modelo = "interruptor";
   const char* nomeInter = "Com4";
 } botao4;
-//struct botao5 {
-//  int entrada = 16, rele = 18;
-//  boolean estado = 0, estado_atual = 0  , estado_antes = 0;
-//  int contador = 0;
-//  const char* tipo = "0";
-//  const char* modelo = "interruptor";
-//  const char* nomeInter = "Com5";
-//} botao5;
 
 long milis = 0;        	// último momento que o LED foi atualizado
 long interval = 250;    // tempo de transição entre estados (milisegundos)
@@ -235,6 +228,7 @@ void loop()
   pisca_led(LED_VERDE, true);
 
   relogio_ntp(9);
+	String timer = timeClient.getFormattedTime();
 
   while (cont_ip_banco < 1)
   {
@@ -277,11 +271,6 @@ void loop()
     botao4.modelo     = root["sinal_4"];
     gravaLog(" " + relogio_ntp(1) + "   Int 4: " + String(botao4.nomeInter) + " / " + String(botao4.tipo) + " / " + String(botao4.modelo), logtxt, 2);
 
-    //    botao5.nomeInter  = root["int_5"];
-    //    botao5.tipo     = root["tipo_5"];
-    //    botao5.modelo     = root["sinal_5"];
-    //    gravaLog(" " + relogio_ntp(1) + "   Int 5: " + String(botao5.nomeInter) + " / " + String(botao5.tipo) + " / " + String(botao5.modelo), logtxt, 2);
-
     conslog   = root["log"];
     logtxt = String(conslog);
     nivelLog = root["nivel"];
@@ -322,6 +311,10 @@ void loop()
   //---------------------------------------
   String s_tipo_1 = String(botao1.tipo);
   String s_modelo_1 = String(botao1.modelo);
+	
+	//VERIFICA SE POSSUI AGENDAMENTO DA PORTA GPIO
+	agendamento(botao1.entrada, botao1.agenda[0], botao1.agenda[1], timer);
+	
   if (s_modelo_1 == "pulso")
   {
     if (digitalRead(botao1.entrada) == s_tipo_1.toInt())
@@ -349,7 +342,7 @@ void loop()
       //Serial.print(botao1.contador, DEC);
     }
     /*  SENSOR DE PRESENÇA  */
-    boolean PIR_1_STATUS = digitalRead(PIR_1);
+/*     boolean PIR_1_STATUS = digitalRead(PIR_1);
     if (PIR_1_STATUS)
     {
       Serial.print(".");
@@ -377,7 +370,7 @@ void loop()
           }
         }
       }
-    }
+    } */
   } else if (s_modelo_1 == "pir")
   {
     //    boolean PIR_1_STATUS = digitalRead(PIR_1);

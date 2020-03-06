@@ -3,12 +3,15 @@ void agendamento(int gpio,String hora_ini, String hora_fim, String hora_atual )
   //char agenda[2][12] = {"21:04:00", "21:05:00"};
   //String timer = timeClient.getFormattedTime();
   //agendamento(led, agenda[0], agenda[1], timer);
+	
   if(hora_atual == hora_ini)
   {
-    digitalWrite(gpio,true);
+    //digitalWrite(gpio,true);
+		acionaPorta(gpio, "", "liga");
     }else if(hora_atual == hora_fim)
     {
-      digitalWrite(gpio,false);
+      //digitalWrite(gpio,false);
+			acionaPorta(botao1.rele, "", "desl");
     }
 }
 
