@@ -13,7 +13,7 @@
 #include <WebServer.h>
 #include <WiFiManager.h>
 
-String VERSAO = "V08.04 - 03/03/2020";
+String VERSAO = "V08.05 - 07/03/2020";
 
 #define BUZZER                5
 #define PIN_MQ2               34
@@ -39,7 +39,7 @@ struct botao1 {
   const char* modelo = "interruptor";
   const char* nomeInter = "Com1";
   const char* tipo = "0";
-	char agenda[2][8] = {"21:04:00", "21:05:00"};
+	char agenda[2][9] = {"21:04:00", "21:05:00"};
 } botao1;
 struct botao2 {
   int entrada = 25, rele = 26;
