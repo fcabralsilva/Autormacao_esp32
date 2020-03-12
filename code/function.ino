@@ -1,3 +1,17 @@
+//void sendSensor()
+//{
+//  float h = dht.readHumidity();
+//  float t = dht.readTemperature(); // or dht.readTemperature(true) for Fahrenheit
+//
+//  if (isnan(h) || isnan(t)) {
+//    Serial.println("Failed to read from DHT sensor!");
+//    return;
+//  }
+//  // You can send any value at any time.
+//  // Please don't send more that 10 values per second.
+//  Blynk.virtualWrite(V5, h);
+//  Blynk.virtualWrite(V6, t);
+//}
 void agendamento(int gpio,String hora_ini, String hora_fim, String hora_atual )
 {
   //char agenda[2][12] = {"21:04:00", "21:05:00"};

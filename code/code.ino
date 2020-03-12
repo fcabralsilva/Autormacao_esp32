@@ -1,6 +1,9 @@
+#define BLYNK_PRINT Serial
+
 #include <ArduinoOTA.h>
 #include <Alarme.h>
 #include <ArduinoJson.h>
+#include <BlynkSimpleEsp32.h>
 #include <DHT.h>
 #include <EEPROM.h>
 #include <FS.h>
@@ -13,7 +16,7 @@
 #include <WebServer.h>
 #include <WiFiManager.h>
 
-String VERSAO = "V08.05 - 07/03/2020";
+String VERSAO = "V08.06 - 12/03/2020";
 
 #define BUZZER                5
 #define PIN_MQ2               34
@@ -66,6 +69,8 @@ struct botao4 {
   const char* nomeInter = "Com4";
 } botao4;
 
+char blynk_token[] = "EwXTxXWrLAEx4nBiB6ibt2DNRBmriQ6b";
+
 long milis = 0;        	// último momento que o LED foi atualizado
 long interval = 250;    // tempo de transição entre estados (milisegundos)
 String ipLocalString, buff, URL, linha, GLP, FUMACA, retorno, serv, logtxt = "sim", hora_rtc,  LIMITE_MQ2, buf, IP_FIXO, GATEWAY, MASCARA_IP;
@@ -105,6 +110,7 @@ int MV_DETC_CONTAR = 0;
 DHT dht(DHTPIN, DHTTYPE);
 WiFiServer server(80);
 Alarme alarme;
+BlynkTimer timer;
 //RCSwitch mySwitch = RCSwitch();
 
 void setup() {
@@ -114,6 +120,8 @@ void setup() {
   dht.begin();
   //mySwitch.enableReceive(RF_RECEIVER);
 
+  //Blynk.begin(auth);
+  
   delay(2000);
 
   pinMode(PIN_AP, INPUT_PULLUP);
@@ -178,6 +186,16 @@ void setup() {
     ESP.restart();
     delay(1000);
   }
+
+  WiFiManagerParameter custom_blynk_token("Blynk", "blynk token", blynk_token, 34);
+  wifiManager.addParameter(&custom_blynk_token);
+  wifiManager.autoConnect("Blynk");
+  Blynk.config(custom_blynk_token.getValue());
+  
+  Serial.print("Blynk Token : ");
+  Serial.println(blynk_token);
+  Blynk.config(blynk_token);
+  
   server.begin();
   ipHost = WiFi.localIP();
   ipLocalString = String(ipHost[0]) + "." + String(ipHost[1]) + "." + String(ipHost[2]) + "." + String(ipHost[3]);
@@ -220,6 +238,9 @@ void setup() {
 
 void loop()
 {
+  Blynk.run();
+  timer.run();
+  
   ArduinoOTA.handle();
 
   WiFiManager wifiManager;
@@ -1036,6 +1057,8 @@ void loop()
   //---------------------------------------
   umidade = dht.readHumidity() * 1;
   temperatura = dht.readTemperature() * 1;
+  Blynk.virtualWrite(V5, umidade);
+  Blynk.virtualWrite(V6, temperatura);
   if (millis() >= timeDht + (timeDhtParam)) {
     umidade = dht.readHumidity();
     temperatura = dht.readTemperature();
@@ -1051,7 +1074,9 @@ void loop()
       temperatura = 0;
       umidade = 0;
       timeDht = millis();
+
     }
+
   }
 
   //---------------------------------------
