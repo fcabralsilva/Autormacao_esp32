@@ -1,17 +1,93 @@
-//void sendSensor()
-//{
-//  float h = dht.readHumidity();
-//  float t = dht.readTemperature(); // or dht.readTemperature(true) for Fahrenheit
-//
-//  if (isnan(h) || isnan(t)) {
-//    Serial.println("Failed to read from DHT sensor!");
-//    return;
-//  }
-//  // You can send any value at any time.
-//  // Please don't send more that 10 values per second.
-//  Blynk.virtualWrite(V5, h);
-//  Blynk.virtualWrite(V6, t);
-//}
+boolean status_porta(int numero_Int, int rele, boolean estado, String _acao)
+{
+	if (numero_Int == rele) 
+		{
+			if (_acao == "liga") {
+				estado = true;
+			} else {
+				estado = false;
+			}
+		}
+	return estado;
+}
+
+boolean portaIO(int entrada, int rele, const char* tipo,const char* modelo,char contador, boolean estado)
+{
+  String s_tipo_1 = String(tipo);
+  String s_modelo_1 = String(modelo);
+  estado_antes = estado;
+  
+  
+  if (s_modelo_1 == "pulso")
+  {
+    if (digitalRead(entrada) == s_tipo_1.toInt())
+    {
+      if (nContar == 0) Serial.println("\n GPIO "+ String(entrada) +" - Pulso"); Serial.print(" Contando >> ");
+      while ((digitalRead(entrada) == s_tipo_1.toInt()) && (nContar <= 300) )
+      {
+        if (millis() >= tempo + paramTempo)
+        {
+          contador++;
+          nContar++;
+          Serial.print(contador, DEC);
+          tempo = millis();
+          digitalWrite(LED_VERMELHO,true);
+        }
+      }
+	  Serial.println("");
+    digitalWrite(LED_VERMELHO,false);
+    }
+  } else if (s_modelo_1 == "interruptor")
+  {
+    estado_atual = digitalRead(entrada);
+    if (estado_atual != estado_inter )
+    {
+      if (nContar == 0)Serial.println(" E1 Inter");
+      estado_inter = estado_atual;
+      contador = 3;
+      //Serial.print(botao1.contador, DEC);
+    }
+
+  }
+  if ((contador >= 1))
+  {
+	String ERRO_ENTRADA = "0";
+	nContar = 0;
+	if (estado_antes == false) 
+	{
+	estado_antes = true;
+	contador = 0;
+	acionaPorta(rele, "", "liga");
+	} else {
+	acionaPorta(rele, "", "desl");
+	estado_antes = false;
+	contador = 0;
+	}
+  }
+  return estado_antes;
+  Serial.println("");
+}
+
+String opcao_agenda(const char *in, const char *out, int saida)
+{
+  String resultado;
+  if(saida == 1){
+    resultado = String(in).substring(0, 2);
+  }
+  if(saida == 2){
+    resultado = String(in).substring(2, 4);
+  }
+  if(saida == 3){
+   resultado = String(out).substring(0, 2);
+  }
+  if(saida == 4){
+    resultado = String(out).substring(2, 4);
+  }
+  return resultado;   
+    
+}
+
+
 void agendamento(int gpio,String hora_ini, String hora_fim, String hora_atual )
 {
   //char agenda[2][12] = {"21:04:00", "21:05:00"};
@@ -20,13 +96,21 @@ void agendamento(int gpio,String hora_ini, String hora_fim, String hora_atual )
 	
   if(hora_atual == hora_ini)
   {
-    //digitalWrite(gpio,true);
+	if(agenda_ == 0)
+	{
 		acionaPorta(gpio, "", "liga");
+		agenda_ = 1;
+	}
+		
     }else if(hora_atual == hora_fim)
-    {
-      //digitalWrite(gpio,false);
-			acionaPorta(botao1.rele, "", "desl");
-    }
+		{
+		  if(agenda_ == 1)
+		  {
+			  acionaPorta(botao1.rele, "", "desl");
+			  agenda_ = 0;
+		  }
+			
+		}
 }
 
 void arduino_ota()
@@ -57,31 +141,118 @@ void arduino_ota()
     else if (error == OTA_END_ERROR) Serial.println("End Failed");
   });
 }
+
 String relogio_ntp(int retorno)
 {
-  String formattedDate;
-  String dayStamp;
-  String hora_ntp;
-  String dia_;
-  String mes_;
-  String ano_;
-  timeClient.update();
-  formattedDate = timeClient.getFormattedDate();
-  int splitT = formattedDate.indexOf("T");
-  dayStamp = formattedDate.substring(5, splitT);
-  dia_ = formattedDate.substring(8, splitT);
-  mes_ = formattedDate.substring(5, splitT -3);
-  ano_ = formattedDate.substring(0, splitT -6);
+  if(retorno == 0 || ATUALIZAR_DH == 0)
+  {  
+    Serial.println(" Atualizando data e hora...");
+    ntp.update();
+    hora = ntp.getEpochTime(); //Atualizar data e hora usando NTP online
+    Serial.print(" NTP Unix: ");
+    Serial.println(hora); 
+    ntp.getFormattedTime();
+    timeval tv;//Cria a estrutura temporaria para funcao abaixo.
+    tv.tv_sec = hora;//Atribui minha data atual. Voce pode usar o NTP para isso ou o site citado no artigo!
+    settimeofday(&tv, NULL);//Configura o RTC para manter a data atribuida atualizada.
+    time_t tt = time(NULL);//Obtem o tempo atual em segundos. Utilize isso sempre que precisar obter o tempo atual
+    data = *gmtime(&tt);//Converte o tempo atual e atribui na estrutura
+    strftime(data_formatada, 64, "%d/%m/%Y %H:%M:%S", &data);//Cria uma String formatada da estrutura "data"
+    Serial.print(" Data e hora atualizada:");
+    Serial.println(data_formatada);
+    ATUALIZAR_DH = 1;
+  }
+  
   if(retorno == 1)
   {
-    hora_ntp   = dia_ +"/"+ mes_ +"/"+ ano_ + " " + timeClient.getFormattedTime(); 
+    //hora_ntp   = dia_ +"/"+ mes_ +"/"+ ano_ + " " + timeClient.getFormattedTime(); 
+    time_t tt = time(NULL);//Obtem o tempo atual em segundos. Utilize isso sempre que precisar obter o tempo atual
+    data = *gmtime(&tt);//Converte o tempo atual e atribui na estrutura
+    strftime(data_formatada, 64, "%d/%m/%Y %H:%M:%S", &data);//Cria uma String formatada da estrutura "data"
+    hora_ntp   = data_formatada;
   }
   if(retorno == 2)
   {
-    hora_ntp = dia_ +"/"+ mes_ +"/"+ ano_;
+    //hora_ntp = dia_ +"/"+ mes_ +"/"+ ano_;
+    time_t tt = time(NULL);//Obtem o tempo atual em segundos. Utilize isso sempre que precisar obter o tempo atual
+    data = *gmtime(&tt);//Converte o tempo atual e atribui na estrutura
+    strftime(data_formatada, 64, "%d/%m/%Y", &data);//Cria uma String formatada da estrutura "data"
+    hora_ntp = data_formatada;
+  }
+  if(retorno == 3)
+  {
+  //String h = timeClient.getFormattedTime();
+  //hora_ntp = h.substring(0,2);
+  //hora_ntp += h.substring(3,5);
+  time_t tt = time(NULL);//Obtem o tempo atual em segundos. Utilize isso sempre que precisar obter o tempo atual
+  data = *gmtime(&tt);//Converte o tempo atual e atribui na estrutura
+  strftime(data_formatada, 64, "%H%M", &data);//Cria uma String formatada da estrutura "data"
+  hora_ntp = data_formatada;
+     
   }
   return hora_ntp;
+  
 }
+
+//
+//String relogio_ntp(int retorno)
+//{
+//	String formattedDate;
+//	String dayStamp;
+//	String hora_ntp;
+//	String dia_;
+//	String mes_;
+//	String ano_;
+//	timeClient.update();
+//	formattedDate = timeClient.getFormattedDate();
+//	int splitT = formattedDate.indexOf("T");
+//	dayStamp = formattedDate.substring(5, splitT);
+//	dia_ = formattedDate.substring(8, splitT);
+//	mes_ = formattedDate.substring(5, splitT -3);
+//	ano_ = formattedDate.substring(0, splitT -6);
+//	char data_formatada[64];
+//	if(retorno == 4)
+//	{
+//		Serial.print(" \n Hora atual atualizada: ");
+//		hora = timeClient.getEpochTime(); 
+//		Serial.println(hora);     // Escreve a hora no monitor serial.
+//		timeval tv;//Cria a estrutura temporaria para funcao abaixo.
+//		tv.tv_sec = hora;//Atribui minha data atual. Voce pode usar o NTP para isso ou o site citado no artigo!
+//		settimeofday(&tv, NULL);//Configura o RTC para manter a data atribuida atualizada.
+//		atualizaHora = millis();
+//		
+//			time_t tt = time(NULL);//Obtem o tempo atual em segundos. Utilize isso sempre que precisar obter o tempo atual
+//			data = *gmtime(&tt);//Converte o tempo atual e atribui na estrutura
+//			strftime(data_formatada, 64, "%d/%m/%Y %H:%M:%S", &data);//Cria uma String formatada da estrutura "data"
+//
+//			printf("\nUnix Serial.println(hora);: %d\n", int32_t(tt));//Mostra na Serial o Unix time
+//			printf("Data formatada: %s\n", data_formatada);//Mostra na Serial a data formatada
+//	}
+//	time_t tt = time(NULL);//Obtem o tempo atual em segundos. Utilize isso sempre que precisar obter o tempo atual
+//	data = *gmtime(&tt);//Converte o tempo atual e atribui na estrutura
+//	strftime(data_formatada, 64, "%d/%m/%Y %H:%M:%S", &data);//Cria uma String formatada da estrutura "data"
+//
+//	printf("\nUnix Serial.println(hora);: %d\n", int32_t(tt));//Mostra na Serial o Unix time
+//	printf("Data formatada: %s\n", data_formatada);//Mostra na Serial a data formatada
+//  
+//  
+//  
+//  if(retorno == 1)
+//  {
+//    hora_ntp   = dia_ +"/"+ mes_ +"/"+ ano_ + " " + timeClient.getFormattedTime(); 
+//  }
+//  if(retorno == 2)
+//  {
+//    hora_ntp = dia_ +"/"+ mes_ +"/"+ ano_;
+//  }
+//  if(retorno == 3)
+//  {
+//	String h = timeClient.getFormattedTime();
+//	hora_ntp = h.substring(0,2);
+//	hora_ntp += h.substring(3,5);
+//  }
+//  return hora_ntp;
+//}
 
 void pisca_led(int LED,boolean estado)
 {
@@ -94,9 +265,7 @@ void pisca_led(int LED,boolean estado)
     }
   }else
     {
-      digitalWrite(LED_AZUL, LOW);
-      digitalWrite(LED_VERDE, LOW);
-      digitalWrite(LED_VERMELHO, LOW);
+      digitalWrite(LED, LOW);
     }
 }
 
@@ -173,10 +342,12 @@ String teste_conexao(){
     {
       gravaLog(" "+relogio_ntp(1) + " - ERRO 0104 - Servidor Desconectado", logtxt, 1);
       retorno = "ERRO_SERVIDOR_DESC";
+      digitalWrite(LED_VERMELHO,true);
     }else if(r == 1)
     {
       Serial.println(" Servidor WEB/Banco OK ");
       retorno = "SERVIDOR_CONECT";
+      digitalWrite(LED_VERMELHO,false);
     }
   }
   return retorno;
@@ -199,7 +370,7 @@ void gravarBanco (String buffer){
       //delay(1000);
     } 
   }
-  pisca_led(LED_VERMELHO,false);
+  //pisca_led(LED_VERMELHO,false);
   if ((client.connect(servidor, portaServidor) == true) && (teste_conexao() == "SERVIDOR_CONECT")) 
   {
     //if (client.connect(servidor, 80)) {
@@ -220,9 +391,10 @@ void gravarBanco (String buffer){
 //---------------------------------------  
 //    FUNÇÃO DA SIRENE
 //--------------------------------------- 
-void sirene(boolean valor){
+void sirene(boolean valor)
+  {
   if(valor == true){
-    if(millis() - time_sirene >= 2000)
+    if(millis() - time_sirene >= 500)
     {
       digitalWrite(BUZZER, !digitalRead(BUZZER));
       time_sirene = millis();
@@ -258,9 +430,9 @@ float MQCalibration(int mq_pin)   //funcao que calibra o sensor em um ambiente l
     Serial.print(".");
     valor += calcularResistencia(analogRead(mq_pin));
     delay(500);
-    digitalWrite(LED_AZUL, !digitalRead(LED_AZUL));//Faz o LED piscar (inverte o estado).
+    digitalWrite(2, !digitalRead(2));//Faz o LED piscar (inverte o estado).
   }
-  digitalWrite(LED_AZUL,false);
+  digitalWrite(2,false);
   valor = valor/ITERACOES_CALIBRACAO;        
   valor = valor/RO_FATOR_AR_LIMPO; //o valor lido dividido pelo R0 do ar limpo resulta no R0 do ambiente
   return valor; 
@@ -272,10 +444,10 @@ float leitura_MQ2(int mq_pin)
   pisca_led(LED_VERDE,false);
   for (i=0;i<ITERACOES_LEITURA;i++) {
     rs += calcularResistencia(analogRead(mq_pin));
-    digitalWrite(LED_AZUL, !digitalRead(LED_AZUL));//Faz o LED piscar (inverte o estado).
-    delay(10);
+    digitalWrite(2, !digitalRead(2));//Faz o LED piscar (inverte o estado).
+    //delay(10);
   }
-  digitalWrite(LED_AZUL,false);
+  digitalWrite(2,false);
   rs = rs/ITERACOES_LEITURA;
   return rs;  
 }
@@ -340,7 +512,7 @@ void gravarArquivo(String msg, String arq) {
     if (s >= 9000){
       deletarArquivo("/log.txt");
       criarArquivo("/log.txt"); 
-      delay(5);
+      //delay(5);
       gravaLog(" "+relogio_ntp(1) + " - Log deletado! ", logtxt, 1);
     }
     if(!logg){
