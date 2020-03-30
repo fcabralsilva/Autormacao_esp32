@@ -1,13 +1,14 @@
 boolean status_porta(int numero_Int, int rele, boolean estado, String _acao)
 {
 	if (numero_Int == rele) 
+	{
+		if (_acao == "liga") 
 		{
-			if (_acao == "liga") {
-				estado = true;
-			} else {
-				estado = false;
-			}
+			estado = true;
+		} else {
+			estado = false;
 		}
+	}
 	return estado;
 }
 
@@ -42,7 +43,7 @@ boolean portaIO(int entrada, int rele, const char* tipo,const char* modelo,char 
     estado_atual = digitalRead(entrada);
     if (estado_atual != estado_inter )
     {
-      if (nContar == 0)Serial.println(" E1 Inter");
+      if (nContar == 0)Serial.println("\n GPIO "+ String(entrada) +" - Interruptor");;
       estado_inter = estado_atual;
       contador = 3;
       //Serial.print(botao1.contador, DEC);
@@ -55,13 +56,14 @@ boolean portaIO(int entrada, int rele, const char* tipo,const char* modelo,char 
 	nContar = 0;
 	if (estado_antes == false) 
 	{
-	estado_antes = true;
-	contador = 0;
-	acionaPorta(rele, "", "liga");
-	} else {
-	acionaPorta(rele, "", "desl");
-	estado_antes = false;
-	contador = 0;
+		estado_antes = true;
+		contador = 0;
+		acionaPorta(rele, "", "liga");
+	} else 
+	{
+		acionaPorta(rele, "", "desl");
+		estado_antes = false;
+		contador = 0;
 	}
   }
   return estado_antes;
@@ -90,10 +92,11 @@ String opcao_agenda(const char *in, const char *out, int saida)
 
 void agendamento(int gpio,String hora_ini, String hora_fim, String hora_atual )
 {
-  //char agenda[2][12] = {"21:04:00", "21:05:00"};
-  //String timer = timeClient.getFormattedTime();
-  //agendamento(led, agenda[0], agenda[1], timer);
-	
+/*
+	char agenda[2][12] = {"21:04:00", "21:05:00"};
+	String timer = timeClient.getFormattedTime();
+	agendamento(led, agenda[0], agenda[1], timer);
+*/
   if(hora_atual == hora_ini)
   {
 	if(agenda_ == 0)
@@ -165,7 +168,6 @@ String relogio_ntp(int retorno)
   
   if(retorno == 1)
   {
-    //hora_ntp   = dia_ +"/"+ mes_ +"/"+ ano_ + " " + timeClient.getFormattedTime(); 
     time_t tt = time(NULL);//Obtem o tempo atual em segundos. Utilize isso sempre que precisar obter o tempo atual
     data = *gmtime(&tt);//Converte o tempo atual e atribui na estrutura
     strftime(data_formatada, 64, "%d/%m/%Y %H:%M:%S", &data);//Cria uma String formatada da estrutura "data"
@@ -173,7 +175,6 @@ String relogio_ntp(int retorno)
   }
   if(retorno == 2)
   {
-    //hora_ntp = dia_ +"/"+ mes_ +"/"+ ano_;
     time_t tt = time(NULL);//Obtem o tempo atual em segundos. Utilize isso sempre que precisar obter o tempo atual
     data = *gmtime(&tt);//Converte o tempo atual e atribui na estrutura
     strftime(data_formatada, 64, "%d/%m/%Y", &data);//Cria uma String formatada da estrutura "data"
@@ -181,78 +182,23 @@ String relogio_ntp(int retorno)
   }
   if(retorno == 3)
   {
-  //String h = timeClient.getFormattedTime();
-  //hora_ntp = h.substring(0,2);
-  //hora_ntp += h.substring(3,5);
   time_t tt = time(NULL);//Obtem o tempo atual em segundos. Utilize isso sempre que precisar obter o tempo atual
   data = *gmtime(&tt);//Converte o tempo atual e atribui na estrutura
   strftime(data_formatada, 64, "%H%M", &data);//Cria uma String formatada da estrutura "data"
   hora_ntp = data_formatada;
      
   }
+  if(retorno == 3)
+  {
+  time_t tt = time(NULL);//Obtem o tempo atual em segundos. Utilize isso sempre que precisar obter o tempo atual
+  data = *gmtime(&tt);//Converte o tempo atual e atribui na estrutura
+  strftime(data_formatada, 64, "%H:%M", &data);//Cria uma String formatada da estrutura "data"
+  hora_ntp = data_formatada;
+     
+  }
   return hora_ntp;
   
 }
-
-//
-//String relogio_ntp(int retorno)
-//{
-//	String formattedDate;
-//	String dayStamp;
-//	String hora_ntp;
-//	String dia_;
-//	String mes_;
-//	String ano_;
-//	timeClient.update();
-//	formattedDate = timeClient.getFormattedDate();
-//	int splitT = formattedDate.indexOf("T");
-//	dayStamp = formattedDate.substring(5, splitT);
-//	dia_ = formattedDate.substring(8, splitT);
-//	mes_ = formattedDate.substring(5, splitT -3);
-//	ano_ = formattedDate.substring(0, splitT -6);
-//	char data_formatada[64];
-//	if(retorno == 4)
-//	{
-//		Serial.print(" \n Hora atual atualizada: ");
-//		hora = timeClient.getEpochTime(); 
-//		Serial.println(hora);     // Escreve a hora no monitor serial.
-//		timeval tv;//Cria a estrutura temporaria para funcao abaixo.
-//		tv.tv_sec = hora;//Atribui minha data atual. Voce pode usar o NTP para isso ou o site citado no artigo!
-//		settimeofday(&tv, NULL);//Configura o RTC para manter a data atribuida atualizada.
-//		atualizaHora = millis();
-//		
-//			time_t tt = time(NULL);//Obtem o tempo atual em segundos. Utilize isso sempre que precisar obter o tempo atual
-//			data = *gmtime(&tt);//Converte o tempo atual e atribui na estrutura
-//			strftime(data_formatada, 64, "%d/%m/%Y %H:%M:%S", &data);//Cria uma String formatada da estrutura "data"
-//
-//			printf("\nUnix Serial.println(hora);: %d\n", int32_t(tt));//Mostra na Serial o Unix time
-//			printf("Data formatada: %s\n", data_formatada);//Mostra na Serial a data formatada
-//	}
-//	time_t tt = time(NULL);//Obtem o tempo atual em segundos. Utilize isso sempre que precisar obter o tempo atual
-//	data = *gmtime(&tt);//Converte o tempo atual e atribui na estrutura
-//	strftime(data_formatada, 64, "%d/%m/%Y %H:%M:%S", &data);//Cria uma String formatada da estrutura "data"
-//
-//	printf("\nUnix Serial.println(hora);: %d\n", int32_t(tt));//Mostra na Serial o Unix time
-//	printf("Data formatada: %s\n", data_formatada);//Mostra na Serial a data formatada
-//  
-//  
-//  
-//  if(retorno == 1)
-//  {
-//    hora_ntp   = dia_ +"/"+ mes_ +"/"+ ano_ + " " + timeClient.getFormattedTime(); 
-//  }
-//  if(retorno == 2)
-//  {
-//    hora_ntp = dia_ +"/"+ mes_ +"/"+ ano_;
-//  }
-//  if(retorno == 3)
-//  {
-//	String h = timeClient.getFormattedTime();
-//	hora_ntp = h.substring(0,2);
-//	hora_ntp += h.substring(3,5);
-//  }
-//  return hora_ntp;
-//}
 
 void pisca_led(int LED,boolean estado)
 {

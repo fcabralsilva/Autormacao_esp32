@@ -13,7 +13,7 @@
 #include <WebServer.h>
 #include <WiFiManager.h>
 
-String VERSAO = "V09.00 - 20/03/2020";
+String VERSAO = "V09.01 - 30/03/2020";
 
 #define BUZZER                18
 #define PIN_MQ2               34
@@ -81,6 +81,11 @@ const char WEB_END[] PROGMEM             = "</div></body></html>";
 const char WEB_DIV_CONTAINER[] PROGMEM   = "<div class=\"container shadow-lg p-3 mb-5 bg-white rounded\">";
 const char WEB_NAV_MENU[] PROGMEM        = "<ul class=\"nav nav-pills mb-3\" id=\"pills-tab\" role=\"tablist\"><li class=\"nav-item\"><a class=\"nav-link active\" id=\"pills-home-tab\" data-toggle=\"pill\" href=\"#pills-home\" role=\"tab\" aria-controls=\"pills-home\" aria-selected=\"true\">Home</a></li> <li class=\"nav-item\"><a class=\"nav-link\" id=\"pills-profile-tab\" data-toggle=\"pill\" href=\"#pills-profile\" role=\"tab\" aria-controls=\"pills-profile\" aria-selected=\"false\">Configuração</a></li></ul>";
 const char WEB_BOTAO_SUCCESS[] PROGMEM   = "<a href=\"?porta=\"{A}\" title=\"Porta:\"{B}\"><button type=\"button\"  class=\"btn btn-success\">\"{C}\"</button></a>";
+const char A_HREF[] PROGMEM   = "  <a href=\"?porta={A}&acao={G}&central={B}\" title=\"Porta:{C} Botão:{D}\"><button type=\"button\"  class=\"{E}\">{F}</button></a>";
+
+
+
+const char refresh[] PROGMEM = "<img width=\"16px\" src=\"data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDUxMiA1MTIiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDUxMiA1MTI7IiB4bWw6c3BhY2U9InByZXNlcnZlIiB3aWR0aD0iNTEycHgiIGhlaWdodD0iNTEycHgiPgo8cGF0aCBzdHlsZT0iZmlsbDojMTdBQ0U4OyIgZD0iTTQ0Ni44LDE2Ni44OTljLTQuNzk5LTcuNS0xNC43LTktMjEuODk5LTMuOUwzNzYuMywxOTkuNmMtNiw0LjQ5OS03LjgsMTIuOS0zLjksMTkuNDk5ICBjMTIuMjk5LDIxLDE4LjYsNDMuNSwxOC42LDY2LjkwMWMwLDc0LjM5OS02MC42MDEsMTM1LTEzNSwxMzVzLTEzNS02MC42MDEtMTM1LTEzNWMwLTY5LjMsNTIuNS0xMjYuNjAxLDEyMC0xMzQuMTAxVjE5NiAgYzAsOSw3LjIsMTQuNywxNSwxNWMyLjk5OSwwLDYuMzAxLTAuOTAxLDktMy4wMDFsMTIwLTg5Ljk5OGM4LjEwMS02LDguMTAxLTE4LjAwMSwwLTI0LjAwMUwyNjUsM2MtMi42OTktMi4wOTgtNi0yLjk5OS05LTIuOTk5ICBjLTcuOCwwLTE1LDYuMzAxLTE1LDE1djQ2LjYwMUMxMjMuOTk5LDY5LjEwMSwzMSwxNjYuODk5LDMxLDI4NmMwLDEyNC4yLDEwMC44LDIyNiwyMjUsMjI2czIyNS0xMDEuOCwyMjUtMjI2ICBDNDgxLDI0My45OTksNDY4Ljk5OSwyMDIuODk5LDQ0Ni44LDE2Ni44OTl6Ii8+CjxnPgoJPHBhdGggc3R5bGU9ImZpbGw6IzE2ODlGQzsiIGQ9Ik0yNjUsMjA3Ljk5OWMtMi42OTksMi4xLTYsMy4wMDEtOSwzLjAwMVYwYzIuOTk5LDAsNi4zMDEsMC45MDEsOSwyLjk5OWwxMjAsOTEgICBjOC4xMDEsNiw4LjEwMSwxOC4wMDEsMCwyNC4wMDFMMjY1LDIwNy45OTl6Ii8+Cgk8cGF0aCBzdHlsZT0iZmlsbDojMTY4OUZDOyIgZD0iTTQ4MSwyODZjMCwxMjQuMi0xMDAuOCwyMjYtMjI1LDIyNnYtOTFjNzQuMzk5LDAsMTM1LTYwLjYwMSwxMzUtMTM1ICAgYzAtMjMuNDAxLTYuMzAxLTQ1LjkwMS0xOC42LTY2LjkwMWMtMy45LTYuNTk5LTIuMS0xNSwzLjktMTkuNDk5bDQ4LjYtMzYuNjAxYzcuMi01LjA5OSwxNy4xLTMuNiwyMS44OTksMy45ICAgQzQ2OC45OTksMjAyLjg5OSw0ODEsMjQzLjk5OSw0ODEsMjg2eiIvPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+Cjwvc3ZnPgo=\" />";
 
 long milis = 0;        	// último momento que o LED foi atualizado
 long interval = 250;    // tempo de transição entre estados (milisegundos)
@@ -227,7 +232,7 @@ void loop()
     // FAZENDO LEITURA DE PARAMETROS DO SISTEMA
     openFS();
 
-    StaticJsonDocument<800> doc;
+    StaticJsonDocument<750> doc;
     json = lerArquivoParam().c_str();
     DeserializationError error = deserializeJson(doc, json);
     if (error)
@@ -515,7 +520,8 @@ void loop()
 
     buf += "<h4><a href=\"http://" + ipLocalString + "\">CENTRAL -" + ipLocalString + "</a></h4>";
     buf += "<p style=\"text-align:right\"><span class=\"badge badge-pill badge-primary\">Versão: " + VERSAO + "</span></span></p>";
-    /*TABLELA_SENSORES*/
+    
+	/*TABLELA_SENSORES*/
     buf += "<table class=\"table table-sm\">";
     buf += "<thead class=\"thead-light\" ><tr><th>SENSOR</th><th>TIPO</th><th>VALOR</th></tr></thead>";
     buf += "<tbody><tr><td>DHT11</td><td>Temperatura/Umidade</td><td>" + String(temperatura) + "Cº / " + String(umidade) + "%</td></tr>";
@@ -523,29 +529,102 @@ void loop()
     buf += "<tr><td>MQ2</td><td>Fumaça</td><td>" + FUMACA + " PPM / " + String(sensorMq2) + "</td></tr>";
     buf += "<tr><td></td><td></td><td></td></tr></tbody>";
     buf += "</table>";
-    /*BOTOES_INPUT*/
+    
+	/*
+		BOTÃO 1
+	*/
     buf += "<div><p>";
-    if (botao1.estado == true) {
-      buf += "  <a href=\"?porta=" + String(botao1.rele) + "&acao=desliga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao1.rele) + " Botão:" + botao1.entrada + "\"><button type=\"button\"  class=\"btn btn-success\">" + String(botao1.nomeInter) + "</button></a>";
-    } else {
-      buf += "  <a href=\"?porta=" + String(botao1.rele) + "&acao=liga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao1.rele) + " Botão:" + botao1.entrada + "\"><button type=\"button\"  class=\"btn btn-danger\">" + String(botao1.nomeInter) + "</button></a>";
-    }
+	String bt1, bt1_a;
+    if (botao1.estado == true) 
+	{
+		bt1 = "btn btn-success";
+		bt1_a = "desliga";
+      // buf += "  <a href=\"?porta=" + String(botao1.rele) + "&acao=desliga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao1.rele) + " Botão:" + botao1.entrada + "\"><button type=\"button\"  class=\"btn btn-success\">" + String(botao1.nomeInter) + "</button></a>";
+    } else 
+		{
+		bt1 = "btn btn-danger";
+		bt1_a = "liga";
+      // buf += "  <a href=\"?porta=" + String(botao1.rele) + "&acao=liga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao1.rele) + " Botão:" + botao1.entrada + "\"><button type=\"button\"  class=\"btn btn-danger\">" + String(botao1.nomeInter) + "</button></a>";
+		}
+	buf += FPSTR(A_HREF);
+	buf.replace("{A}", String(botao1.rele));
+	buf.replace("{B}", ipLocalString);
+	buf.replace("{C}", String(botao1.rele));
+	buf.replace("{D}", String(botao1.entrada));
+	buf.replace("{E}", bt1);
+	buf.replace("{G}", bt1_a);
+	buf.replace("{F}", String(botao1.nomeInter));
+	
+	/*
+		BOTÃO 2
+	*/
+	String bt2, bt2_a;
     if (botao2.estado == true) {
-      buf += "  <a href=\"?porta=" + String(botao2.rele) + "&acao=desliga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao2.rele) + " Botão:" + botao2.entrada + "\"><button type=\"button\"  class=\"btn btn-success\">" + String(botao2.nomeInter) + "</button></a>";
+		bt2 = "btn btn-success";
+		bt2_a = "desliga";
+      //buf += "  <a href=\"?porta=" + String(botao2.rele) + "&acao=desliga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao2.rele) + " Botão:" + botao2.entrada + "\"><button type=\"button\"  class=\"btn btn-success\">" + String(botao2.nomeInter) + "</button></a>";
     } else {
-      buf += "  <a href=\"?porta=" + String(botao2.rele) + "&acao=liga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao2.rele) + " Botão:" + botao2.entrada + "\"><button type=\"button\"  class=\"btn btn-danger\">" + String(botao2.nomeInter) + "</button></a>";
+		bt2 = "btn btn-danger";
+		bt2_a = "liga";
+      //buf += "  <a href=\"?porta=" + String(botao2.rele) + "&acao=liga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao2.rele) + " Botão:" + botao2.entrada + "\"><button type=\"button\"  class=\"btn btn-danger\">" + String(botao2.nomeInter) + "</button></a>";
     }
-    if (botao3.estado == true) {
-      buf += "  <a href=\"?porta=" + String(botao3.rele) + "&acao=desliga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao3.rele) + " Botão:" + botao3.entrada + "\"><button type=\"button\"  class=\"btn btn-success\">" + String(botao3.nomeInter) + "</button></a>";
+	buf += FPSTR(A_HREF);
+	buf.replace("{A}", String(botao2.rele));
+	buf.replace("{B}", ipLocalString);
+	buf.replace("{C}", String(botao2.rele));
+	buf.replace("{D}", String(botao2.entrada));
+	buf.replace("{E}", bt2);
+	buf.replace("{G}", bt2_a);
+	buf.replace("{F}", String(botao2.nomeInter));
+	
+	/*
+		BOTÃO 3
+	*/
+	String bt3, bt3_a;
+    if (botao3.estado == true) 
+	{
+		bt3 = "btn btn-success";
+		bt3_a = "desliga";
+      //buf += "  <a href=\"?porta=" + String(botao3.rele) + "&acao=desliga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao3.rele) + " Botão:" + botao3.entrada + "\"><button type=\"button\"  class=\"btn btn-success\">" + String(botao3.nomeInter) + "</button></a>";
     } else {
-      buf += "  <a href=\"?porta=" + String(botao3.rele) + "&acao=liga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao3.rele) + " Botão:" + botao3.entrada + "\"><button type=\"button\"  class=\"btn btn-danger\">" + String(botao3.nomeInter) + "</button></a>";
+		bt3 = "btn btn-danger";
+		bt3_a = "liga";
+      //buf += "  <a href=\"?porta=" + String(botao3.rele) + "&acao=liga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao3.rele) + " Botão:" + botao3.entrada + "\"><button type=\"button\"  class=\"btn btn-danger\">" + String(botao3.nomeInter) + "</button></a>";
     }
-    if (botao4.estado == true) {
-      buf += "  <a href=\"?porta=" + String(botao4.rele) + "&acao=desliga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao4.rele) + " Botão:" + botao4.entrada + "\"><button type=\"button\"  class=\"btn btn-success\">" + String(botao4.nomeInter) + "</button></a>";
+	buf += FPSTR(A_HREF);
+	buf.replace("{A}", String(botao3.rele));
+	buf.replace("{B}", ipLocalString);
+	buf.replace("{C}", String(botao3.rele));
+	buf.replace("{D}", String(botao3.entrada));
+	buf.replace("{E}", bt3);
+	buf.replace("{G}", bt3_a);
+	buf.replace("{F}", String(botao3.nomeInter));	
+
+	/*
+		BOTÃO 4
+	*/
+	String bt4, bt4_a;	
+    if (botao4.estado == true) 
+	{
+		bt4 = "btn btn-success";
+		bt4_a = "desliga";    
+	//buf += "  <a href=\"?porta=" + String(botao4.rele) + "&acao=desliga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao4.rele) + " Botão:" + botao4.entrada + "\"><button type=\"button\"  class=\"btn btn-success\">" + String(botao4.nomeInter) + "</button></a>";
     } else {
-      buf += "  <a href=\"?porta=" + String(botao4.rele) + "&acao=liga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao4.rele) + " Botão:" + botao4.entrada + "\"><button type=\"button\"  class=\"btn btn-danger\">" + String(botao4.nomeInter) + "</button></a>";
+		bt4 = "btn btn-danger";
+		bt4_a = "liga";  
+      //buf += "  <a href=\"?porta=" + String(botao4.rele) + "&acao=liga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao4.rele) + " Botão:" + botao4.entrada + "\"><button type=\"button\"  class=\"btn btn-danger\">" + String(botao4.nomeInter) + "</button></a>";
     }
-    buf += "<a href=\"?00015\" title=\"Desligar\"><button type=\"button\"  class=\"btn btn-danger\">Desli. Tudo</button></a>";
+	buf += FPSTR(A_HREF);
+	buf.replace("{A}", String(botao4.rele));
+	buf.replace("{B}", ipLocalString);
+	buf.replace("{C}", String(botao4.rele));
+	buf.replace("{D}", String(botao4.entrada));
+	buf.replace("{E}", bt4);
+	buf.replace("{G}", bt4_a);
+	buf.replace("{F}", String(botao4.nomeInter));    
+	
+	
+	buf += "<a href=\"?00015\" title=\"Desligar\"><button type=\"button\"  class=\"btn btn-danger\">Desli. Tudo</button></a>";
     buf += "</p>";
     /* BOTOES_ALARME */
     if (b_status_alarme == 0) {
@@ -560,7 +639,7 @@ void loop()
     buf += "<table border='0px'>";
     buf += "<input type=\"hidden\" name=\"cod\" value=\"00012\">";
     buf += "<tr>";
-    buf += "<td ><strong>Servidor</strong></td><td><input maxlength=\"15\" style=\"width:130px\" type=\"text\"   name=\"servidor\" value=\"" + serv + "\"></td><td><a href='?00018' title='Atualizar data e hora da central'><button type='button' class='btn btn-danger'>Data/Hora</button></td></tr>";
+    buf += "<td ><strong>Servidor</strong></td><td><input maxlength=\"15\" style=\"width:130px\" type=\"text\"   name=\"servidor\" value=\"" + serv + "\"></td><td colspan=\"2\"><input style=\"border:0px;width:80px\" type=\"time\" value=\""+relogio_ntp(3)+"\" disabled><a href='?00018' title='Atualizar data e hora da central'>"+refresh+"</td></tr>";
     buf += "</tr>";
 
     buf += "</tr>";
@@ -573,10 +652,12 @@ void loop()
     buf += "<td><select   style=\"width:100%x\" name=\"sinal_1\"><option value=\"pulso\" " + selectedHTNL(botao1.modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao1.modelo, "interruptor") + ">Inter.</option><option value=\"pir\" " + selectedHTNL(botao1.modelo, "pir") + ">PIR</option></select></td>";
     buf += "</tr>";
     buf += "<tr><td></td><td>";
-    buf += "<input maxlength=\"2\" style=\"width:24px\" type=\"text\"   name=\"hora1_in_1\" value=\"" + opcao_agenda(botao1.agenda_in, botao1.agenda_out, 1) + "\">:";
-    buf += "<input maxlength=\"2\" style=\"width:24px\" type=\"text\"   name=\"hora1_in_2\" value=\"" + opcao_agenda(botao1.agenda_in, botao1.agenda_out, 2) +"\">-";
-    buf += "<input maxlength=\"2\" style=\"width:24px\" type=\"text\"   name=\"hora1_out_1\" value=\"" + opcao_agenda(botao1.agenda_in, botao1.agenda_out, 3) + "\">:";
-    buf += "<input maxlength=\"2\" style=\"width:24px\" type=\"text\"   name=\"hora1_out_2\" value=\"" + opcao_agenda(botao1.agenda_in, botao1.agenda_out, 4) + "\">";
+	
+	String input_text = "<input maxlength=\"2\" style=\"width:24px\" type=\"text\"";
+    buf += input_text+"name=\"hora1_in_1\" value=\"" + opcao_agenda(botao1.agenda_in, botao1.agenda_out, 1) + "\">:";
+    buf += input_text+"name=\"hora1_in_2\" value=\"" + opcao_agenda(botao1.agenda_in, botao1.agenda_out, 2) +"\">-";
+    buf += input_text+"name=\"hora1_out_1\" value=\"" + opcao_agenda(botao1.agenda_in, botao1.agenda_out, 3) + "\">:";
+    buf += input_text+"name=\"hora1_out_2\" value=\"" + opcao_agenda(botao1.agenda_in, botao1.agenda_out, 4) + "\">";
     buf += "</td></tr>";
 
     buf += "<tr>";
@@ -584,11 +665,12 @@ void loop()
     buf += "<td><select   style=\"width:100%x\"  name=\"tipo_2\"><option value=\"0\" " + selectedHTNL(botao2.tipo, "0") + " > - </option><option value=\"1\" " + selectedHTNL(botao2.tipo, "1") + "> + </option></select></td>";
     buf += "<td><select   style=\"width:100%x\" name=\"sinal_2\"><option value=\"pulso\" " + selectedHTNL(botao2.modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao2.modelo, "interruptor") + ">Inter.</option><option value=\"pir\" " + selectedHTNL(botao2.modelo, "pir") + ">PIR</option></select></td>";
     buf += "</tr>";
+	
     buf += "<tr><td></td><td>";
-    buf += "<input maxlength=\"2\" style=\"width:24px\" type=\"text\"   name=\"hora2_in_1\" value=\""+opcao_agenda(botao2.agenda_in, botao2.agenda_out, 1)+"\">:";
-    buf += "<input maxlength=\"2\" style=\"width:24px\" type=\"text\"   name=\"hora2_in_2\" value=\""+opcao_agenda(botao2.agenda_in, botao2.agenda_out, 2)+"\">-";
-    buf += "<input maxlength=\"2\" style=\"width:24px\" type=\"text\"   name=\"hora2_out_1\" value=\""+opcao_agenda(botao2.agenda_in, botao2.agenda_out, 3)+"\">:";
-    buf += "<input maxlength=\"2\" style=\"width:24px\" type=\"text\"   name=\"hora2_out_2\" value=\""+opcao_agenda(botao2.agenda_in, botao2.agenda_out, 4)+"\">";
+    buf += input_text+"name=\"hora2_in_1\" value=\""+opcao_agenda(botao2.agenda_in, botao2.agenda_out, 1)+"\">:";
+    buf += input_text+"name=\"hora2_in_2\" value=\""+opcao_agenda(botao2.agenda_in, botao2.agenda_out, 2)+"\">-";
+    buf += input_text+"name=\"hora2_out_1\" value=\""+opcao_agenda(botao2.agenda_in, botao2.agenda_out, 3)+"\">:";
+    buf += input_text+"name=\"hora2_out_2\" value=\""+opcao_agenda(botao2.agenda_in, botao2.agenda_out, 4)+"\">";
     buf += "</td></tr>";
 
     buf += "<tr>";
@@ -596,11 +678,12 @@ void loop()
     buf += "<td><select   style=\"width:100%x\"  name=\"tipo_3\"><option value=\"0\" " + selectedHTNL(botao3.tipo, "0") + "> - </option><option value=\"1\" " + selectedHTNL(botao3.tipo, "1") + "> + </option></select></td>";
     buf += "<td><select   style=\"width:100%x\" name=\"sinal_3\"><option value=\"pulso\" " + selectedHTNL(botao3.modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao3.modelo, "interruptor") + ">Inter.</option><option value=\"pir\" " + selectedHTNL(botao3.modelo, "pir") + ">PIR</option></select></td>";
     buf += "</tr>";
+	
     buf += "<tr><td></td><td>";
-    buf += "<input maxlength=\"2\" style=\"width:24px\" type=\"text\"   name=\"hora3_in_1\" value=\""+opcao_agenda(botao3.agenda_in, botao3.agenda_out, 1)+"\">:";
-    buf += "<input maxlength=\"2\" style=\"width:24px\" type=\"text\"   name=\"hora3_in_2\" value=\""+opcao_agenda(botao3.agenda_in, botao3.agenda_out, 2)+"\">-";
-    buf += "<input maxlength=\"2\" style=\"width:24px\" type=\"text\"   name=\"hora3_out_1\" value=\""+opcao_agenda(botao3.agenda_in, botao3.agenda_out, 3)+"\">:";
-    buf += "<input maxlength=\"2\" style=\"width:24px\" type=\"text\"   name=\"hora3_out_2\" value=\""+opcao_agenda(botao3.agenda_in, botao3.agenda_out, 4)+"\">";
+    buf += input_text+"name=\"hora3_in_1\" value=\""+opcao_agenda(botao3.agenda_in, botao3.agenda_out, 1)+"\">:";
+    buf += input_text+"name=\"hora3_in_2\" value=\""+opcao_agenda(botao3.agenda_in, botao3.agenda_out, 2)+"\">-";
+    buf += input_text+"name=\"hora3_out_1\" value=\""+opcao_agenda(botao3.agenda_in, botao3.agenda_out, 3)+"\">:";
+    buf += input_text+"name=\"hora3_out_2\" value=\""+opcao_agenda(botao3.agenda_in, botao3.agenda_out, 4)+"\">";
     buf += "</td></tr>";
 
     buf += "<tr>";
@@ -609,10 +692,10 @@ void loop()
     buf += "<td><select   style=\"width:100%x\" name=\"sinal_4\"><option value=\"pulso\" " + selectedHTNL(botao4.modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao4.modelo, "interruptor") + ">Inter.</option><option value=\"pir\" " + selectedHTNL(botao4.modelo, "pir") + ">PIR</option></select></td>";
     buf += "</tr>";
     buf += "<tr><td></td><td>";
-    buf += "<input maxlength=\"2\" style=\"width:24px\" type=\"text\"   name=\"hora4_in_1\" value=\""+opcao_agenda(botao4.agenda_in, botao4.agenda_out, 1)+"\">:";
-    buf += "<input maxlength=\"2\" style=\"width:24px\" type=\"text\"   name=\"hora4_in_2\" value=\""+opcao_agenda(botao4.agenda_in, botao4.agenda_out, 2)+"\">-";
-    buf += "<input maxlength=\"2\" style=\"width:24px\" type=\"text\"   name=\"hora4_out_1\" value=\""+opcao_agenda(botao4.agenda_in, botao4.agenda_out, 3)+"\">:";
-    buf += "<input maxlength=\"2\" style=\"width:24px\" type=\"text\"   name=\"hora4_out_2\" value=\""+opcao_agenda(botao4.agenda_in, botao4.agenda_out, 4)+"\">";
+    buf += input_text+"name=\"hora4_in_1\" value=\""+opcao_agenda(botao4.agenda_in, botao4.agenda_out, 1)+"\">:";
+    buf += input_text+"name=\"hora4_in_2\" value=\""+opcao_agenda(botao4.agenda_in, botao4.agenda_out, 2)+"\">-";
+    buf += input_text+"name=\"hora4_out_1\" value=\""+opcao_agenda(botao4.agenda_in, botao4.agenda_out, 3)+"\">:";
+    buf += input_text+"name=\"hora4_out_2\" value=\""+opcao_agenda(botao4.agenda_in, botao4.agenda_out, 4)+"\">";
     buf += "</td></tr>";
 
     buf += "<tr>";
