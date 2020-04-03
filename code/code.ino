@@ -27,6 +27,7 @@ String VERSAO = "V09.05 - 03/04/2020";
 #define SMOKE                 2
 #define LED_VERDE             15
 #define LED_VERMELHO          4
+#define LED_AZUL              2
 
 struct botao1 {
   int entrada = 32, rele = 33;
@@ -79,10 +80,10 @@ const char WEB_NAV_MENU[] PROGMEM        = "<ul class=\"nav nav-pills mb-3\" id=
 const char WEB_BOTAO_SUCCESS[] PROGMEM   = "<a href=\"?porta=\"{A}\" title=\"Porta:\"{B}\"><button type=\"button\"  class=\"btn btn-success\">\"{C}\"</button></a>";
 const char A_HREF[] PROGMEM              = "  <a href=\"?porta={A}&acao={G}&central={B}\" title=\"Porta:{C} Botão:{D}\"><button type=\"button\"  class=\"{E}\">{F}</button></a>";
 const char refresh[] PROGMEM             = "<img width=\"16px\" src=\"data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDUxMiA1MTIiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDUxMiA1MTI7IiB4bWw6c3BhY2U9InByZXNlcnZlIiB3aWR0aD0iNTEycHgiIGhlaWdodD0iNTEycHgiPgo8cGF0aCBzdHlsZT0iZmlsbDojMTdBQ0U4OyIgZD0iTTQ0Ni44LDE2Ni44OTljLTQuNzk5LTcuNS0xNC43LTktMjEuODk5LTMuOUwzNzYuMywxOTkuNmMtNiw0LjQ5OS03LjgsMTIuOS0zLjksMTkuNDk5ICBjMTIuMjk5LDIxLDE4LjYsNDMuNSwxOC42LDY2LjkwMWMwLDc0LjM5OS02MC42MDEsMTM1LTEzNSwxMzVzLTEzNS02MC42MDEtMTM1LTEzNWMwLTY5LjMsNTIuNS0xMjYuNjAxLDEyMC0xMzQuMTAxVjE5NiAgYzAsOSw3LjIsMTQuNywxNSwxNWMyLjk5OSwwLDYuMzAxLTAuOTAxLDktMy4wMDFsMTIwLTg5Ljk5OGM4LjEwMS02LDguMTAxLTE4LjAwMSwwLTI0LjAwMUwyNjUsM2MtMi42OTktMi4wOTgtNi0yLjk5OS05LTIuOTk5ICBjLTcuOCwwLTE1LDYuMzAxLTE1LDE1djQ2LjYwMUMxMjMuOTk5LDY5LjEwMSwzMSwxNjYuODk5LDMxLDI4NmMwLDEyNC4yLDEwMC44LDIyNiwyMjUsMjI2czIyNS0xMDEuOCwyMjUtMjI2ICBDNDgxLDI0My45OTksNDY4Ljk5OSwyMDIuODk5LDQ0Ni44LDE2Ni44OTl6Ii8+CjxnPgoJPHBhdGggc3R5bGU9ImZpbGw6IzE2ODlGQzsiIGQ9Ik0yNjUsMjA3Ljk5OWMtMi42OTksMi4xLTYsMy4wMDEtOSwzLjAwMVYwYzIuOTk5LDAsNi4zMDEsMC45MDEsOSwyLjk5OWwxMjAsOTEgICBjOC4xMDEsNiw4LjEwMSwxOC4wMDEsMCwyNC4wMDFMMjY1LDIwNy45OTl6Ii8+Cgk8cGF0aCBzdHlsZT0iZmlsbDojMTY4OUZDOyIgZD0iTTQ4MSwyODZjMCwxMjQuMi0xMDAuOCwyMjYtMjI1LDIyNnYtOTFjNzQuMzk5LDAsMTM1LTYwLjYwMSwxMzUtMTM1ICAgYzAtMjMuNDAxLTYuMzAxLTQ1LjkwMS0xOC42LTY2LjkwMWMtMy45LTYuNTk5LTIuMS0xNSwzLjktMTkuNDk5bDQ4LjYtMzYuNjAxYzcuMi01LjA5OSwxNy4xLTMuNiwyMS44OTksMy45ICAgQzQ2OC45OTksMjAyLjg5OSw0ODEsMjQzLjk5OSw0ODEsMjg2eiIvPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+Cjwvc3ZnPgo=\" />";
-const char PAINEL_SENSOR []              = "<div class=\"row\"><div class=\"col-sm-2\"><h3><i class=\"fas fa-thermometer-half\" style=\"color:#059e8a;\"></i>{A}<sup class=\"units\">&deg;C</sup></h3></div><div class=\"col-sm-2\"><h3><i class=\"fas fa-tint\" style=\"color:#00add6;\"></i> {B}<sup class=\"units\">%</sup></h3></div><div class=\"col-sm-2\"><h3><i class=\"fas fa-burn\" style=\"color:#fb0102;\"></i> {C}<sup class=\"units\">ppm</sup></h3></div><div class=\"col-sm-2\"><h3><i class=\"fab fa-cloudversify\" style=\"color:#fb0102;\"></i> {D}<sup class=\"units\">ppm</sup></h3></div></div>";
+const char PAINEL_SENSOR []              = "<div class=\"row\"><div class=\"col-sm-2\"><h3><i class=\"fas fa-thermometer-half\" style=\"color:#059e8a;\"></i> {A}<sup class=\"units\">&deg;C</sup></h3></div><div class=\"col-sm-2\"><h3><i class=\"fas fa-tint\" style=\"color:#00add6;\"></i> {B}<sup class=\"units\">%</sup></h3></div><div class=\"col-sm-2\"><h3><i class=\"fas fa-burn\" style=\"color:#fb0102;\"></i> {C}<sup class=\"units\">ppm</sup></h3></div><div class=\"col-sm-2\"><h3><i class=\"fab fa-cloudversify\" style=\"color:#fb0102;\"></i> {D}<sup class=\"units\">ppm</sup></h3></div></div>";
 
 long milis = 0;        	// último momento que o LED foi atualizado
-long interval = 250;    // tempo de transição entre estados (milisegundos)
+long interval = 500;    // tempo de transição entre estados (milisegundos)
 String ipLocalString, buff, URL, linha, GLP, FUMACA, retorno, serv, logtxt = "sim", hora_rtc, buf;
 const char *json, *LIMITE_MQ2 = "99";
 const char *ssid, *password, *servidor, *conslog, *nivelLog = "4", *verao, *s_senha_alarme = "123456";
@@ -145,6 +146,7 @@ void setup() {
   digitalWrite(LED_VERDE, LOW);
   pinMode(LED_VERMELHO, OUTPUT);
   digitalWrite(LED_VERMELHO, HIGH);
+  pinMode(LED_AZUL, OUTPUT);
 
   alarme.sensores(i_sensor_alarme);
   alarme.sirene(i_sirene_alarme);
@@ -727,7 +729,9 @@ void loop()
   if (millis() >= timeMq2 + timeMq2Param)
   {
     sensorMq2 = analogRead(PIN_MQ2);
-
+    digitalWrite(LED_AZUL, HIGH);
+    delay(100);
+    digitalWrite(LED_AZUL, LOW);
     GLP = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, GAS_LPG) );
     if (GLP == "2147483647") GLP = "0";
 
@@ -768,6 +772,9 @@ void loop()
   if (millis() >= timeDht + (timeDhtParam)) {
     umidade = dht.readHumidity();
     temperatura = dht.readTemperature();
+    digitalWrite(LED_AZUL, HIGH);
+    delay(100);
+    digitalWrite(LED_AZUL, LOW);
     int t = 1;
     if ((temperatura == int(temperatura)) && (umidade == int(umidade)) && (t == 1) )
     {
