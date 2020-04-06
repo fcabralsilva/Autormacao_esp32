@@ -12,7 +12,7 @@
 #include <WebServer.h>
 #include <WiFiManager.h>
 
-String VERSAO = "V09.05 - 03/04/2020";
+String VERSAO = "V09.06 - 06/04/2020";
 
 #define BUZZER                18
 #define PIN_MQ2               34
@@ -145,7 +145,7 @@ void setup() {
   pinMode(LED_VERDE, OUTPUT);
   digitalWrite(LED_VERDE, LOW);
   pinMode(LED_VERMELHO, OUTPUT);
-  digitalWrite(LED_VERMELHO, HIGH);
+  //digitalWrite(LED_VERMELHO, HIGH);
   pinMode(LED_AZUL, OUTPUT);
 
   alarme.sensores(i_sensor_alarme);
@@ -195,7 +195,7 @@ void setup() {
   ledcAttachPin(5, channel);
   gravarArquivo("\n *** INICIANDO SISTEMA *** \n \n " + VERSAO, "log.txt");
   digitalWrite(BUZZER, HIGH);
-  delay(2000);
+  delay(1000);
   digitalWrite(BUZZER, LOW);
 
 }
@@ -502,49 +502,42 @@ void loop()
     /*DIV PRINCIPAL*/
     buf += "<div class=\"tab-content\" id=\"pills-tabContent\">";
     buf += "<div class=\"tab-pane fade show active\" id=\"pills-home\" role=\"tabpanel\" aria-labelledby=\"pills-home-tab\">";
-
-    //buf += "<h4><a href=\"http://" + ipLocalString + "\">CENTRAL -" + ipLocalString + "</a></h4>";
-
-
-    buf += FPSTR(PAINEL_SENSOR);
+	
+	buf +="<hr /><br>";
+	buf += FPSTR(PAINEL_SENSOR);
     buf.replace("{A}", String(temperatura));
     buf.replace("{B}", String(umidade));
     buf.replace("{C}", String(GLP));
     buf.replace("{D}", String(FUMACA));
-    //
-    //	  /*TABLELA_SENSORES*/
-    //    buf += "<table class=\"table table-sm\">";
-    //    buf += "<thead class=\"thead-light\" ><tr><th>SENSOR</th><th>TIPO</th><th>VALOR</th></tr></thead>";
-    //    buf += "<tbody><tr><td>DHT11</td><td>Temperatura/Umidade</td><td>" + String(temperatura) + "Cº / " + String(umidade) + "%</td></tr>";
-    //    buf += "<tr><td>MQ2</td><td>Gás</td><td>" + GLP + " PPM / " + String(sensorMq2) + "</td></tr>";
-    //    buf += "<tr><td>MQ2</td><td>Fumaça</td><td>" + FUMACA + " PPM / " + String(sensorMq2) + "</td></tr>";
-    //    buf += "<tr><td></td><td></td><td></td></tr></tbody>";
-    //    buf += "</table>";
-
-    /*
-    	BOTÃO 1
-    */
     buf += "<div><p>";
+
+	buf +="<br><hr />";
+	/*
+		BOTÃO 1
+    */
     String bt1, bt1_a;
+	int conta_botao = 0;
     if (botao1.estado == true)
     {
       bt1 = "btn btn-success";
       bt1_a = "desliga";
-      // buf += "  <a href=\"?porta=" + String(botao1.rele) + "&acao=desliga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao1.rele) + " Botão:" + botao1.entrada + "\"><button type=\"button\"  class=\"btn btn-success\">" + String(botao1.nomeInter) + "</button></a>";
     } else
     {
       bt1 = "btn btn-danger";
       bt1_a = "liga";
-      // buf += "  <a href=\"?porta=" + String(botao1.rele) + "&acao=liga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao1.rele) + " Botão:" + botao1.entrada + "\"><button type=\"button\"  class=\"btn btn-danger\">" + String(botao1.nomeInter) + "</button></a>";
     }
-    buf += FPSTR(A_HREF);
-    buf.replace("{A}", String(botao1.rele));
-    buf.replace("{B}", ipLocalString);
-    buf.replace("{C}", String(botao1.rele));
-    buf.replace("{D}", String(botao1.entrada));
-    buf.replace("{E}", bt1);
-    buf.replace("{G}", bt1_a);
-    buf.replace("{F}", String(botao1.nomeInter));
+	if(String(botao1.nomeInter) != "0"){
+	  buf += FPSTR(A_HREF);
+	  buf.replace("{A}", String(botao1.rele));
+	  buf.replace("{B}", ipLocalString);
+	  buf.replace("{C}", String(botao1.rele));
+	  buf.replace("{D}", String(botao1.entrada));
+	  buf.replace("{E}", bt1);
+	  buf.replace("{G}", bt1_a);
+	  buf.replace("{F}", String(botao1.nomeInter));
+	  conta_botao ++;
+	}
+
 
     /*
     	BOTÃO 2
@@ -553,20 +546,21 @@ void loop()
     if (botao2.estado == true) {
       bt2 = "btn btn-success";
       bt2_a = "desliga";
-      //buf += "  <a href=\"?porta=" + String(botao2.rele) + "&acao=desliga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao2.rele) + " Botão:" + botao2.entrada + "\"><button type=\"button\"  class=\"btn btn-success\">" + String(botao2.nomeInter) + "</button></a>";
     } else {
       bt2 = "btn btn-danger";
       bt2_a = "liga";
-      //buf += "  <a href=\"?porta=" + String(botao2.rele) + "&acao=liga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao2.rele) + " Botão:" + botao2.entrada + "\"><button type=\"button\"  class=\"btn btn-danger\">" + String(botao2.nomeInter) + "</button></a>";
     }
-    buf += FPSTR(A_HREF);
-    buf.replace("{A}", String(botao2.rele));
-    buf.replace("{B}", ipLocalString);
-    buf.replace("{C}", String(botao2.rele));
-    buf.replace("{D}", String(botao2.entrada));
-    buf.replace("{E}", bt2);
-    buf.replace("{G}", bt2_a);
-    buf.replace("{F}", String(botao2.nomeInter));
+	if(String(botao2.nomeInter) != "0"){
+	  buf += FPSTR(A_HREF);
+	  buf.replace("{A}", String(botao2.rele));
+	  buf.replace("{B}", ipLocalString);
+	  buf.replace("{C}", String(botao2.rele));
+	  buf.replace("{D}", String(botao2.entrada));
+	  buf.replace("{E}", bt2);
+	  buf.replace("{G}", bt2_a);
+	  buf.replace("{F}", String(botao2.nomeInter));
+	  conta_botao ++;
+	}
 
     /*
     	BOTÃO 3
@@ -576,21 +570,22 @@ void loop()
     {
       bt3 = "btn btn-success";
       bt3_a = "desliga";
-      //buf += "  <a href=\"?porta=" + String(botao3.rele) + "&acao=desliga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao3.rele) + " Botão:" + botao3.entrada + "\"><button type=\"button\"  class=\"btn btn-success\">" + String(botao3.nomeInter) + "</button></a>";
     } else {
       bt3 = "btn btn-danger";
       bt3_a = "liga";
-      //buf += "  <a href=\"?porta=" + String(botao3.rele) + "&acao=liga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao3.rele) + " Botão:" + botao3.entrada + "\"><button type=\"button\"  class=\"btn btn-danger\">" + String(botao3.nomeInter) + "</button></a>";
     }
-    buf += FPSTR(A_HREF);
-    buf.replace("{A}", String(botao3.rele));
-    buf.replace("{B}", ipLocalString);
-    buf.replace("{C}", String(botao3.rele));
-    buf.replace("{D}", String(botao3.entrada));
-    buf.replace("{E}", bt3);
-    buf.replace("{G}", bt3_a);
-    buf.replace("{F}", String(botao3.nomeInter));
-
+	if(String(botao3.nomeInter) != "0"){
+	  buf += FPSTR(A_HREF);
+	  buf.replace("{A}", String(botao3.rele));
+	  buf.replace("{B}", ipLocalString);
+	  buf.replace("{C}", String(botao3.rele));
+	  buf.replace("{D}", String(botao3.entrada));
+	  buf.replace("{E}", bt3);
+	  buf.replace("{G}", bt3_a);
+	  buf.replace("{F}", String(botao3.nomeInter));
+	  conta_botao ++;
+	}
+	
     /*
     	BOTÃO 4
     */
@@ -599,24 +594,27 @@ void loop()
     {
       bt4 = "btn btn-success";
       bt4_a = "desliga";
-      //buf += "  <a href=\"?porta=" + String(botao4.rele) + "&acao=desliga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao4.rele) + " Botão:" + botao4.entrada + "\"><button type=\"button\"  class=\"btn btn-success\">" + String(botao4.nomeInter) + "</button></a>";
     } else {
       bt4 = "btn btn-danger";
       bt4_a = "liga";
-      //buf += "  <a href=\"?porta=" + String(botao4.rele) + "&acao=liga&central=" + ipLocalString + "\" title=\"Porta:" + String(botao4.rele) + " Botão:" + botao4.entrada + "\"><button type=\"button\"  class=\"btn btn-danger\">" + String(botao4.nomeInter) + "</button></a>";
     }
-    buf += FPSTR(A_HREF);
-    buf.replace("{A}", String(botao4.rele));
-    buf.replace("{B}", ipLocalString);
-    buf.replace("{C}", String(botao4.rele));
-    buf.replace("{D}", String(botao4.entrada));
-    buf.replace("{E}", bt4);
-    buf.replace("{G}", bt4_a);
-    buf.replace("{F}", String(botao4.nomeInter));
+    
+	if(String(botao4.nomeInter) != "0"){
+      buf += FPSTR(A_HREF);
+	  buf.replace("{A}", String(botao4.rele));
+	  buf.replace("{B}", ipLocalString);
+	  buf.replace("{C}", String(botao4.rele));
+	  buf.replace("{D}", String(botao4.entrada));
+	  buf.replace("{E}", bt4);
+	  buf.replace("{G}", bt4_a);
+	  buf.replace("{F}", String(botao4.nomeInter));
+	  conta_botao ++;
+	}
 
-
+	if(conta_botao > 1){
     buf += "<a href=\"?00015\" title=\"Desligar\"><button type=\"button\"  class=\"btn btn-danger\">Desli. Tudo</button></a>";
-    buf += "</p>";
+    }
+	buf += "</p>";
     /* BOTOES_ALARME */
     if (b_status_alarme == 0) {
       buf += " <tr> <td> <a href=\"?00117\" title=\"Desligar\"> <button type=\"button\" class=\"btn btn-success\">Ligar Alarme</button> </a> </td> </tr> ";
@@ -745,7 +743,7 @@ void loop()
     gravaLog(" " + relogio_ntp(1) + " - MQ2 A: " + String(sensorMq2) + " GLP:" + GLP + " " + "CO:" + CO + " " + "FU:" + FUMACA + " " + "L:" + contarParaGravar1, logtxt, 4);
     timeMq2 = millis();
     //buff = "sensor=mq-2&valor=mq-2;" + String(GLP) + ";&central=" + String(ipLocalString) + "&p=" + String(PIN_MQ2);
-    if (GLP >= LIMITE_MQ2)
+    if ((GLP >= LIMITE_MQ2) || (FUMACA >= LIMITE_MQ2 ))
     {
       digitalWrite(BUZZER, true);
       digitalWrite(LED_VERMELHO, true);
@@ -755,7 +753,7 @@ void loop()
       digitalWrite(BUZZER, false);
     }
     //GRAVA NO BANCO O VALOR LIDO APOS X LEITURAS
-    if ((contarParaGravar1 == 20) || (GLP >= LIMITE_MQ2))
+    if ((contarParaGravar1 == 20) || (GLP >= LIMITE_MQ2) || (FUMACA >= LIMITE_MQ2 ) )
     {
       buff = "sensor=mq-2&valor=mq-2;" + String(GLP) + ";&central=" + String(ipLocalString) + "&p=" + String(PIN_MQ2);
       gravarBanco (buff);
