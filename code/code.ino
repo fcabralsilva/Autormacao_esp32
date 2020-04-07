@@ -12,7 +12,7 @@
 #include <WebServer.h>
 #include <WiFiManager.h>
 
-String VERSAO = "V09.06 - 06/04/2020";
+String VERSAO = "V09.07 - 07/04/2020";
 
 #define BUZZER                18
 #define PIN_MQ2               34
@@ -162,7 +162,7 @@ void setup() {
   wifiManager.setAPCallback(configModeCallback);
   wifiManager.setSaveConfigCallback(saveConfigCallback);
 
-  if (!wifiManager.autoConnect("WIFI_AUT", "12345678")) {
+  if (!wifiManager.autoConnect("WIFI_AUTOMAÇÃO", "123")) {
     Serial.println(" FALHA NA CONEÇÃO! ");
     ESP.restart();
   }
@@ -478,6 +478,13 @@ void loop()
 
     }
 
+    if(requisicao == "00001")
+    {
+      //Resetar configurações WIFI para trocar de rede.
+      wifiManager.setBreakAfterConfig(true);
+      wifiManager.resetSettings();
+    }
+
     /* ALARME */
     alarme.monitoramento(i_sensor_alarme, i_sirene_alarme, b_status_alarme);
 
@@ -710,7 +717,7 @@ void loop()
     buf += "<div class='collapse' id='collapseExample'> <div class='card card-body'> ";
     buf += lerArquivo();
     buf += "</div> </div> </div> </div> ";
-    buf += "<p style=\"text-align:center\"><p style=\"text-align:right\"> <span class=\"badge badge-pill badge-primary\">IP: " + ipLocalString + " " + VERSAO + "</span></span></p>";
+    buf += "<a href=\"http://"+ipLocalString+"\"><p style=\"text-align:center\"><p style=\"text-align:right\"> <span class=\"badge badge-pill badge-primary\">IP: " + ipLocalString + " " + VERSAO + "</span></span></a></p>";
     buf += "<script src=\"https://code.jquery.com/jquery-3.3.1.slim.min.js\" integrity=\"sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo\" crossorigin=\"anonymous\"></script>";
     buf += "<script src=\"https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js\" integrity=\"sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy\" crossorigin=\"anonymous\"></script>";
     buf += "</body></html>";
