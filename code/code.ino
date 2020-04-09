@@ -12,7 +12,7 @@
 #include <WebServer.h>
 #include <WiFiManager.h>
 
-String VERSAO = "V09.07 - 07/04/2020";
+String VERSAO = "V09.10 - 09/04/2020";
 
 #define BUZZER                18
 #define PIN_MQ2               34
@@ -70,7 +70,7 @@ struct botao4 {
   const char* agenda_out;
 } botao4;
 
-const char WEB_HEAD[] PROGMEM            = "<!DOCTYPE html><html lang=\"pt-br\"><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=no\"/><meta charset=\"utf-8\"><link rel=\"stylesheet\" href=\"https://use.fontawesome.com/releases/v5.7.2/css/all.css\" integrity=\"sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr\" crossorigin=\"anonymous\"><link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css\"><title>{v}</title>";
+const char WEB_HEAD[] PROGMEM            = "<!DOCTYPE html><html lang=\"pt-br\"><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=no\"/><meta charset=\"utf-8\"><link rel=\"stylesheet\" href=\"https://use.fontawesome.com/releases/v5.7.2/css/all.css\" integrity=\"sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr\" crossorigin=\"anonymous\"><link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css\"><script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js\"></script><title>{v}</title>";
 const char WEB_STYLE[] PROGMEM           = "<style type=\"text/css\">body .form-control{font-size:12px}input,button,select,optgroup,textarea {  margin: 5px;}.table td, .table th {padding:0px;}.th {width:100px;}.shadow-lg {box-shadow: 0px } #collapseExample {font-size:10px}</style>";
 const char WEB_SCRIPT[] PROGMEM          = "<script>function c(l){document.getElementById('s').value=l.innerText||l.textContent;document.getElementById('p').focus();}</script>";
 const char WEB_HEAD_END[] PROGMEM        = "</head><body>";
@@ -80,12 +80,12 @@ const char WEB_NAV_MENU[] PROGMEM        = "<ul class=\"nav nav-pills mb-3\" id=
 const char WEB_BOTAO_SUCCESS[] PROGMEM   = "<a href=\"?porta=\"{A}\" title=\"Porta:\"{B}\"><button type=\"button\"  class=\"btn btn-success\">\"{C}\"</button></a>";
 const char A_HREF[] PROGMEM              = "  <a href=\"?porta={A}&acao={G}&central={B}\" title=\"Porta:{C} Botão:{D}\"><button type=\"button\"  class=\"{E}\">{F}</button></a>";
 const char refresh[] PROGMEM             = "<img width=\"16px\" src=\"data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDUxMiA1MTIiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDUxMiA1MTI7IiB4bWw6c3BhY2U9InByZXNlcnZlIiB3aWR0aD0iNTEycHgiIGhlaWdodD0iNTEycHgiPgo8cGF0aCBzdHlsZT0iZmlsbDojMTdBQ0U4OyIgZD0iTTQ0Ni44LDE2Ni44OTljLTQuNzk5LTcuNS0xNC43LTktMjEuODk5LTMuOUwzNzYuMywxOTkuNmMtNiw0LjQ5OS03LjgsMTIuOS0zLjksMTkuNDk5ICBjMTIuMjk5LDIxLDE4LjYsNDMuNSwxOC42LDY2LjkwMWMwLDc0LjM5OS02MC42MDEsMTM1LTEzNSwxMzVzLTEzNS02MC42MDEtMTM1LTEzNWMwLTY5LjMsNTIuNS0xMjYuNjAxLDEyMC0xMzQuMTAxVjE5NiAgYzAsOSw3LjIsMTQuNywxNSwxNWMyLjk5OSwwLDYuMzAxLTAuOTAxLDktMy4wMDFsMTIwLTg5Ljk5OGM4LjEwMS02LDguMTAxLTE4LjAwMSwwLTI0LjAwMUwyNjUsM2MtMi42OTktMi4wOTgtNi0yLjk5OS05LTIuOTk5ICBjLTcuOCwwLTE1LDYuMzAxLTE1LDE1djQ2LjYwMUMxMjMuOTk5LDY5LjEwMSwzMSwxNjYuODk5LDMxLDI4NmMwLDEyNC4yLDEwMC44LDIyNiwyMjUsMjI2czIyNS0xMDEuOCwyMjUtMjI2ICBDNDgxLDI0My45OTksNDY4Ljk5OSwyMDIuODk5LDQ0Ni44LDE2Ni44OTl6Ii8+CjxnPgoJPHBhdGggc3R5bGU9ImZpbGw6IzE2ODlGQzsiIGQ9Ik0yNjUsMjA3Ljk5OWMtMi42OTksMi4xLTYsMy4wMDEtOSwzLjAwMVYwYzIuOTk5LDAsNi4zMDEsMC45MDEsOSwyLjk5OWwxMjAsOTEgICBjOC4xMDEsNiw4LjEwMSwxOC4wMDEsMCwyNC4wMDFMMjY1LDIwNy45OTl6Ii8+Cgk8cGF0aCBzdHlsZT0iZmlsbDojMTY4OUZDOyIgZD0iTTQ4MSwyODZjMCwxMjQuMi0xMDAuOCwyMjYtMjI1LDIyNnYtOTFjNzQuMzk5LDAsMTM1LTYwLjYwMSwxMzUtMTM1ICAgYzAtMjMuNDAxLTYuMzAxLTQ1LjkwMS0xOC42LTY2LjkwMWMtMy45LTYuNTk5LTIuMS0xNSwzLjktMTkuNDk5bDQ4LjYtMzYuNjAxYzcuMi01LjA5OSwxNy4xLTMuNiwyMS44OTksMy45ICAgQzQ2OC45OTksMjAyLjg5OSw0ODEsMjQzLjk5OSw0ODEsMjg2eiIvPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+Cjwvc3ZnPgo=\" />";
-const char PAINEL_SENSOR []              = "<div class=\"row\"><div class=\"col-sm-2\"><h3><i class=\"fas fa-thermometer-half\" style=\"color:#059e8a;\"></i> {A}<sup class=\"units\">&deg;C</sup></h3></div><div class=\"col-sm-2\"><h3><i class=\"fas fa-tint\" style=\"color:#00add6;\"></i> {B}<sup class=\"units\">%</sup></h3></div><div class=\"col-sm-2\"><h3><i class=\"fas fa-burn\" style=\"color:#fb0102;\"></i> {C}<sup class=\"units\">ppm</sup></h3></div><div class=\"col-sm-2\"><h3><i class=\"fab fa-cloudversify\" style=\"color:#fb0102;\"></i> {D}<sup class=\"units\">ppm</sup></h3></div></div>";
+//const char PAINEL_SENSOR []              = "<div class=\"row\"><div class=\"col-sm-2\"><h3><i class=\"fas fa-thermometer-half\" style=\"color:#059e8a;\"></i> {A}<sup class=\"units\">&deg;C</sup></h3></div><div class=\"col-sm-2\"><h3><i class=\"fas fa-tint\" style=\"color:#00add6;\"></i> {B}<sup class=\"units\">%</sup></h3></div><div class=\"col-sm-2\"><h3><i class=\"fas fa-burn\" style=\"color:#fb0102;\"></i> {C}<sup class=\"units\">ppm</sup></h3></div><div class=\"col-sm-2\"><h3><i class=\"fab fa-cloudversify\" style=\"color:#fb0102;\"></i> {D}<sup class=\"units\">ppm</sup></h3></div></div>";
 
 long milis = 0;        	// último momento que o LED foi atualizado
 long interval = 500;    // tempo de transição entre estados (milisegundos)
 String ipLocalString, buff, URL, linha, GLP, FUMACA, retorno, serv, logtxt = "sim", hora_rtc, buf;
-const char *json, *LIMITE_MQ2 = "99";
+const char *json, *LIMITE_MQ2 = "99",*LIMITE_MQ2_FU = "99";
 const char *ssid, *password, *servidor, *conslog, *nivelLog = "4", *verao, *s_senha_alarme = "123456";
 const int PIN_AP = 0, i_sensor_alarme = 17, i_sirene_alarme = 18;
 int portaServidor = 80;
@@ -125,7 +125,7 @@ void setup() {
 
   pinMode(botao1.rele, OUTPUT);
   pinMode(botao1.entrada, INPUT_PULLUP);
-  digitalWrite(botao1.rele, HIGH);
+  digitalWrite(botao1.rele, LOW);
 
   pinMode(botao2.rele, OUTPUT);
   pinMode(botao2.entrada, INPUT_PULLUP);
@@ -265,6 +265,7 @@ void loop()
     logtxt = String(conslog);
     nivelLog = root["nivel"];
     LIMITE_MQ2 = root["v_mq"];
+    LIMITE_MQ2_FU = root["v_mq_fu"];
     s_senha_alarme = root["s_a"];
     //gravaLog(" " + relogio_ntp(1) + "   Log ?: " + String(conslog) + " N: " + String(nivelLog), logtxt, 1);
     //gravaLog(" " + relogio_ntp(1) + "   Senha Alarme : " + String(s_senha_alarme), logtxt, 1);
@@ -420,6 +421,7 @@ void loop()
                     + "\",\"log\":\"" + quebraString("log", stringUrl)
                     + "\",\"nivel\":\"" + quebraString("nivel", stringUrl)
                     + "\",\"v_mq\":\"" + quebraString("v_mq", stringUrl)
+                    + "\",\"v_mq_fu\":\"" + quebraString("v_mq_fu", stringUrl)
                     + "\",\"s_a\":\"" + quebraString("senhaAlarme", stringUrl)
                     + "\"}", "param.txt");
       cont_ip_banco = 0;
@@ -510,15 +512,79 @@ void loop()
     buf += "<div class=\"tab-content\" id=\"pills-tabContent\">";
     buf += "<div class=\"tab-pane fade show active\" id=\"pills-home\" role=\"tabpanel\" aria-labelledby=\"pills-home-tab\">";
 	
-	buf +="<hr /><br>";
-	buf += FPSTR(PAINEL_SENSOR);
-    buf.replace("{A}", String(temperatura));
-    buf.replace("{B}", String(umidade));
-    buf.replace("{C}", String(GLP));
-    buf.replace("{D}", String(FUMACA));
-    buf += "<div><p>";
-
-	buf +="<br><hr />";
+    buf +="<hr />";
+    buf +="<div class=\"row\">";
+    buf +="<div class=\"col-sm-2\">";
+    int temp = temperatura;
+    buf +="<h1><i class=\"fas fa-thermometer-half\" style=\"color:#059e8a;\"></i> "+ String(temp)+"<sup class=\"units\">&deg;C</sup></h1>";
+    buf +="</div>";
+    buf +="<div class=\"col-sm-2\">";
+    int umid = umidade;
+    buf +="<h3><i class=\"fas fa-tint\" style=\"color:#00add6;\"></i> "+String(umid)+"<sup class=\"units\">%</sup></h3>";
+    //buf +="<div class=\"progress\">";
+    if(umid >= 60)
+    {
+      //buf +="<div class=\"progress-bar bg-success\" data-toggle=\"tooltip\" title=\"Nível recomendado\" style=\"width:"+String(umid)+"%\">Ideal </div>";
+      buf +="<span class=\"badge badge-pill badge-success\" data-toggle=\"tooltip\" title=\"Nível recomendado\"> Recomendado </span>";
+    }else if(umid > 31 && umid < 60)
+    {
+      //buf +="<div class=\"progress-bar bg-danger\" data-toggle=\"tooltip\" title=\"Perigo, risco respiratório!!!\" style=\"width:"+String(umid)+"%\">Atenção</div>";
+      buf +="<span class=\"badge badge-pill badge-warning\"> Cuidado </span>";
+    }else if(umid <= 30)
+    {
+      //buf +="<div class=\"progress-bar bg-warning\" style=\"width:"+String(umid)+"%\">Cuidado </div>";
+      buf +="<span class=\"badge badge-pill badge-danger\"> Perigo </span>";
+    }
+    //buf +="</div>";
+    buf +="</div>";
+    buf +="<div class=\"col-sm-2\">";
+    int limit_glp = String(LIMITE_MQ2).toInt();
+    int glp = GLP.toInt();
+    buf +="<h3><i class=\"fas fa-burn\" style=\"color:#fb0102;\"></i> "+String(GLP)+"<sup class=\"units\">ppm</sup></h3>";
+    if(glp >= limit_glp )
+    {
+      //buf +="<div class=\"progress-bar bg-success\" data-toggle=\"tooltip\" title=\"Nível recomendado\" style=\"width:"+String(umid)+"%\">Ideal </div>";
+      buf +="<span class=\"badge badge-pill badge-danger\"> Perigo </span>";
+      
+    }else if((glp > (limit_glp / 2)) && (glp < (limit_glp / 2)))
+    {
+      //buf +="<div class=\"progress-bar bg-danger\" data-toggle=\"tooltip\" title=\"Perigo, risco respiratório!!!\" style=\"width:"+String(umid)+"%\">Atenção</div>";
+      buf +="<span class=\"badge badge-pill badge-warning\"> Cuidado </span>";
+    }else if(glp <= (limit_glp / 3))
+    {
+      //buf +="<div class=\"progress-bar bg-warning\" style=\"width:"+String(umid)+"%\">Cuidado </div>";
+      buf +="<span class=\"badge badge-pill badge-success\"> Recomendado </span>";
+    }
+    int limit_fu = String(LIMITE_MQ2_FU).toInt();
+    int fu = FUMACA.toInt();
+    buf +="</div>";
+    buf +="<div class=\"col-sm-2\">";
+    buf +="<h3><i class=\"fab fa-cloudversify\" style=\"color:#fb0102;\"></i> "+String(FUMACA)+"<sup class=\"units\">ppm</sup></h3>";
+    if(fu >= limit_fu )
+    {
+      //buf +="<div class=\"progress-bar bg-success\" data-toggle=\"tooltip\" title=\"Nível recomendado\" style=\"width:"+String(umid)+"%\">Ideal </div>";
+      buf +="<span class=\"badge badge-pill badge-danger\"> Perigo </span>";
+      
+    }else if((fu > (limit_fu / 2)) && (fu < (limit_fu / 2)))
+    {
+      //buf +="<div class=\"progress-bar bg-danger\" data-toggle=\"tooltip\" title=\"Perigo, risco respiratório!!!\" style=\"width:"+String(umid)+"%\">Atenção</div>";
+      buf +="<span class=\"badge badge-pill badge-warning\"> Cuidado </span>";
+    }else if(fu <= (limit_fu / 3))
+    {
+      //buf +="<div class=\"progress-bar bg-warning\" style=\"width:"+String(umid)+"%\">Cuidado </div>";
+      buf +="<span class=\"badge badge-pill badge-success\"> Recomendado </span>";
+    }
+    
+    buf +="</div>";
+    buf +="</div>";
+    
+//    buf += FPSTR(PAINEL_SENSOR);
+//    buf.replace("{A}", String(temperatura));
+//    buf.replace("{B}", String(umidade));
+//    buf.replace("{C}", String(GLP));
+//    buf.replace("{D}", String(FUMACA));
+    
+    buf += "<div><hr />";
 	/*
 		BOTÃO 1
     */
@@ -632,87 +698,53 @@ void loop()
     /*DIV CONFIGURAÇÕES*/
     buf += "<div class=\"tab-pane fade\" id=\"pills-profile\" role=\"tabpanel\" aria-labelledby=\"pills-profile-tab\">";
     buf += "<form class=\"form-group\" action=\"?00012\">";
-    buf += "<table border='0px'>";
+    //buf += "<table border='0px'>";
     buf += "<input type=\"hidden\" name=\"cod\" value=\"00012\">";
-    buf += "<tr>";
-    buf += "<td ><strong>Servidor</strong></td><td><input maxlength=\"15\" style=\"width:130px\" type=\"text\"   name=\"servidor\" value=\"" + serv + "\"></td><td colspan=\"2\"><input style=\"border:0px;width:80px\" type=\"time\" value=\"" + relogio_ntp(3) + "\" disabled><a href='?00018' title='Atualizar data e hora da central'>" + refresh + "</td></tr>";
-    buf += "</tr>";
+    buf +=  "<div class=\"container\">";
+    buf +=  "<hr>";
+    buf +=  " <div class=\"row\">";
+    buf +=  "   <div class=\"col-sm-4\">";
+    buf +=  "       <strong>Servidor</strong><input maxlength=\"15\" style=\"width:130px\" type=\"text\"   name=\"servidor\" value=\"" + serv + "\">";
+    buf +=  "   </div>";
+    buf +=  "   <div class=\"col-sm-2\">";
+    buf +=  "       <input style=\"border:0px;width:80px\" type=\"time\" value=\"" + relogio_ntp(3) + "\" disabled><a href='?00018' title='Atualizar data e hora da central'>" + refresh+"</a>";
+    buf +=  "   </div>";
+    buf +=  " </div>";
+    buf +=  "<hr>";
+    
+    buf += gpio_html (1,botao1.entrada, botao1.nomeInter, botao1.tipo, botao1.modelo, botao1.agenda_in, botao1.agenda_out);
+    buf += gpio_html (2,botao2.entrada, botao2.nomeInter, botao2.tipo, botao2.modelo, botao2.agenda_in, botao2.agenda_out);
+    buf += gpio_html (3,botao3.entrada, botao3.nomeInter, botao3.tipo, botao3.modelo, botao3.agenda_in, botao3.agenda_out);
+    buf += gpio_html (4,botao4.entrada, botao4.nomeInter, botao4.tipo, botao4.modelo, botao4.agenda_in, botao4.agenda_out);
+    buf +=  "<hr>";
 
-    buf += "</tr>";
-    buf += "<td></td><td><strong>Nome</strong></td><td><strong>Sinal</strong></td><td><strong>Tipo</strong></td>";
-    buf += "</tr>";
+    buf +=  " <div class=\"row\">";
+    buf +=  "   <div class=\"col-sm-4\">";
+    buf += "        <strong>LOG</strong> <select class='' style='width:100%x' name='log'> <option value='sim' " + selectedHTNL(conslog, "sim ") + "> Sim</option> <option value='nao' " + selectedHTNL(conslog, "nao ") + ">Não</option> </select> <select class='' style='width:100%x' name='nivel' title='Nível do log'> <option value='1' " + selectedHTNL(nivelLog, "1") + ">1</option> <option value='2' " + selectedHTNL(nivelLog, "2") + ">2</option> <option value='3' " + selectedHTNL(nivelLog, "3") + ">3</option> <option value='4' " + selectedHTNL(nivelLog, "4") + ">4</option> </select>";
+    buf += "        <a href='?00013' title='APAGAR TODOS OS REGISTROS!'><button type='button' class='btn btn-danger btn-sm'> X </button></a>";
+    buf += "        <button class=\"btn btn-primary btn-sm\" type=\"button\" data-toggle=\"collapse\" data-target=\"#collapseExample\" aria-expanded=\"false\" aria-controls=\"collapseExample\">Log</button></td>";
+    buf += "    </div>";
+    buf += "  </div>";
+    buf +=  " <div class=\"row\">";
+    buf +=  "   <div class=\"col-sm-6\">";
+    buf += "        <strong>Senha</strong></td><td><input maxlength=\"10\" style=\"width:80px\" type=\"password\"   name=\"senhaAlarme\" value=\"" + String(s_senha_alarme) + "\">";
+    buf += "    </div>";
+    buf += "  </div>";
+    buf +=  " <div class=\"row\">";
+    buf +=  "   <div class=\"col-sm-8\">";
+    buf += "        <strong>MQ2 </strong>";
+    buf += "        <sup>GAS </sup><input maxlength=\"2\" style=\"width:24px\" type=\"text\" name=\"v_mq\" value=\"" + String(LIMITE_MQ2) + "\">";
+    buf += "        <sup>Fuma&ccedil;a </sup><input maxlength=\"2\" style=\"width:24px\" type=\"text\" name=\"v_mq_fu\" value=\"" + String(LIMITE_MQ2_FU) + "\">";
+    buf += "    </div>";
+    buf += "  </div>";
+    buf +=  " <div class=\"row\">";
+    buf +=  "   <div class=\"col-sm-2\">";
+    buf += "         <input class=\"btn btn-info\" type=\"submit\" value=\"Salvar\">";
+    buf += "    </div>";
+    buf += "  </div>";
+    buf += "</div>";
 
-    buf += "<tr>";
-    buf += "<td>GPIO " + String(botao1.entrada) + "</td><td><input maxlength=\"18\" style=\"width:130px\" type=\"text\"   name=\"int_1\" value=\"" + String(botao1.nomeInter) + "\"></td>";
-    buf += "<td><select   style=\"width:100%x\"  name=\"tipo_1\"><option value=\"0\" " + selectedHTNL(botao1.tipo, "0") + "> - </option><option value=\"1\" " + selectedHTNL(botao1.tipo, "1") + "> + </option></select></td>";
-    buf += "<td><select   style=\"width:100%x\" name=\"sinal_1\"><option value=\"pulso\" " + selectedHTNL(botao1.modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao1.modelo, "interruptor") + ">Inter.</option><option value=\"pir\" " + selectedHTNL(botao1.modelo, "pir") + ">PIR</option></select></td>";
-    buf += "</tr>";
-    buf += "<tr><td></td><td>";
-
-    String input_text = "<input maxlength=\"2\" style=\"width:24px\" type=\"text\"";
-    buf += input_text + "name=\"hora1_in_1\" value=\"" + opcao_agenda(botao1.agenda_in, botao1.agenda_out, 1) + "\">:";
-    buf += input_text + "name=\"hora1_in_2\" value=\"" + opcao_agenda(botao1.agenda_in, botao1.agenda_out, 2) + "\">-";
-    buf += input_text + "name=\"hora1_out_1\" value=\"" + opcao_agenda(botao1.agenda_in, botao1.agenda_out, 3) + "\">:";
-    buf += input_text + "name=\"hora1_out_2\" value=\"" + opcao_agenda(botao1.agenda_in, botao1.agenda_out, 4) + "\">";
-    buf += "</td></tr>";
-
-    buf += "<tr>";
-    buf += "<td>GPIO " + String(botao2.entrada) + "</td><td><input maxlength=\"18\" style=\"width:130px\" type=\"text\"   name=\"int_2\" value=\"" + String(botao2.nomeInter) + "\"></td>";
-    buf += "<td><select   style=\"width:100%x\"  name=\"tipo_2\"><option value=\"0\" " + selectedHTNL(botao2.tipo, "0") + " > - </option><option value=\"1\" " + selectedHTNL(botao2.tipo, "1") + "> + </option></select></td>";
-    buf += "<td><select   style=\"width:100%x\" name=\"sinal_2\"><option value=\"pulso\" " + selectedHTNL(botao2.modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao2.modelo, "interruptor") + ">Inter.</option><option value=\"pir\" " + selectedHTNL(botao2.modelo, "pir") + ">PIR</option></select></td>";
-    buf += "</tr>";
-
-    buf += "<tr><td></td><td>";
-    buf += input_text + "name=\"hora2_in_1\" value=\"" + opcao_agenda(botao2.agenda_in, botao2.agenda_out, 1) + "\">:";
-    buf += input_text + "name=\"hora2_in_2\" value=\"" + opcao_agenda(botao2.agenda_in, botao2.agenda_out, 2) + "\">-";
-    buf += input_text + "name=\"hora2_out_1\" value=\"" + opcao_agenda(botao2.agenda_in, botao2.agenda_out, 3) + "\">:";
-    buf += input_text + "name=\"hora2_out_2\" value=\"" + opcao_agenda(botao2.agenda_in, botao2.agenda_out, 4) + "\">";
-    buf += "</td></tr>";
-
-    buf += "<tr>";
-    buf += "<td>GPIO " + String(botao3.entrada) + "</td><td><input maxlength=\"18\" style=\"width:130px\" type=\"text\"   name=\"int_3\" value=\"" + String(botao3.nomeInter) + "\"></td>";
-    buf += "<td><select   style=\"width:100%x\"  name=\"tipo_3\"><option value=\"0\" " + selectedHTNL(botao3.tipo, "0") + "> - </option><option value=\"1\" " + selectedHTNL(botao3.tipo, "1") + "> + </option></select></td>";
-    buf += "<td><select   style=\"width:100%x\" name=\"sinal_3\"><option value=\"pulso\" " + selectedHTNL(botao3.modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao3.modelo, "interruptor") + ">Inter.</option><option value=\"pir\" " + selectedHTNL(botao3.modelo, "pir") + ">PIR</option></select></td>";
-    buf += "</tr>";
-
-    buf += "<tr><td></td><td>";
-    buf += input_text + "name=\"hora3_in_1\" value=\"" + opcao_agenda(botao3.agenda_in, botao3.agenda_out, 1) + "\">:";
-    buf += input_text + "name=\"hora3_in_2\" value=\"" + opcao_agenda(botao3.agenda_in, botao3.agenda_out, 2) + "\">-";
-    buf += input_text + "name=\"hora3_out_1\" value=\"" + opcao_agenda(botao3.agenda_in, botao3.agenda_out, 3) + "\">:";
-    buf += input_text + "name=\"hora3_out_2\" value=\"" + opcao_agenda(botao3.agenda_in, botao3.agenda_out, 4) + "\">";
-    buf += "</td></tr>";
-
-    buf += "<tr>";
-    buf += "<td>GPIO " + String(botao4.entrada) + "</td><td><input maxlength=\"18\" style=\"width:130px\" type=\"text\"   name=\"int_4\" value=\"" + String(botao4.nomeInter) + "\"></td>";
-    buf += "<td><select   style=\"width:100%x\"  name=\"tipo_4\"><option value=\"0\" " + selectedHTNL(botao4.tipo, "0") + "> - </option><option value=\"1\" " + selectedHTNL(botao4.tipo, "1") + "> + </option></select></td>";
-    buf += "<td><select   style=\"width:100%x\" name=\"sinal_4\"><option value=\"pulso\" " + selectedHTNL(botao4.modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao4.modelo, "interruptor") + ">Inter.</option><option value=\"pir\" " + selectedHTNL(botao4.modelo, "pir") + ">PIR</option></select></td>";
-    buf += "</tr>";
-    buf += "<tr><td></td><td>";
-    buf += input_text + "name=\"hora4_in_1\" value=\"" + opcao_agenda(botao4.agenda_in, botao4.agenda_out, 1) + "\">:";
-    buf += input_text + "name=\"hora4_in_2\" value=\"" + opcao_agenda(botao4.agenda_in, botao4.agenda_out, 2) + "\">-";
-    buf += input_text + "name=\"hora4_out_1\" value=\"" + opcao_agenda(botao4.agenda_in, botao4.agenda_out, 3) + "\">:";
-    buf += input_text + "name=\"hora4_out_2\" value=\"" + opcao_agenda(botao4.agenda_in, botao4.agenda_out, 4) + "\">";
-    buf += "</td></tr>";
-
-    buf += "<tr>";
-    buf += "<td> <label for=''>LOG </td> ";
-    buf += "<td colsplan=\"2\"> <select class='' style='width:100%x' name='log'> <option value='sim' " + selectedHTNL(conslog, "sim ") + "> Sim</option> <option value='nao' " + selectedHTNL(conslog, "nao ") + ">Não</option> </select> <select class='' style='width:100%x' name='nivel' title='Nível do log'> <option value='1' " + selectedHTNL(nivelLog, "1") + ">1</option> <option value='2' " + selectedHTNL(nivelLog, "2") + ">2</option> <option value='3' " + selectedHTNL(nivelLog, "3") + ">3</option> <option value='4' " + selectedHTNL(nivelLog, "4") + ">4</option> </select>";
-    buf += "<a href='?00013' title='APAGAR TODOS OS REGISTROS!'><button type='button' class='btn btn-danger'>X</button></td>";
-    buf += "</tr>";
-    buf += "<tr>";
-    buf += "<td>Senha Alarme</td><td><input maxlength=\"10\" style=\"width:80px\" type=\"password\"   name=\"senhaAlarme\" value=\"" + String(s_senha_alarme) + "\"></td>";
-    buf += "</tr>";
-
-    buf += "<tr><td>MQ2</td>";
-    buf += "<td><input maxlength=\"2\" style=\"width:50px\" type=\"text\" name=\"v_mq\" value=\"" + String(LIMITE_MQ2) + "\"></td></tr>";
-
-    buf += "<tr>";
-    buf += "<td></td><td><input class=\"btn btn-info\" type=\"submit\" value=\"Salvar\"></td>";
-    buf += "</tr>";
-
-    buf += "<tr><td><button class=\"btn btn-primary\" type=\"button\" data-toggle=\"collapse\" data-target=\"#collapseExample\" aria-expanded=\"false\" aria-controls=\"collapseExample\">Ver Logs </button></td></tr>";
-
-    buf += "</table> </form> ";
+    buf += "</form> ";
 
     buf += "<div class='collapse' id='collapseExample'> <div class='card card-body'> ";
     buf += lerArquivo();
@@ -721,7 +753,8 @@ void loop()
     buf += "<script src=\"https://code.jquery.com/jquery-3.3.1.slim.min.js\" integrity=\"sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo\" crossorigin=\"anonymous\"></script>";
     buf += "<script src=\"https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js\" integrity=\"sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy\" crossorigin=\"anonymous\"></script>";
     buf += "</body></html>";
-    buf += " <script> function calcNum(num) { document.calcform.visor.type = 'password'; document.calcform.visor.value = document.calcform.visor.value + num; } var delay = 1500;  function calcParse(oper) { var valor = document.calcform.visor.value; if (valor == '') { document.calcform.visor.value = ''; } else { var senha = '" + String(s_senha_alarme) + "'; document.calcform.visor.type = 'text'; if (senha == valor) { document.calcform.visor.value = 'Senha Correta       '; window.location.href = \"?00017\"; valor = ''; } else { document.calcform.visor.value = 'Senha Incorreta      '; valor = ''; setTimeout(function() { calcLimpar(); }, delay); } } }  function calcLimpar() { document.calcform.visor.value = ''; } </script> ";
+    buf += "<script>$(document).ready(function(){$('[data-toggle=\"tooltip\"]').tooltip();});";
+    buf += " function calcNum(num) { document.calcform.visor.type = 'password'; document.calcform.visor.value = document.calcform.visor.value + num; } var delay = 1500;  function calcParse(oper) { var valor = document.calcform.visor.value; if (valor == '') { document.calcform.visor.value = ''; } else { var senha = '" + String(s_senha_alarme) + "'; document.calcform.visor.type = 'text'; if (senha == valor) { document.calcform.visor.value = 'Senha Correta       '; window.location.href = \"?00017\"; valor = ''; } else { document.calcform.visor.value = 'Senha Incorreta      '; valor = ''; setTimeout(function() { calcLimpar(); }, delay); } } }  function calcLimpar() { document.calcform.visor.value = ''; } </script> ";
     buf += " </body>  </html> ";
     client.print(buf);
     client.flush();
@@ -750,7 +783,7 @@ void loop()
     gravaLog(" " + relogio_ntp(1) + " - MQ2 A: " + String(sensorMq2) + " GLP:" + GLP + " " + "CO:" + CO + " " + "FU:" + FUMACA + " " + "L:" + contarParaGravar1, logtxt, 4);
     timeMq2 = millis();
     //buff = "sensor=mq-2&valor=mq-2;" + String(GLP) + ";&central=" + String(ipLocalString) + "&p=" + String(PIN_MQ2);
-    if ((GLP >= LIMITE_MQ2) || (FUMACA >= LIMITE_MQ2 ))
+    if ((GLP >= LIMITE_MQ2) || (FUMACA >= LIMITE_MQ2_FU ))
     {
       digitalWrite(BUZZER, true);
       digitalWrite(LED_VERMELHO, true);
@@ -760,7 +793,7 @@ void loop()
       digitalWrite(BUZZER, false);
     }
     //GRAVA NO BANCO O VALOR LIDO APOS X LEITURAS
-    if ((contarParaGravar1 == 20) || (GLP >= LIMITE_MQ2) || (FUMACA >= LIMITE_MQ2 ) )
+    if ((contarParaGravar1 == 20) || (GLP >= LIMITE_MQ2) || (FUMACA >= LIMITE_MQ2_FU ) )
     {
       buff = "sensor=mq-2&valor=mq-2;" + String(GLP) + ";&central=" + String(ipLocalString) + "&p=" + String(PIN_MQ2);
       gravarBanco (buff);
