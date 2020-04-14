@@ -6,10 +6,10 @@ String gpio_html (int numero,int botao_entrada, String botao_nomeInter, const ch
     buff += "     <strong>GPIO" + String(botao_entrada) + "</strong><input maxlength=\"18\" style=\"width:120px\" type=\"text\"   name=\"int_"+String(numero)+"\" value=\"" + String(botao_nomeInter) + "\">";
     buff += "   </div>";
     buff += "   <div class=\"col-sm-2\">";
-    buff += "      <strong> Nome </strong><select   style=\"width:100%x\"  name=\"tipo_"+String(numero)+"\"><option value=\"0\" " + selectedHTNL(botao_tipo, "0") + "> - </option><option value=\"1\" " + selectedHTNL(botao_tipo, "1") + "> + </option></select>";
+    buff += "      <strong> Sinal </strong><select   style=\"width:100%x\"  name=\"tipo_"+String(numero)+"\"><option value=\"0\" " + selectedHTNL(botao_tipo, "0") + "> - </option><option value=\"1\" " + selectedHTNL(botao_tipo, "1") + "> + </option></select>";
     buff += "   </div>";
     buff += "   <div class=\"col-sm-2\">";
-    buff += "      <strong>Sinal </strong><select   style=\"width:100%x\" name=\"sinal_"+String(numero)+"\"><option value=\"pulso\" " + selectedHTNL(botao_modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao_modelo, "interruptor") + ">Inter.</option><option value=\"pir\" " + selectedHTNL(botao_modelo, "pir") + ">PIR</option></select>";
+    buff += "      <strong>Tipo </strong><select   style=\"width:100%x\" name=\"sinal_"+String(numero)+"\"><option value=\"pulso\" " + selectedHTNL(botao_modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao_modelo, "interruptor") + ">Inter.</option><option value=\"pir\" " + selectedHTNL(botao_modelo, "pir") + ">PIR</option></select>";
     buff += "   </div>";
     buff += "   <div class=\"col-sm-4\">";
     buff += "     <strong>Agenda </strong>";

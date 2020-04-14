@@ -12,7 +12,7 @@
 #include <WebServer.h>
 #include <WiFiManager.h>
 
-String VERSAO = "V09.10 - 09/04/2020";
+String VERSAO = "V09.11 - 14/04/2020";
 
 #define BUZZER                18
 #define PIN_MQ2               34
@@ -391,6 +391,14 @@ void loop()
       stringUrl = "";
       int final_s = i.indexOf("HTTP/1.1");
       stringUrl = i.substring(0, final_s - 1);
+      String senha_;
+      if (quebraString("senhaAlarme", stringUrl) == "")
+      {
+        senha_ = s_senha_alarme;
+      }else
+      {
+        senha_ = quebraString("senhaAlarme", stringUrl);
+      }
 
       gravarArquivo("{\"servidor\":\"" + quebraString("servidor", stringUrl)
 
@@ -422,7 +430,7 @@ void loop()
                     + "\",\"nivel\":\"" + quebraString("nivel", stringUrl)
                     + "\",\"v_mq\":\"" + quebraString("v_mq", stringUrl)
                     + "\",\"v_mq_fu\":\"" + quebraString("v_mq_fu", stringUrl)
-                    + "\",\"s_a\":\"" + quebraString("senhaAlarme", stringUrl)
+                    + "\",\"s_a\":\"" + senha_
                     + "\"}", "param.txt");
       cont_ip_banco = 0;
       closeFS();
@@ -546,14 +554,14 @@ void loop()
       //buf +="<div class=\"progress-bar bg-success\" data-toggle=\"tooltip\" title=\"Nível recomendado\" style=\"width:"+String(umid)+"%\">Ideal </div>";
       buf +="<span class=\"badge badge-pill badge-danger\"> Perigo </span>";
       
-    }else if((glp > (limit_glp / 2)) && (glp < (limit_glp / 2)))
-    {
-      //buf +="<div class=\"progress-bar bg-danger\" data-toggle=\"tooltip\" title=\"Perigo, risco respiratório!!!\" style=\"width:"+String(umid)+"%\">Atenção</div>";
-      buf +="<span class=\"badge badge-pill badge-warning\"> Cuidado </span>";
     }else if(glp <= (limit_glp / 3))
     {
       //buf +="<div class=\"progress-bar bg-warning\" style=\"width:"+String(umid)+"%\">Cuidado </div>";
       buf +="<span class=\"badge badge-pill badge-success\"> Recomendado </span>";
+    }
+    else {
+      //buf +="<div class=\"progress-bar bg-danger\" data-toggle=\"tooltip\" title=\"Perigo, risco respiratório!!!\" style=\"width:"+String(umid)+"%\">Atenção</div>";
+      buf +="<span class=\"badge badge-pill badge-warning\"> Cuidado </span>";
     }
     int limit_fu = String(LIMITE_MQ2_FU).toInt();
     int fu = FUMACA.toInt();
@@ -565,7 +573,7 @@ void loop()
       //buf +="<div class=\"progress-bar bg-success\" data-toggle=\"tooltip\" title=\"Nível recomendado\" style=\"width:"+String(umid)+"%\">Ideal </div>";
       buf +="<span class=\"badge badge-pill badge-danger\"> Perigo </span>";
       
-    }else if((fu > (limit_fu / 2)) && (fu < (limit_fu / 2)))
+    }else if((fu >= (limit_fu / 2)) && (fu <= (limit_fu / 2)))
     {
       //buf +="<div class=\"progress-bar bg-danger\" data-toggle=\"tooltip\" title=\"Perigo, risco respiratório!!!\" style=\"width:"+String(umid)+"%\">Atenção</div>";
       buf +="<span class=\"badge badge-pill badge-warning\"> Cuidado </span>";
@@ -727,7 +735,7 @@ void loop()
     buf += "  </div>";
     buf +=  " <div class=\"row\">";
     buf +=  "   <div class=\"col-sm-6\">";
-    buf += "        <strong>Senha</strong></td><td><input maxlength=\"10\" style=\"width:80px\" type=\"password\"   name=\"senhaAlarme\" value=\"" + String(s_senha_alarme) + "\">";
+    buf += "        <strong>Senha</strong></td><td><input maxlength=\"10\" style=\"width:80px\" type=\"password\"   name=\"senhaAlarme\" value=\"\">";
     buf += "    </div>";
     buf += "  </div>";
     buf +=  " <div class=\"row\">";
@@ -783,7 +791,7 @@ void loop()
     gravaLog(" " + relogio_ntp(1) + " - MQ2 A: " + String(sensorMq2) + " GLP:" + GLP + " " + "CO:" + CO + " " + "FU:" + FUMACA + " " + "L:" + contarParaGravar1, logtxt, 4);
     timeMq2 = millis();
     //buff = "sensor=mq-2&valor=mq-2;" + String(GLP) + ";&central=" + String(ipLocalString) + "&p=" + String(PIN_MQ2);
-    if ((GLP >= LIMITE_MQ2) || (FUMACA >= LIMITE_MQ2_FU ))
+    if ((GLP.toInt() >= String(LIMITE_MQ2).toInt()) || (FUMACA.toInt() > String(LIMITE_MQ2_FU).toInt()))
     {
       digitalWrite(BUZZER, true);
       digitalWrite(LED_VERMELHO, true);
@@ -793,7 +801,7 @@ void loop()
       digitalWrite(BUZZER, false);
     }
     //GRAVA NO BANCO O VALOR LIDO APOS X LEITURAS
-    if ((contarParaGravar1 == 20) || (GLP >= LIMITE_MQ2) || (FUMACA >= LIMITE_MQ2_FU ) )
+    if ((contarParaGravar1 == 20) || (GLP.toInt() >= String(LIMITE_MQ2).toInt()) || (FUMACA.toInt() > String(LIMITE_MQ2_FU).toInt()) )
     {
       buff = "sensor=mq-2&valor=mq-2;" + String(GLP) + ";&central=" + String(ipLocalString) + "&p=" + String(PIN_MQ2);
       gravarBanco (buff);
