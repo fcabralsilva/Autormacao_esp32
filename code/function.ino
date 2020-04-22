@@ -482,7 +482,7 @@ void gravarArquivo(String msg, String arq) {
   {
     File logg = SPIFFS.open("/log.txt", "a+");
     int s = logg.size(); // verificar tamanho do arquivo
-    if (s >= 9000) {
+    if (s >= 15000) {
       deletarArquivo("/log.txt");
       criarArquivo("/log.txt");
       //delay(5);

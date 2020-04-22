@@ -12,7 +12,7 @@
 #include <WebServer.h>
 #include <WiFiManager.h>
 
-String VERSAO = "V09.12 - 17/04/2020";
+String VERSAO = "V09.14 - 22/04/2020";
 
 #define BUZZER                18
 #define PIN_MQ2               34
@@ -91,7 +91,7 @@ const int PIN_AP = 0, i_sensor_alarme = 17, i_sirene_alarme = 18;
 int portaServidor = 80;
 int contarParaGravar1 = 0, nContar = 0, cont_ip_banco = 0, nivel_log = 4, estado_atual = 0, estado_antes = 0, freq = 2000, channel = 0, resolution = 8, n = 0, sensorMq2 = 0, MEM_EEPROM_MQ2 = 20;
 short paramTempo = 60;
-unsigned long time3, time3Param = 90000, timeDht, timeMq2 , tempo = 0, timeDhtParam = 300000, timeMq2Param = 10000, time_sirene;
+unsigned long time3, time3Param = 90000, timeDht, timeMq2 , tempo = 0, timeMq2Param = 10000, time_sirene;
 IPAddress ipHost;
 WiFiUDP udp;
 NTPClient ntp(udp, "a.st1.ntp.br", -3 * 3600, 60000);//Cria um objeto "NTP" com as configurações.utilizada no Brasil
@@ -179,8 +179,8 @@ void setup() {
   //---------------------------------------
   //PRIMEIRA LEITURA DOs SENSORES
   //---------------------------------------
-  umidade = dht.readHumidity() * 1;
-  temperatura = dht.readTemperature() * 1;
+  umidade = dht.readHumidity();
+  temperatura = dht.readTemperature();
   calibrarSensor();
   sensorMq2 = analogRead(PIN_MQ2);
   GLP = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, GAS_LPG) );
@@ -197,7 +197,6 @@ void setup() {
   digitalWrite(BUZZER, HIGH);
   delay(1000);
   digitalWrite(BUZZER, LOW);
-
 }
 
 void loop()
@@ -462,7 +461,7 @@ void loop()
       deletarArquivo("/param.txt");
       criarArquivo("/param.txt");
       //gravaLog(" " + relogio_ntp(1) + " - Configuração minima ", logtxt, 3);
-      gravarArquivo("{\"servidor\":\"" + String(ipHost) + "\",\"int_1\":\"P1\",\"int_2\":\"P2\",\"int_3\":\"P3\",\"int_4\":\"P4\",\"int_5\":\"P5\",\"tipo_1\":\"0\",\"tipo_2\":\"0\",\"tipo_3\":\"0\",\"tipo_4\":\"0\",\"tipo_5\":\"0\",\"sinal_1\":\"interruptor\",\"sinal_2\":\"interruptor\",\"sinal_3\":\"interruptor\",\"sinal_4\":\"interruptor\",\"sinal_5\":\"interruptor\",\"log\":\"sim\",\"verao\":\"nao\",\"nivel\":\"4\",\"s_a\":\"4\"}", "param.txt");
+      gravarArquivo("{\"servidor\":\"" + String(ipHost) + "\",\"int_1\":\"R1\",\"tipo_1\":\"0\",\"sinal_1\":\"pulso\",\"h_i_1\":\"0000\",\"h_o_1\":\"0000\",\"int_2\":\"R2\",\"tipo_2\":\"0\",\"sinal_2\":\"pulso\",\"h_i_2\":\"0000\",\"h_o_2\":\"0000\",\"int_3\":\"R3\",\"tipo_3\":\"0\",\"sinal_3\":\"pulso\",\"h_i_3\":\"0000\",\"h_o_3\":\"0000\",\"int_4\":\"R4\",\"tipo_4\":\"0\",\"sinal_4\":\"pulso\",\"h_i_4\":\"0000\",\"h_o_4\":\"0000\",\"log\":\"sim\",\"nivel\":\"4\",\"v_mq\":\"20\",\"v_mq_fu\":\"50\",\"s_a\":\"123\"}", "param.txt");
       closeFS();
     }
     /*
@@ -559,7 +558,7 @@ void loop()
     buf += "<div class=\"col-sm-2\">";
     int limit_glp = String(LIMITE_MQ2).toInt();
     int glp = GLP.toInt();
-    buf += "<h3><i class=\"fas fa-burn\" style=\"color:#fb0102;\"></i> " + String(GLP) + "<sup class=\"units\">ppm</sup></h3>";
+    buf += "<h3><i class=\"fas fa-burn\" style=\"color:#fb0102;\"></i> " + String(GLP) +"/"+String(FUMACA)+ "<sup class=\"units\">ppm</sup></h3>";
     if (glp >= limit_glp )
     {
       //buf +="<div class=\"progress-bar bg-success\" data-toggle=\"tooltip\" title=\"Nível recomendado\" style=\"width:"+String(umid)+"%\">Ideal </div>";
@@ -815,12 +814,16 @@ void loop()
   /*
      ROTINA DO SENSOR DHT11
   */
-  umidade = dht.readHumidity() * 1;
-  temperatura = dht.readTemperature() * 1;
-
-  if (millis() >= timeDht + (timeDhtParam)) {
-    umidade = dht.readHumidity();
-    temperatura = dht.readTemperature();
+//  umidade = dht.readHumidity();
+//  if(umidade >= 100) umidade = 0;
+//  temperatura = dht.readTemperature();
+//  if(temperatura >= 100) temperatura = 0;
+  
+  if (millis() >= timeDht + (5000)) {
+  umidade = dht.readHumidity();
+  if(umidade >= 100) umidade = 0;
+  temperatura = dht.readTemperature();
+  if(temperatura >= 100) temperatura = 0;
     digitalWrite(LED_AZUL, HIGH);
     delay(100);
     digitalWrite(LED_AZUL, LOW);
@@ -831,13 +834,11 @@ void loop()
       buff = "sensor=dht11&valor=dht11;" + String(temperatura) + ";" + String(umidade) + ";&central=" + String(ipLocalString) + "&p=" + String(DHTPIN);
       gravarBanco(buff);
     } else {
-      gravaLog(" " + relogio_ntp(1) + " - ERRO 0109 - Sensor DHT", logtxt, 1);
+      gravaLog(" " + relogio_ntp(1) + " - ERRO 0109 - Sensor DHT erro de leitura", logtxt, 1);
       t = 0;
       temperatura = 0;
       umidade = 0;
       timeDht = millis();
-
     }
-
   }
 }
