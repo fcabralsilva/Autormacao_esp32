@@ -12,7 +12,7 @@
 #include <WebServer.h>
 #include <WiFiManager.h>
 
-String VERSAO = "V09.14 - 22/04/2020";
+String VERSAO = "V09.15 - 06/05/2020";
 
 #define BUZZER                18
 #define PIN_MQ2               34
@@ -493,12 +493,13 @@ void loop()
       alarme.desligado(i_sirene_alarme);
 
     }
-
+    //HTTP://IP_HOST/?00001
     if (requisicao == "00001")
     {
       //Resetar configurações WIFI para trocar de rede.
-      wifiManager.setBreakAfterConfig(true);
-      wifiManager.resetSettings();
+      esp_wifi_restore();
+      delay(1000);
+      ESP.restart();
     }
 
     /* ALARME */
