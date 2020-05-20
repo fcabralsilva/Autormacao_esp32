@@ -12,7 +12,7 @@
 #include <WebServer.h>
 #include <WiFiManager.h>
 
-String VERSAO = "V09.15 - 06/05/2020";
+String VERSAO = "V09.16 - 07/05/2020";
 
 #define BUZZER                18
 #define PIN_MQ2               34
@@ -38,6 +38,7 @@ struct botao1 {
   const char* tipo = "0";
   const char* agenda_in;
   const char* agenda_out;
+  const char* timer;
 } botao1;
 struct botao2 {
   int entrada = 25, rele = 26;
@@ -99,10 +100,10 @@ NTPClient ntp(udp, "a.st1.ntp.br", -3 * 3600, 60000);//Cria um objeto "NTP" com 
 struct tm data;//Cria a estrutura que contem as informacoes da data.
 int hora;
 char data_formatada[64];
-int ATUALIZAR_DH;
+int ATUALIZAR_DH, i_timer_valor;
 String hora_ntp;
 
-boolean estado_inter;
+boolean estado_inter, cont_timer;
 
 float umidade = 0, temperatura = 0;
 float LPGCurve[3]   =  {2.3, 0.20, -0.47};
@@ -235,6 +236,7 @@ void loop()
     botao1.modelo     = root["sinal_1"];
     botao1.agenda_in  = root["h_i_1"];
     botao1.agenda_out = root["h_o_1"];
+    botao1.timer      = root["t_1"];
     //gravaLog(" " + relogio_ntp(1) + "   Int 1: " + String(botao1.nomeInter) + " / " + String(botao1.tipo) + " / " + String(botao1.modelo)+ " / " + String(botao1.agenda_in)+ " / " + String(botao1.agenda_out), logtxt, 2);
 
     botao2.nomeInter  = root["int_2"];
@@ -295,7 +297,33 @@ void loop()
   */
   agendamento(botao1.rele, botao1.agenda_in, botao1.agenda_out, relogio_ntp(3));
 
-  // MONTAR BOTOES DE INTERRUPTORES
+  /*
+   *  VERIFICA SE EXISTE VALOR DE TIMER CONFIGURADO
+   */
+   String s_timer_valor = String(botao1.timer);
+   if(s_timer_valor.toInt() > 0)
+   {
+      if(cont_timer == 1)
+      {
+        i_timer_valor = s_timer_valor.toInt();
+        cont_timer = 0;
+      }
+      if(botao1.estado)
+      {
+        int i_timer= i_timer_valor-- ;
+        Serial.println( "timer configurado : " + String(i_timer));
+        delay(1000);
+        if(i_timer_valor == 0)
+        {
+          acionaPorta(botao1.rele, "", "desl");
+          cont_timer = 0;
+        }
+      }
+   }
+   
+  /*
+   * MONTAR BOTOES DE INTERRUPTORES
+   */
   botao1.estado = portaIO(botao1.entrada, botao1.rele, botao1.tipo, botao1.modelo, botao1.contador, botao1.estado);
   botao2.estado = portaIO(botao2.entrada, botao2.rele, botao2.tipo, botao2.modelo, botao2.contador, botao2.estado);
   botao3.estado = portaIO(botao3.entrada, botao3.rele, botao3.tipo, botao3.modelo, botao3.contador, botao3.estado);
@@ -413,6 +441,7 @@ void loop()
                     + "\",\"sinal_1\":\"" + quebraString("sinal_1", stringUrl)
                     + "\",\"h_i_1\":\"" + quebraString("hora1_in_1", stringUrl) + quebraString("hora1_in_2", stringUrl)
                     + "\",\"h_o_1\":\"" + quebraString("hora1_out_1", stringUrl) + quebraString("hora1_out_2", stringUrl)
+                    + "\",\"t_1\":\"" + quebraString("timer_1", stringUrl)
 
                     + "\",\"int_2\":\"" + quebraString("int_2", stringUrl)
                     + "\",\"tipo_2\":\"" + quebraString("tipo_2", stringUrl)

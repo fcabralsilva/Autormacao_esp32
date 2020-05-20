@@ -2,14 +2,14 @@ String gpio_html (int numero, int botao_entrada, String botao_nomeInter, const c
 {
   String buff;
   buff += "<div class=\"row\">";
-  buff += "   <div class=\"col-sm-3\">";
+  buff += "   <div class=\"col-sm-2\" style=\"width:50px\">";
   buff += "     <strong>GPIO" + String(botao_entrada) + "</strong><input maxlength=\"18\" style=\"width:120px\" type=\"text\"   name=\"int_" + String(numero) + "\" value=\"" + String(botao_nomeInter) + "\">";
   buff += "   </div>";
   buff += "   <div class=\"col-sm-2\">";
-  buff += "      <strong> Sinal </strong><select   style=\"width:100%x\"  name=\"tipo_" + String(numero) + "\"><option value=\"0\" " + selectedHTNL(botao_tipo, "0") + "> - </option><option value=\"1\" " + selectedHTNL(botao_tipo, "1") + "> + </option></select>";
+  buff += "      <strong> Sinal </strong><select   style=\"width:80px\"  name=\"tipo_" + String(numero) + "\"><option value=\"0\" " + selectedHTNL(botao_tipo, "0") + "> - </option><option value=\"1\" " + selectedHTNL(botao_tipo, "1") + "> + </option></select>";
   buff += "   </div>";
   buff += "   <div class=\"col-sm-2\">";
-  buff += "      <strong>Tipo </strong><select   style=\"width:100%x\" name=\"sinal_" + String(numero) + "\"><option value=\"pulso\" " + selectedHTNL(botao_modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao_modelo, "interruptor") + ">Inter.</option><option value=\"pir\" " + selectedHTNL(botao_modelo, "pir") + ">PIR</option></select>";
+  buff += "      <strong>Tipo </strong><select   style=\"width:100px\" name=\"sinal_" + String(numero) + "\"><option value=\"pulso\" " + selectedHTNL(botao_modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao_modelo, "interruptor") + ">Inter.</option><option value=\"pir\" " + selectedHTNL(botao_modelo, "pir") + ">PIR</option></select>";
   buff += "   </div>";
   buff += "   <div class=\"col-sm-4\">";
   buff += "     <strong>Agenda </strong>";
@@ -18,7 +18,12 @@ String gpio_html (int numero, int botao_entrada, String botao_nomeInter, const c
   buff += input_text_ + "name=\"hora" + String(numero) + "_in_2\" value=\"" + opcao_agenda(botao_agenda_in, botao_agenda_out, 2) + "\">-";
   buff += input_text_ + "name=\"hora" + String(numero) + "_out_1\" value=\"" + opcao_agenda(botao_agenda_in, botao_agenda_out, 3) + "\">:";
   buff += input_text_ + "name=\"hora" + String(numero) + "_out_2\" value=\"" + opcao_agenda(botao_agenda_in, botao_agenda_out, 4) + "\">";
-  buff += "</div></div>";
+  buff += "   </div>";
+  buff += "   <div class=\"col-sm-2\">";
+  buff += "     <strong>Timer</strong>";
+  buff += "     <input maxlength=\"4\" style=\"width:80px\" type=\"text\" name=\"timer_" + String(numero) + "\">";  
+  buff += "   </div>";
+  buff += "</div>";
 
   return buff;
 
