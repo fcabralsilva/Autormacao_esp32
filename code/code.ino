@@ -12,7 +12,7 @@
 #include <WebServer.h>
 #include <WiFiManager.h>
 
-String VERSAO = "V09.16 - 07/05/2020";
+String VERSAO = "V09.17 - 28/07/2020";
 
 #define BUZZER                18
 #define PIN_MQ2               34
@@ -779,6 +779,9 @@ void loop()
     buf +=  " <div class=\"row\">";
     buf +=  "   <div class=\"col-sm-2\">";
     buf += "         <input class=\"btn btn-info\" type=\"submit\" value=\"Salvar\">";
+    buf += "         <a href='?00000' title=''>";
+    buf += "          <button type='button' class='btn btn-danger btn-sm'> Reiniciar </button>";
+    buf += "         </a>";
     buf += "    </div>";
     buf += "  </div>";
     buf += "</div>";
