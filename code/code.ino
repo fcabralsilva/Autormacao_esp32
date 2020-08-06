@@ -12,7 +12,7 @@
 #include <WebServer.h>
 #include <WiFiManager.h>
 
-String VERSAO = "V09.18 - 28/07/2020";
+String VERSAO = "V09.19 - 06/08/2020";
 
 #define BUZZER                18
 #define PIN_MQ2               34
@@ -184,7 +184,9 @@ void setup() {
   //PRIMEIRA LEITURA DOs SENSORES
   //---------------------------------------
   umidade = dht.readHumidity();
+  if(umidade >= 100) umidade = 0;
   temperatura = dht.readTemperature();
+  if(temperatura >= 100) temperatura = 0;
   calibrarSensor();
   sensorMq2 = analogRead(PIN_MQ2);
   GLP = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, GAS_LPG) );
