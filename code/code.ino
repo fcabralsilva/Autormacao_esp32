@@ -11,8 +11,9 @@
 #include <WiFiUDP.h>
 #include <WebServer.h>
 #include <WiFiManager.h>
+#include <Timing.h>
 
-String VERSAO = "V09.19 - 06/08/2020";
+String VERSAO = "V09.20 - 24/08/2020";
 
 #define BUZZER                18
 #define PIN_MQ2               34
@@ -89,17 +90,17 @@ int t = 10;
 long milis = 0;        	// último momento que o LED foi atualizado
 long interval = 500;    // tempo de transição entre estados (milisegundos)
 String ipLocalString, buff, URL, linha, GLP, FUMACA, retorno, serv, logtxt = "sim", hora_rtc, buf;
-const char *json, *LIMITE_MQ2 = "99", *LIMITE_MQ2_FU = "99";
+const char *json, *LIMITE_MQ2 = "999", *LIMITE_MQ2_FU = "999";
 const char *ssid, *password, *servidor, *conslog, *nivelLog = "4", *verao, *s_senha_alarme = "123456";
 const int PIN_AP = 0, i_sensor_alarme = 17, i_sirene_alarme = 18;
 int portaServidor = 80;
-int contarParaGravar1 = 0, nContar = 0, cont_ip_banco = 0, nivel_log = 4, estado_atual = 0, estado_antes = 0, freq = 2000, channel = 0, resolution = 8, n = 0, sensorMq2 = 0, MEM_EEPROM_MQ2 = 20;
+int contarParaGravar1 = 0, nContar = 0, cont_ip_banco = 0,P_LEITURAS_MQ = 0, nivel_log = 4, estado_atual = 0, estado_antes = 0, freq = 2000, channel = 0, resolution = 8, n = 0, sensorMq2 = 0, MEM_EEPROM_MQ2 = 20;
 short paramTempo = 60;
 unsigned long time3, time3Param = 90000, timeDht, timeMq2 , tempo = 0, timeMq2Param = 10000, time_sirene;
 IPAddress ipHost;
 WiFiUDP udp;
 NTPClient ntp(udp, "a.st1.ntp.br", -3 * 3600, 60000);//Cria um objeto "NTP" com as configurações.utilizada no Brasil
-
+Timing time_mq2;
 struct tm data;//Cria a estrutura que contem as informacoes da data.
 int hora;
 char data_formatada[64];
@@ -124,7 +125,7 @@ void setup() {
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
   Serial.begin(115200);
   dht.begin();
-
+  time_mq2.begin(1);
   pinMode(PIN_AP, INPUT_PULLUP);
 
   pinMode(botao1.rele, OUTPUT);
@@ -511,7 +512,7 @@ void loop()
     if (requisicao == "00016") //
     {
       cont_ip_banco = 0;
-    }
+    }    
     /*
       FUNÇÃO DE CONTROLE DO ALARME
       ATIVAR ALARME - CHAMADA HTTP EX: HTTP://IP_HOST/?00117
@@ -543,7 +544,19 @@ void loop()
     {
       relogio_ntp(0);
     }
-
+    /*
+     * PAUSAR LEITURAS DO SENSOR DE GAS
+     */
+    if (requisicao == "00019") //
+    {
+      P_LEITURAS_MQ = 1;
+    }else
+    {
+      if (time_mq2.onTimeout(120000))
+      {
+        P_LEITURAS_MQ = 0;
+      }
+    }
 
     /*
        PAGINA WEB
@@ -777,15 +790,18 @@ void loop()
     buf +=  " <div class=\"row\">";
     buf +=  "   <div class=\"col-sm-8\">";
     buf += "        <strong>MQ2 </strong>";
-    buf += "        <sup>GAS </sup><input maxlength=\"2\" style=\"width:24px\" type=\"text\" name=\"v_mq\" value=\"" + String(LIMITE_MQ2) + "\">";
-    buf += "        <sup>Fuma&ccedil;a </sup><input maxlength=\"2\" style=\"width:24px\" type=\"text\" name=\"v_mq_fu\" value=\"" + String(LIMITE_MQ2_FU) + "\">";
+    buf += "        <sup>GAS </sup><input maxlength=\"3\" style=\"width:35px\" type=\"text\" name=\"v_mq\" value=\"" + String(LIMITE_MQ2) + "\">";
+    buf += "        <sup>Fuma&ccedil;a </sup><input maxlength=\"3\" style=\"width:35px\" type=\"text\" name=\"v_mq_fu\" value=\"" + String(LIMITE_MQ2_FU) + "\">";
+    buf += "         <a href='?00019' title=''>";
+    buf += "          <button type='button' class='btn btn-danger btn-sm'> Pausar Leitura </button>";
+    buf += "         </a>";
     buf += "    </div>";
     buf += "  </div>";
     buf +=  " <div class=\"row\">";
     buf +=  "   <div class=\"col-sm-2\">";
     buf += "         <input class=\"btn btn-info\" type=\"submit\" value=\"Salvar\">";
     buf += "         <a href='?00000' title=''>";
-    buf += "          <button type='button' class='btn btn-danger btn-sm'> Reiniciar Central </button>";
+    buf += "         <button type='button' class='btn btn-danger btn-sm'> Reiniciar Central </button>";
     buf += "         </a>";
     buf += "    </div>";
     buf += "  </div>";
@@ -833,11 +849,17 @@ void loop()
     //buff = "sensor=mq-2&valor=mq-2;" + String(GLP) + ";&central=" + String(ipLocalString) + "&p=" + String(PIN_MQ2);
     if ((GLP.toInt() >= String(LIMITE_MQ2).toInt()) || (FUMACA.toInt() > String(LIMITE_MQ2_FU).toInt()))
     {
-      digitalWrite(BUZZER, true);
-      digitalWrite(LED_VERMELHO, true);
+      if(P_LEITURAS_MQ == 0)
+      {
+        //digitalWrite(BUZZER, true);
+        sirene(true);
+        digitalWrite(LED_VERMELHO, true);
+      }
+
     } else
     {
       digitalWrite(LED_VERMELHO, false);
+      sirene(false);
       digitalWrite(BUZZER, false);
     }
     //GRAVA NO BANCO O VALOR LIDO APOS X LEITURAS

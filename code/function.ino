@@ -371,13 +371,15 @@ void sirene(boolean valor)
 {
   if (valor == true)
   {
-    if (millis() - time_sirene >= 500)
+    if (millis() - time_sirene > 1000)
     {
-      digitalWrite(BUZZER, !digitalRead(BUZZER));
+      digitalWrite(BUZZER,true);
       time_sirene = millis();
+    }else{
+      digitalWrite(BUZZER,false);
     }
-
-  } else
+  }
+  if (valor == false)
   {
     digitalWrite(BUZZER, false);
   }
