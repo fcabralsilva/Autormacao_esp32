@@ -1,9 +1,9 @@
-String gpio_html (int numero, int botao_entrada, String botao_nomeInter, const char* botao_tipo, const char* botao_modelo, const char*botao_agenda_in, const char*botao_agenda_out)
+String gpio_html (int numero, int botao_entrada, int botao_rele, String botao_nomeInter, const char* botao_tipo, const char* botao_modelo, const char*botao_agenda_in, const char*botao_agenda_out)
 {
   String buff;
   buff += "<div class=\"row\">";
   buff += "   <div class=\"col-sm-2\" style=\"width:50px\">";
-  buff += "     <strong>GPIO" + String(botao_entrada) + "</strong><input maxlength=\"18\" style=\"width:120px\" type=\"text\"   name=\"int_" + String(numero) + "\" value=\"" + String(botao_nomeInter) + "\">";
+  buff += "     <strong>GPIO E " + String(botao_entrada) +" S "+String(botao_rele) + "</strong><input maxlength=\"18\" style=\"width:120px\" type=\"text\"   name=\"int_" + String(numero) + "\" value=\"" + String(botao_nomeInter) + "\">";
   buff += "   </div>";
   buff += "   <div class=\"col-sm-2\">";
   buff += "      <strong> Sinal </strong><select   style=\"width:80px\"  name=\"tipo_" + String(numero) + "\"><option value=\"0\" " + selectedHTNL(botao_tipo, "0") + "> - </option><option value=\"1\" " + selectedHTNL(botao_tipo, "1") + "> + </option></select>";
@@ -13,7 +13,7 @@ String gpio_html (int numero, int botao_entrada, String botao_nomeInter, const c
   buff += "   </div>";
   buff += "   <div class=\"col-sm-4\">";
   buff += "     <strong>Agenda </strong>";
-  String input_text_ = "<input maxlength=\"2\" style=\"width:24px\" type=\"text\"";
+  String input_text_ = "<input maxlength=\"2\" style=\"width:26px\" type=\"text\"";
   buff += input_text_ + "name=\"hora" + String(numero) + "_in_1\" value=\"" + opcao_agenda(botao_agenda_in, botao_agenda_out, 1) + "\">:";
   buff += input_text_ + "name=\"hora" + String(numero) + "_in_2\" value=\"" + opcao_agenda(botao_agenda_in, botao_agenda_out, 2) + "\">-";
   buff += input_text_ + "name=\"hora" + String(numero) + "_out_1\" value=\"" + opcao_agenda(botao_agenda_in, botao_agenda_out, 3) + "\">:";
@@ -24,9 +24,7 @@ String gpio_html (int numero, int botao_entrada, String botao_nomeInter, const c
   buff += "     <input maxlength=\"4\" style=\"width:80px\" type=\"text\" name=\"timer_" + String(numero) + "\">";  
   buff += "   </div>";
   buff += "</div>";
-
   return buff;
-
 }
 
 boolean status_porta(int numero_Int, int rele, boolean estado, String _acao)
@@ -43,63 +41,72 @@ boolean status_porta(int numero_Int, int rele, boolean estado, String _acao)
   return estado;
 }
 
-boolean portaIO(int entrada, int rele, const char* tipo, const char* modelo, char contador, boolean estado)
-{
-  String s_tipo_1 = String(tipo);
-  String s_modelo_1 = String(modelo);
-  estado_antes = estado;
-
-
-  if (s_modelo_1 == "pulso")
-  {
-    if (digitalRead(entrada) == s_tipo_1.toInt())
-    {
-      if (nContar == 0) Serial.println("\n GPIO " + String(entrada) + " - Pulso"); Serial.print(" Contando >> ");
-      while ((digitalRead(entrada) == s_tipo_1.toInt()) && (nContar <= 300) )
-      {
-        if (millis() >= tempo + paramTempo)
-        {
-          contador++;
-          nContar++;
-          Serial.print(contador, DEC);
-          tempo = millis();
-          digitalWrite(LED_VERMELHO, true);
-        }
-      }
-      Serial.println("");
-      digitalWrite(LED_VERMELHO, false);
-    }
-  } else if (s_modelo_1 == "interruptor")
-  {
-    estado_atual = digitalRead(entrada);
-    if (estado_atual != estado_inter )
-    {
-      if (nContar == 0)Serial.println("\n GPIO " + String(entrada) + " - Interruptor");;
-      estado_inter = estado_atual;
-      contador = 3;
-      //Serial.print(botao1.contador, DEC);
-    }
-
-  }
-  if ((contador >= 1))
-  {
-    String ERRO_ENTRADA = "0";
-    nContar = 0;
-    if (estado_antes == false)
-    {
-      estado_antes = true;
-      contador = 0;
-      acionaPorta(rele, "", "liga");
-    } else
-    {
-      acionaPorta(rele, "", "desl");
-      estado_antes = false;
-      contador = 0;
-    }
-  }
-  return estado_antes;
-  Serial.println("");
-}
+//boolean portaIO(int entrada, int rele, const char* tipo, const char* modelo, char contador, boolean estado)
+//{
+//  String s_tipo_1 = String(tipo);
+//  String s_modelo_1 = String(modelo);
+//  estado_antes = estado;
+//
+//
+//  if (s_modelo_1 == "pulso")
+//  {
+//    if (digitalRead(entrada) == s_tipo_1.toInt())
+//    {
+//      if (nContar == 0) Serial.println("\n GPIO " + String(entrada) + " - Pulso"); Serial.print(" Contando >> ");
+//      while ((digitalRead(entrada) == s_tipo_1.toInt()) && (nContar <= 300) )
+//      {
+//        if (millis() >= tempo + paramTempo)
+//        {
+//          contador++;
+//          nContar++;
+//          Serial.print(contador, DEC);
+//          tempo = millis();
+//          digitalWrite(LED_VERMELHO, true);
+//        }
+//      }
+//      Serial.println("");
+//      digitalWrite(LED_VERMELHO, false);
+//    }
+//  } else if (s_modelo_1 == "interruptor")
+//  {
+//    estado_atual = digitalRead(entrada);
+//    if (estado_atual != estado_inter )
+//    {
+//      if (nContar == 0)Serial.println("\n GPIO " + String(entrada) + " - Interruptor");;
+//      estado_inter = estado_atual;
+//      contador = 3;
+//      //Serial.print(botao1.contador, DEC);
+//    }
+//
+//  }
+//  if ((contador >= 1))
+//  {
+//    String ERRO_ENTRADA = "0";
+//    nContar = 0;
+//    if (estado_antes == false)
+//    {
+//      estado_antes = true;
+//      contador = 0;
+//      acionaPorta(rele, "", "liga");
+//    } else
+//    {
+//      acionaPorta(rele, "", "desl");
+//      estado_antes = false;
+//      contador = 0;
+//    }
+//  }
+//  if(rele == botao1.rele){
+//    botao1.estado = estado_antes;
+//  }else if (rele == botao2.rele){
+//    botao2.estado = estado_antes;
+//  }else if (rele == botao3.rele){
+//    botao3.estado = estado_antes;
+//  }else if (rele == botao4.rele){
+//    botao4.estado = estado_antes;
+//  }
+//  return estado_antes;
+//  Serial.println("");
+//}
 
 String opcao_agenda(const char *in, const char *out, int saida)
 {
@@ -121,28 +128,28 @@ String opcao_agenda(const char *in, const char *out, int saida)
 }
 
 
-void agendamento(int gpio, String hora_ini, String hora_fim, String hora_atual )
+boolean agendamento(int gpio, String hora_ini, String hora_fim, String hora_atual, boolean estado )
 {
+  boolean estado_fim;
   /*
   	char agenda[2][12] = {"21:04:00", "21:05:00"};
   	String timer = timeClient.getFormattedTime();
   	agendamento(led, agenda[0], agenda[1], timer);
   */
-  if (hora_atual == hora_ini)
+  if ((hora_atual == hora_ini) && (estado == false) )
   {
-    if (agenda_ == 0)
-    {
       acionaPorta(gpio, "", "liga");
-      agenda_ = 1;
-    }
-  } else if (hora_atual == hora_fim)
+      estado_fim = true;
+  } 
+  if ((hora_atual == hora_fim) && (estado == true))
   {
-    if (agenda_ == 1)
-    {
-      acionaPorta(botao1.rele, "", "desl");
-      agenda_ = 0;
-    }
+      acionaPorta(gpio, "", "desl");
+      estado_fim = false;
   }
+  hora_ini      ="";
+  hora_fim      ="";
+  hora_atual    ="";
+  return estado_fim; 					
 }
 
 void arduino_ota()
@@ -217,7 +224,7 @@ String relogio_ntp(int retorno)
     hora_ntp = data_formatada;
 
   }
-  if (retorno == 3)
+  if (retorno == 4)
   {
     time_t tt = time(NULL);//Obtem o tempo atual em segundos. Utilize isso sempre que precisar obter o tempo atual
     data = *gmtime(&tt);//Converte o tempo atual e atribui na estrutura
@@ -518,7 +525,7 @@ void gravarArquivo(String msg, String arq) {
   }
 }
 
-String lerArquivo() {
+String lerLog() {
   //Faz a leitura do arquivo
   String buff;
   File ARQUIVO = SPIFFS.open("/log.txt", "r");

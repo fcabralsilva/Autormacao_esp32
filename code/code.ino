@@ -13,7 +13,7 @@
 #include <WiFiManager.h>
 #include <Timing.h>
 
-String VERSAO = "V09.20 - 24/08/2020";
+String VERSAO = "V09.40 - 30/01/2021";
 
 #define BUZZER                18
 #define PIN_MQ2               34
@@ -31,6 +31,7 @@ String VERSAO = "V09.20 - 24/08/2020";
 #define LED_AZUL              2
 #define RELE_ILU              5
 #define DS18B20               6
+#define portaServidor         80
 
 struct botao1 {
   int entrada = 32, rele = 33;
@@ -93,11 +94,12 @@ String ipLocalString, buff, URL, linha, GLP, FUMACA, retorno, serv, logtxt = "si
 const char *json, *LIMITE_MQ2 = "999", *LIMITE_MQ2_FU = "999";
 const char *ssid, *password, *servidor, *conslog, *nivelLog = "4", *verao, *s_senha_alarme = "123456";
 const int PIN_AP = 0, i_sensor_alarme = 17, i_sirene_alarme = 18;
-int portaServidor = 80;
-int contarParaGravar1 = 0, nContar = 0, cont_ip_banco = 0,P_LEITURAS_MQ = 0, nivel_log = 4, estado_atual = 0, estado_antes = 0, freq = 2000, channel = 0, resolution = 8, n = 0, sensorMq2 = 0, MEM_EEPROM_MQ2 = 20;
+//int portaServidor = 80;
+int contarParaGravar1 = 0, nContar = 0, cont_ip_banco = 0, P_LEITURAS_MQ = 0, nivel_log = 4, estado_atual = 0, estado_antes = 0, freq = 2000, channel = 0, resolution = 8, n = 0, sensorMq2 = 0, MEM_EEPROM_MQ2 = 20;
 short paramTempo = 60;
 unsigned long time3, time3Param = 90000, timeDht, timeMq2 , tempo = 0, timeMq2Param = 10000, time_sirene;
 IPAddress ipHost;
+int agenda_ = 0;
 WiFiUDP udp;
 NTPClient ntp(udp, "a.st1.ntp.br", -3 * 3600, 60000);//Cria um objeto "NTP" com as configurações.utilizada no Brasil
 Timing time_mq2;
@@ -107,7 +109,8 @@ char data_formatada[64];
 int ATUALIZAR_DH, i_timer_valor;
 String hora_ntp;
 
-boolean estado_inter, cont_timer;
+String comandos_txt = "<p><strong>PORTAS ENTRADA SA&Iacute;DA</strong></p><p>entrada 1 = 32, rele 1 = 33<br />entrada 2 = 25, rele 2 = 18<br />entrada 3 = 14, rele 3 = 27<br />entrada 4 = 12, rele 4 = 13</p><p><strong><span class=\"pl-c1\">LED'S PARA MONITORAMENTO</span></strong></p><p><span class=\"pl-c1\">LED_AZUL&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 2<br />LED_VERDE&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;4<br />LED_VERMELHO 16</span></p><p><strong><span class=\"pl-c1\">SENSORES</span></strong></p><p><span class=\"pl-c1\">BUZZER&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 5<br />PIN_MQ2&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;34<br />DHTPIN&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;19</span></p><p><strong>REINCIAR CENTRAL POR COMANDA HTTP</strong>&nbsp;</p><p>HTTP://IP_HOST/?00000</p><p><strong>REINICIAS CONFIGURAÇÕES WIFI</strong>&nbsp;</p><p>HTTP://IP_HOST/?00002</p><p><strong>EXEMPLO NA CHAMADA WEB DESLIGAR LAMPADA</strong>&nbsp;</p><p>HTTP://IP_HOST/?porta=NN&amp;acao=(liga ou&nbsp;desligar)&amp;central=IP_HOST</p><p><strong>CALIBRAR SENSOR MQ2</strong></p><p>HTTP://IP_HOST/?0001</p><p><strong>APAGAR ARQUIVO DE LOG MANUALMENTE</strong></p><p>HTTP://IP_HOST/?00013</p><p><strong>APLICAR CONFIGURA&Ccedil;&Otilde;ES MINIMAS PARA FUNCIONAMENTO DA CENTRAL</strong></p><p>HTTP://IP_HOST/?00014</p><p><strong>DESLIGAR TODOS AS PORTAS OUTPUT DA CENTRAL</strong></p><p>HTTP://IP_HOST/?00015</p><p><strong>APLICAR AS CONFIGURA&Ccedil;&Otilde;ES AP&Oacute;S SEREM GRAVADAS NA CENTRAL</strong>&nbsp;</p><p>HTTP://IP_HOST/?00016</p>";
+boolean estado_inter, cont_timer, ler_dht = true;
 
 float umidade = 0, temperatura = 0;
 float LPGCurve[3]   =  {2.3, 0.20, -0.47};
@@ -115,11 +118,11 @@ float COCurve[3]    =  {2.3, 0.72, -0.34};
 float SmokeCurve[3] =  {2.3, 0.53, -0.44};
 float Ro = 10;
 
-boolean b_status_alarme = 0, agenda_ = 0;
+//boolean b_status_alarme = 0, agenda_ = 0;
 
 DHT dht(DHTPIN, DHTTYPE);
 WiFiServer server(80);
-Alarme alarme;
+//Alarme alarme;
 
 void setup() {
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
@@ -153,8 +156,8 @@ void setup() {
   //digitalWrite(LED_VERMELHO, HIGH);
   pinMode(LED_AZUL, OUTPUT);
 
-  alarme.sensores(i_sensor_alarme);
-  alarme.sirene(i_sirene_alarme);
+  //alarme.sensores(i_sensor_alarme);
+  //alarme.sirene(i_sirene_alarme);
 
   openFS();
   criarArquivo("/param.txt");
@@ -184,10 +187,6 @@ void setup() {
   //---------------------------------------
   //PRIMEIRA LEITURA DOs SENSORES
   //---------------------------------------
-  umidade = dht.readHumidity();
-  if(umidade >= 100) umidade = 0;
-  temperatura = dht.readTemperature();
-  if(temperatura >= 100) temperatura = 0;
   calibrarSensor();
   sensorMq2 = analogRead(PIN_MQ2);
   GLP = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, GAS_LPG) );
@@ -202,7 +201,7 @@ void setup() {
   ledcAttachPin(5, channel);
   gravarArquivo("\n *** INICIANDO SISTEMA *** \n \n " + VERSAO, "log.txt");
   digitalWrite(BUZZER, HIGH);
-  delay(1000);
+  delay(500);
   digitalWrite(BUZZER, LOW);
 }
 
@@ -299,45 +298,452 @@ void loop()
   }
 
   /*
-     VERIFICA SE POSSUI AGENDAMENTO DA PORTA GPIO
+    ---------------------------------------
+     ENTRADA E SAIDA DE GPIO 1
+    ---------------------------------------
+     --------------------------------------
+     INICIO DA FUNÇÃO AGENDAMENTO
+     --------------------------------------
   */
-  agendamento(botao1.rele, botao1.agenda_in, botao1.agenda_out, relogio_ntp(3));
-
+  if ((relogio_ntp(3) == botao1.agenda_in) && (botao1.estado == false) )
+  {
+    acionaPorta(botao1.rele, "", "liga");
+    botao1.estado = true;
+  }
+  if ((relogio_ntp(3) == botao1.agenda_out) && (botao1.estado == true))
+  {
+    acionaPorta(botao1.rele, "", "desl");
+    botao1.estado = false;
+  }
   /*
-   *  VERIFICA SE EXISTE VALOR DE TIMER CONFIGURADO
-   */
-   String s_timer_valor = String(botao1.timer);
-   if(s_timer_valor.toInt() > 0)
-   {
-      if(cont_timer == 1)
+     FIM DA FUNÇÃO AGENDAMENTO
+
+      VERIFICA SE EXISTE VALOR DE TIMER CONFIGURADO
+  */
+  String s_timer_valor = String(botao1.timer);
+  if (s_timer_valor.toInt() > 0)
+  {
+    if (cont_timer == 1)
+    {
+      i_timer_valor = s_timer_valor.toInt();
+      cont_timer = 0;
+    }
+    if (botao1.estado)
+    {
+      int i_timer = i_timer_valor-- ;
+      Serial.println( "timer configurado : " + String(i_timer));
+      delay(1000);
+      if (i_timer_valor == 0)
       {
-        i_timer_valor = s_timer_valor.toInt();
+        acionaPorta(botao1.rele, "", "desl");
         cont_timer = 0;
       }
-      if(botao1.estado)
+    }
+  }
+  /*
+    ---------------------------------------
+    INICIO DA FUNÇÃO BOTÃO POR PULSO
+    ---------------------------------------
+  */
+  if (String(botao1.modelo) == "pulso")
+  {
+    if (digitalRead(botao1.entrada) == (String(botao1.tipo).toInt()))
+    {
+      if (nContar == 0)Serial.println("\n"); Serial.println("\n E1 Pulso");
+      while ((digitalRead(botao1.entrada) == (String(botao1.tipo).toInt())) && (nContar <= 300) )
       {
-        int i_timer= i_timer_valor-- ;
-        Serial.println( "timer configurado : " + String(i_timer));
-        delay(1000);
-        if(i_timer_valor == 0)
+        if (millis() >= tempo + paramTempo)
         {
-          acionaPorta(botao1.rele, "", "desl");
-          cont_timer = 0;
+          botao1.contador++;
+          nContar++;
+          Serial.print(botao1.contador, DEC);
+          tempo = millis();
         }
       }
-   }
-   
+    }
+    /*
+       ---------------------------------------
+       FIM DA FUNÇÃO BOTÃO POR PULSO
+       ---------------------------------------
+      ---------------------------------------
+       INICIO DA FUNÇÃO BOTÃO POR INTERRUPTOR
+       ---------------------------------------
+    */
+  } else if (String(botao1.modelo) == "interruptor")
+  {
+    botao1.estado_atual = digitalRead(botao1.entrada);
+    if (botao1.estado_atual != botao1.estado_antes )
+    {
+      if (nContar == 0)Serial.println(" E1 Inter");
+      botao1.estado_antes = botao1.estado_atual;
+      botao1.contador = 3;
+      //Serial.print(botao1.contador, DEC);
+    }
+    /*
+       ---------------------------------------
+       FIM DA FUNÇÃO BOTÃO POR INTERRUPTOR
+       ---------------------------------------
+      ---------------------------------------
+       INICIO DA FUNÇÃO POR PRESENÇA
+       ---------------------------------------
+    */
+    //    boolean PIR_1_STATUS = digitalRead(PIR_1);
+    //    if(PIR_1_STATUS)
+    //    {
+    //      Serial.print(".");
+    //      digitalWrite(LED_AZUL, !digitalRead(LED_AZUL));
+    //      delay(80);
+    //      MV_DETC = true;
+    //      MV_DETC_CONTAR = 0;
+    //    }
+    //    if(MV_DETC == true)
+    //      {
+    //        if (millis() - TEMP_4 > 1000)
+    //        {
+    //          TEMP_4 = millis();
+    //          MV_DETC_CONTAR++;
+    //          Serial.println( " "+String(MV_DETC_CONTAR)+"s");
+    //          if(MV_DETC_CONTAR == PIR_1_INTRVL)
+    //          {
+    //            MV_DETC_CONTAR = 0;
+    //            MV_DETC = false;
+    //            if(botao1.estado_antes == true)
+    //            {
+    //              //Desligar lampada
+    //              botao1.estado_antes = botao1.estado_atual;
+    //              botao1.contador = 3;
+    //            }
+    //          }
+    //        }
+    //     }
+    //  } else if (s_modelo_1 == "pir")
+    //  {
+    //    boolean PIR_1_STATUS = digitalRead(PIR_1);
+    //    if(PIR_1_STATUS)
+    //    {
+    //      Serial.println(" Mov. Detec.");
+    //      digitalWrite(LED_AZUL, !digitalRead(LED_AZUL));
+    //      delay(80);
+    //    }
+    /*
+       ---------------------------------------
+       FIM DA FUNÇÃO BOTÃO PRESENÇA
+       ---------------------------------------
+      ---------------------------------------
+       ACIONAMENTO APÓS FUNÇÕES ACIMA
+       ---------------------------------------
+    */
+  }
+  if ((botao1.contador >= 1) && (botao1.contador <= 9))
+  {
+    nContar = 0;
+    if (botao1.estado == false) {
+      botao1.estado = true;
+      botao1.contador = 0;
+      acionaPorta(botao1.rele, "", "liga");
+    } else {
+      acionaPorta(botao1.rele, "", "desl");
+      botao1.estado = false;
+      botao1.contador = 0;
+    }
+  }
   /*
-   * MONTAR BOTOES DE INTERRUPTORES
-   */
-  botao1.estado = portaIO(botao1.entrada, botao1.rele, botao1.tipo, botao1.modelo, botao1.contador, botao1.estado);
-  botao2.estado = portaIO(botao2.entrada, botao2.rele, botao2.tipo, botao2.modelo, botao2.contador, botao2.estado);
-  botao3.estado = portaIO(botao3.entrada, botao3.rele, botao3.tipo, botao3.modelo, botao3.contador, botao3.estado);
-  botao4.estado = portaIO(botao4.entrada, botao4.rele, botao4.tipo, botao4.modelo, botao4.contador, botao4.estado);
+     ---------------------------------------
+     FIM DA FUNÇÃO BOTÃO PRESENÇA
+     ---------------------------------------
+    ---------------------------------------
+     FIM ENTRADA E SAIDA DE GPIO 1
+     ---------------------------------------
+  */
 
   /*
-      APAGAR TODAS AS PORTAS DE SAIDA
+    ---------------------------------------
+     ENTRADA E SAIDA DE GPIO 2
+    ---------------------------------------
+     --------------------------------------
+     INICIO DA FUNÇÃO AGENDAMENTO
+     --------------------------------------
   */
+  if ((relogio_ntp(3) == botao2.agenda_in) && (botao2.estado == false) )
+  {
+    acionaPorta(botao2.rele, "", "liga");
+    botao2.estado = true;
+  }
+  if ((relogio_ntp(3) == botao2.agenda_out) && (botao2.estado == true))
+  {
+    acionaPorta(botao2.rele, "", "desl");
+    botao2.estado = false;
+  }
+  /*
+     FIM DA FUNÇÃO AGENDAMENTO
+
+      VERIFICA SE EXISTE VALOR DE TIMER CONFIGURADO
+  */
+
+  /*
+    ---------------------------------------
+     INICIO DA FUNÇÃO BOTÃO POR PULSO
+     ---------------------------------------
+  */
+  if (String(botao2.modelo) == "pulso")
+  {
+    if (digitalRead(botao2.entrada) == (String(botao2.tipo).toInt()))
+    {
+      if (nContar == 0)Serial.println("\n"); Serial.println(" E2 Pulso");
+      while ((digitalRead(botao2.entrada) == (String(botao2.tipo).toInt())) && (nContar <= 300) )
+      {
+        if (millis() >= tempo + paramTempo)
+        {
+          botao2.contador++;
+          nContar++;
+          Serial.print(botao2.contador, DEC);
+          tempo = millis();
+        }
+      }
+    }
+  }
+  /*
+     ---------------------------------------
+     FIM DA FUNÇÃO BOTÃO POR PULSO
+     ---------------------------------------
+     ---------------------------------------
+     INICIO DA FUNÇÃO BOTÃO POR INTERRUPTOR
+     ---------------------------------------
+  */
+  if (String(botao2.modelo) == "interruptor")
+  {
+    botao2.estado_atual = digitalRead(botao2.entrada);
+    if (botao2.estado_atual != botao2.estado_antes )
+    {
+      if (nContar == 0)Serial.println("\n"); Serial.println(" E2 Inter ");
+      botao2.estado_antes = botao2.estado_atual;
+      botao2.contador = 3;
+      //Serial.print(botao2.contador, DEC);
+    }
+  }
+  /*
+    ---------------------------------------
+    FIM DA FUNÇÃO BOTÃO POR INTERRUPTOR
+    ---------------------------------------
+    ---------------------------------------
+    INICIO DA FUNÇÃO POR PRESENÇA
+    ---------------------------------------
+  */
+
+  /*
+     ---------------------------------------
+     FIM DA FUNÇÃO BOTÃO PRESENÇA
+     ---------------------------------------
+     ---------------------------------------
+     ACIONAMENTO APÓS FUNÇÕES ACIMA
+     ---------------------------------------
+  */
+  if ((botao2.contador >= 1) && (botao2.contador <= 9))
+  {
+    nContar = 0;
+    if (botao2.estado == false) {
+      botao2.estado = true;
+      botao2.contador = 0;
+      acionaPorta(botao2.rele, "", "liga");
+    } else {
+      acionaPorta(botao2.rele, "", "desl");
+      botao2.estado = false;
+      botao2.contador = 0;
+    }
+  }
+  /*
+    ---------------------------------------
+    FIM ENTRADA E SAIDA DE GPIO 2
+    ---------------------------------------
+  */
+
+  /*
+     ---------------------------------------
+     ENTRADA E SAIDA DE GPIO 3
+     ---------------------------------------
+     --------------------------------------
+     INICIO DA FUNÇÃO AGENDAMENTO
+     --------------------------------------
+  */
+
+  /*
+     FIM DA FUNÇÃO AGENDAMENTO
+
+      VERIFICA SE EXISTE VALOR DE TIMER CONFIGURADO
+  */
+
+  /*
+    ---------------------------------------
+    INICIO DA FUNÇÃO BOTÃO POR PULSO
+    ---------------------------------------
+  */
+  if (String(botao3.modelo) == "pulso")
+  {
+    if (digitalRead(botao3.entrada) == (String(botao3.tipo).toInt()))
+    {
+      if (nContar == 0)Serial.println("\n"); Serial.println(" E3 Pulso");
+      while ((digitalRead(botao3.entrada) == (String(botao3.tipo).toInt())) && (nContar <= 300) )
+      {
+        if (millis() >= tempo + paramTempo)
+        {
+          botao3.contador++;
+          nContar++;
+          Serial.print(botao3.contador, DEC);
+          tempo = millis();
+        }
+      }
+    }
+  }
+  /*
+     ---------------------------------------
+     FIM DA FUNÇÃO BOTÃO POR PULSO
+     ---------------------------------------
+     ---------------------------------------
+     INICIO DA FUNÇÃO BOTÃO POR INTERRUPTOR
+     ---------------------------------------
+  */
+  if (String(botao3.modelo) == "interruptor")
+  {
+    botao3.estado_atual = digitalRead(botao3.entrada);
+    if (botao3.estado_atual != botao3.estado_antes )
+    {
+      if (nContar == 0)Serial.println("\n"); Serial.print(" E3 Inter");
+      botao3.estado_antes = botao3.estado_atual;
+      botao3.contador = 3;
+      //Serial.print(botao3.contador, DEC);
+    }
+  }
+  /*
+     ---------------------------------------
+     FIM DA FUNÇÃO BOTÃO POR INTERRUPTOR
+     ---------------------------------------
+     ---------------------------------------
+     INICIO DA FUNÇÃO POR PRESENÇA
+     ---------------------------------------
+  */
+
+
+  /*
+     ---------------------------------------
+     FIM DA FUNÇÃO BOTÃO PRESENÇA
+     ---------------------------------------
+     ---------------------------------------
+     ACIONAMENTO APÓS FUNÇÕES ACIMA
+     ---------------------------------------
+  */
+  if ((botao3.contador >= 2) && (botao3.contador <= 9))
+  {
+    nContar = 0;
+    if (botao3.estado == false) {
+      botao3.estado = true;
+      botao3.contador = 0;
+      acionaPorta(botao3.rele, "", "liga");
+    } else {
+      acionaPorta(botao3.rele, "", "desl");
+      botao3.estado = false;
+      botao3.contador = 0;
+    }
+  }
+  /*
+    ---------------------------------------
+    FIM ENTRADA E SAIDA DE GPIO 3
+    ---------------------------------------
+  */
+
+  /*
+  * ---------------------------------------
+  * ENTRADA E SAIDA DE GPIO 4
+  * ---------------------------------------
+  * --------------------------------------
+  * INICIO DA FUNÇÃO AGENDAMENTO
+  * --------------------------------------
+  */
+  
+  /*
+  * FIM DA FUNÇÃO AGENDAMENTO
+  * 
+  *  VERIFICA SE EXISTE VALOR DE TIMER CONFIGURADO
+  */
+  
+  /*
+  * ---------------------------------------
+  * INICIO DA FUNÇÃO BOTÃO POR PULSO
+  * ---------------------------------------
+  */
+  if (String(botao4.modelo) == "pulso")
+  {
+    if (digitalRead(botao4.entrada) == (String(botao4.tipo).toInt()))
+    {
+      if (nContar == 0)Serial.println("\n"); Serial.println("\n E4 Pulso");
+      while ((digitalRead(botao4.entrada) == (String(botao4.tipo).toInt())) && (nContar <= 300) )
+      {
+        if (millis() >= tempo + paramTempo)
+        {
+          botao4.contador++;
+          nContar++;
+          Serial.print(botao4.contador, DEC);
+          tempo = millis();
+        }
+      }
+    }
+  } 
+  /*
+  * ---------------------------------------
+  * FIM DA FUNÇÃO BOTÃO POR PULSO
+  * ---------------------------------------
+  * ---------------------------------------
+  * INICIO DA FUNÇÃO BOTÃO POR INTERRUPTOR
+  * ---------------------------------------
+  */
+  if (String(botao4.modelo) == "interruptor")
+  {
+    botao4.estado_atual = digitalRead(botao4.entrada);
+    if (botao4.estado_atual != botao4.estado_antes )
+    {
+      if (nContar == 0)Serial.println(" E4 Inter");
+      botao4.estado_antes = botao4.estado_atual;
+      botao4.contador = 3;
+      //Serial.print(botao4.contador, DEC);
+    }
+  }
+  /*
+  * ---------------------------------------
+  * FIM DA FUNÇÃO BOTÃO POR INTERRUPTOR
+  * ---------------------------------------
+  * ---------------------------------------
+  * INICIO DA FUNÇÃO POR PRESENÇA
+  * ---------------------------------------
+  */
+  /*
+  * ---------------------------------------
+  * FIM DA FUNÇÃO BOTÃO PRESENÇA
+  * ---------------------------------------
+  * ---------------------------------------
+  * ACIONAMENTO APÓS FUNÇÕES ACIMA
+  * ---------------------------------------
+  */
+  if ((botao4.contador >= 2) && (botao4.contador <= 9))
+  {
+    nContar = 0;
+    if (botao4.estado == false) {
+      botao4.estado = true;
+      botao4.contador = 0;
+      acionaPorta(botao4.rele, "", "liga");
+    } else {
+      acionaPorta(botao4.rele, "", "desl");
+      botao4.estado = false;
+      botao4.contador = 0;
+    }
+  }
+  /*
+  *---------------------------------------
+  * FIM ENTRADA E SAIDA DE GPIO 4
+  * ---------------------------------------
+  */ 
+
+  /*
+   * APAGAR TODAS AS PORTAS DE SAIDA
+   */
   if ((botao1.contador >= 10)
       || (botao2.contador >= 10)
       || (botao3.contador >= 10)
@@ -359,7 +765,7 @@ void loop()
   }
 
   /*
-    LEITURA DA REQUISIÇÃO DE CHAMADAS GET
+    LEITURA DA REQUISIÇÃO DE CHAMADAS HTTP GET
   */
   if (client)
   {
@@ -387,10 +793,42 @@ void loop()
       nContar = 0;
       n = 0;
       acionaPorta(numeroInt, requisicao, acao);
-      botao1.estado = status_porta(numeroInt, botao1.rele, botao1.estado, acao);
-      botao2.estado = status_porta(numeroInt, botao2.rele, botao2.estado, acao);
-      botao3.estado = status_porta(numeroInt, botao3.rele, botao3.estado, acao);
-      botao4.estado = status_porta(numeroInt, botao4.rele, botao4.estado, acao);
+      if (numeroInt == botao1.rele)
+      {
+        if (acao == "liga")
+        {
+          botao1.estado = true;
+        } else {
+          botao1.estado = false;
+        }
+      }
+      if (numeroInt == botao2.rele)
+      {
+        if (acao == "liga")
+        {
+          botao2.estado = true;
+        } else {
+          botao2.estado = false;
+        }
+      }
+      if (numeroInt == botao3.rele)
+      {
+        if (acao == "liga")
+        {
+          botao3.estado = true;
+        } else {
+          botao3.estado = false;
+        }
+      }
+      if (numeroInt == botao4.rele)
+      {
+        if (acao == "liga")
+        {
+          botao4.estado = true;
+        } else {
+          botao4.estado = false;
+        }
+      }
     }
 
     /*
@@ -399,6 +837,9 @@ void loop()
     if (requisicao == "00000")
     {
       gravaLog(" " + relogio_ntp(1) + " - REINIANDO", logtxt, 1);
+      WiFiClient client = server.available();
+      client.println("HTTP/1.1 200 OK");
+      delay(1000);
       ESP.restart();
     }
     if (requisicao == "00001")
@@ -407,6 +848,27 @@ void loop()
     }
 
     /*
+      SE FOR PRESSIONADO BOTÃO BOOT na placa, TODAS AS CONFIGURAÇÕES DA CENTRAL
+      SERÃO DELETADAS(WIFI, PARAMETROS, ETC). VARIAVEL DO BOTÃO É PIN_AP.
+    */
+    if ( digitalRead(PIN_AP) == LOW || requisicao == "00002" )
+    {
+
+      gravaLog(" " + relogio_ntp(1) + " - Modo AP Ativado ", logtxt, 1);
+      /*
+        Apagando dados de conexão WIFI da central
+      */
+      esp_wifi_restore();
+      Serial.println("\n Apagando configurações WIFI..."); //tenta abrir o portal
+      if (!wifiManager.startConfigPortal(" WIFI_AUT", "12345678") )
+      {
+        gravaLog(" " + relogio_ntp(1) + " - ERRO 0102 - Falha no modo AP", logtxt, 1);
+        ESP.restart();
+      }
+      Serial.println(" Modo config WIFI...");
+
+    }
+    /*
       CALIBRAR SENSOR MQ2 - CHAMADA HTTP EX: HTTP://IP_HOST/?00010
     */
     if (requisicao == "00010")
@@ -414,14 +876,73 @@ void loop()
       gravaLog(" " + relogio_ntp(1) + " - Recalibrando sensor MQ-X", logtxt, 2);
       calibrarSensor();
     }
+    
+    
 
     /*
-      GRAVAR VALOR DE LEITURA DO SENSOR DE GAS NA EEPROM - CHAMADA HTTP EX: HTTP://IP_HOST/?00011
+      APAGAR ARQUIVO DE LOG MANUALMENTE - CHAMADA HTTP EX: HTTP://IP_HOST/?00013
+    */
+    if (requisicao == "00013")
+    {
+      deletarArquivo("/log.txt");
+      criarArquivo("/log.txt");
+    }
+
+    /*
+      APLICAR CONFIGURAÇÕES MINIMAS PARA FUNCIONAMENTO DA CENTRAL - CHAMADA HTTP EX: HTTP://IP_HOST/?00014
+    */
+    if (requisicao == "00014")
+    {
+      openFS();
+      listDir(SPIFFS, "/", 0);
+      deletarArquivo("/param.txt");
+      criarArquivo("/param.txt");
+      //gravaLog(" " + relogio_ntp(1) + " - Configuração minima ", logtxt, 3);
+      gravarArquivo("{\"servidor\":\"" + String(ipHost) + "\",\"int_1\":\"R1\",\"tipo_1\":\"0\",\"sinal_1\":\"pulso\",\"h_i_1\":\"0000\",\"h_o_1\":\"0000\",\"int_2\":\"R2\",\"tipo_2\":\"0\",\"sinal_2\":\"pulso\",\"h_i_2\":\"0000\",\"h_o_2\":\"0000\",\"int_3\":\"R3\",\"tipo_3\":\"0\",\"sinal_3\":\"pulso\",\"h_i_3\":\"0000\",\"h_o_3\":\"0000\",\"int_4\":\"R4\",\"tipo_4\":\"0\",\"sinal_4\":\"pulso\",\"h_i_4\":\"0000\",\"h_o_4\":\"0000\",\"log\":\"sim\",\"nivel\":\"4\",\"v_mq\":\"20\",\"v_mq_fu\":\"50\",\"s_a\":\"123\"}", "param.txt");
+      closeFS();
+    }
+    /*
+      DESLIGAR TODOS AS PORTAS OUTPUT DA CENTRAL - CHAMADA HTTP EX: HTTP://IP_HOST/?00015
+    */
+    if (requisicao == "00015") //
+    {
+      botao1.contador = 11;
+    }
+    /*
+      APLICAR AS CONFIGURAÇÕES APÓS SEREM GRAVADAS NA CENTRAL - CHAMADA HTTP EX: HTTP://IP_HOST/?00016
+    */
+    if (requisicao == "00016") //
+    {
+      cont_ip_banco = 0;
+    }
+    /*
+      FUNÇÃO DE CONTROLE DO ALARME
+      ATIVAR ALARME - CHAMADA HTTP EX: HTTP://IP_HOST/?00117
+      DESATIVAR ALARME - CHAMADA HTTP EX: HTTP://IP_HOST/?00017
+    */
+    if (requisicao == "00018")
+    {
+      relogio_ntp(0);
+    }
+    /*
+       PAUSAR LEITURAS DO SENSOR DE GAS
+    */
+    if (requisicao == "00019") //
+    {
+      gravaLog(" " + relogio_ntp(1) + " - PAUSAR LEITURAS DO SENSOR DE GAS", logtxt, 4);
+      P_LEITURAS_MQ = 1;
+    } else
+    {
+      if (time_mq2.onTimeout(120000))
+      {
+        P_LEITURAS_MQ = 0;
+      }
+    }
+    
+    /*
+    * GRAVA PARAMETROS NO SPIFFS(SISTEMA DE ARQUIVO) DA CENTRAL, ARQUIVO "param.txt"
     */
     String codidoExec = stringUrl.substring(10, 15);
-    /*
-      GRAVA PARAMETROS NO SPIFFS(SISTEMA DE ARQUIVO) DA CENTRAL, ARQUIVO "param.txt"
-    */
     if (codidoExec == "00012")
     {
       openFS();
@@ -439,7 +960,6 @@ void loop()
       {
         senha_ = quebraString("senhaAlarme", stringUrl);
       }
-
       gravarArquivo("{\"servidor\":\"" + quebraString("servidor", stringUrl)
 
                     + "\",\"int_1\":\"" + quebraString("int_1", stringUrl)
@@ -478,89 +998,8 @@ void loop()
     }
 
     /*
-      APAGAR ARQUIVO DE LOG MANUALMENTE - CHAMADA HTTP EX: HTTP://IP_HOST/?00013
-    */
-    if (requisicao == "00013")
-    {
-      deletarArquivo("/log.txt");
-      criarArquivo("/log.txt");
-    }
-
-    /*
-      APLICAR CONFIGURAÇÕES MINIMAS PARA FUNCIONAMENTO DA CENTRAL - CHAMADA HTTP EX: HTTP://IP_HOST/?00014
-    */
-    if (requisicao == "00014")
-    {
-      openFS();
-      listDir(SPIFFS, "/", 0);
-      deletarArquivo("/param.txt");
-      criarArquivo("/param.txt");
-      //gravaLog(" " + relogio_ntp(1) + " - Configuração minima ", logtxt, 3);
-      gravarArquivo("{\"servidor\":\"" + String(ipHost) + "\",\"int_1\":\"R1\",\"tipo_1\":\"0\",\"sinal_1\":\"pulso\",\"h_i_1\":\"0000\",\"h_o_1\":\"0000\",\"int_2\":\"R2\",\"tipo_2\":\"0\",\"sinal_2\":\"pulso\",\"h_i_2\":\"0000\",\"h_o_2\":\"0000\",\"int_3\":\"R3\",\"tipo_3\":\"0\",\"sinal_3\":\"pulso\",\"h_i_3\":\"0000\",\"h_o_3\":\"0000\",\"int_4\":\"R4\",\"tipo_4\":\"0\",\"sinal_4\":\"pulso\",\"h_i_4\":\"0000\",\"h_o_4\":\"0000\",\"log\":\"sim\",\"nivel\":\"4\",\"v_mq\":\"20\",\"v_mq_fu\":\"50\",\"s_a\":\"123\"}", "param.txt");
-      closeFS();
-    }
-    /*
-      DESLIGAR TODOS AS PORTAS OUTPUT DA CENTRAL - CHAMADA HTTP EX: HTTP://IP_HOST/?00015
-    */
-    if (requisicao == "00015") //
-    {
-      botao1.contador = 11;
-    }
-    /*
-      APLICAR AS CONFIGURAÇÕES APÓS SEREM GRAVADAS NA CENTRAL - CHAMADA HTTP EX: HTTP://IP_HOST/?00016
-    */
-    if (requisicao == "00016") //
-    {
-      cont_ip_banco = 0;
-    }    
-    /*
-      FUNÇÃO DE CONTROLE DO ALARME
-      ATIVAR ALARME - CHAMADA HTTP EX: HTTP://IP_HOST/?00117
-      DESATIVAR ALARME - CHAMADA HTTP EX: HTTP://IP_HOST/?00017
-    */
-    if (requisicao == "00117")
-    {
-      b_status_alarme = 1;
-      pisca_led(LED_VERMELHO, true);
-    } else if (requisicao == "00017")
-    {
-      b_status_alarme = 0;
-      alarme.desligado(i_sirene_alarme);
-
-    }
-    //HTTP://IP_HOST/?00001
-    if (requisicao == "00001")
-    {
-      //Resetar configurações WIFI para trocar de rede.
-      esp_wifi_restore();
-      delay(1000);
-      ESP.restart();
-    }
-
-    /* ALARME */
-    alarme.monitoramento(i_sensor_alarme, i_sirene_alarme, b_status_alarme);
-
-    if (requisicao == "00018")
-    {
-      relogio_ntp(0);
-    }
-    /*
-     * PAUSAR LEITURAS DO SENSOR DE GAS
+     * MONTAR PAGINA WEB DA CENTRAL
      */
-    if (requisicao == "00019") //
-    {
-      P_LEITURAS_MQ = 1;
-    }else
-    {
-      if (time_mq2.onTimeout(120000))
-      {
-        P_LEITURAS_MQ = 0;
-      }
-    }
-
-    /*
-       PAGINA WEB
-    */
     String buf = FPSTR(WEB_HEAD);
     buf.replace("{v}", "Central Automação");
     buf += FPSTR(WEB_SCRIPT);
@@ -606,7 +1045,7 @@ void loop()
     buf += "<div class=\"col-sm-2\">";
     int limit_glp = String(LIMITE_MQ2).toInt();
     int glp = GLP.toInt();
-    buf += "<h3><i class=\"fas fa-burn\" style=\"color:#fb0102;\"></i> " + String(GLP) +"/"+String(FUMACA)+ "<sup class=\"units\">ppm</sup></h3>";
+    buf += "<h3><i class=\"fas fa-burn\" style=\"color:#fb0102;\"></i> " + String(GLP) + "/" + String(FUMACA) + "<sup class=\"units\">ppm</sup></h3>";
     if (glp >= limit_glp )
     {
       //buf +="<div class=\"progress-bar bg-success\" data-toggle=\"tooltip\" title=\"Nível recomendado\" style=\"width:"+String(umid)+"%\">Ideal </div>";
@@ -625,10 +1064,10 @@ void loop()
     int fu = FUMACA.toInt();
     buf += "</div>";
     /* FIM PAINEL SENSORES*/
-    
+
     buf += "</div>";
     buf += "<div><hr />";
-    
+
     /*
       BOTÃO 1
     */
@@ -728,30 +1167,30 @@ void loop()
     }
 
     /*
-     *  BOTÃO PARA DESLIGAR TODAS AS PORTAS
-     */
+        BOTÃO PARA DESLIGAR TODAS AS PORTAS
+    */
 
     if (conta_botao > 1)
     {
       buf += "<a href=\"?00015\" title=\"Desligar\"><button type=\"button\"  class=\"btn btn-danger\">Desli. Tudo</button></a>";
     }
-    
+
     /*
-       BOTÃO_ALARME 
+       BOTÃO_ALARME
     */
-    if (b_status_alarme == 0) {
-      buf += " <td> <a href=\"?00117\" title=\"Desligar\"> <button type=\"button\" class=\"btn btn-success\">Ligar Alarme</button> </a> </td>";
-    } else {
-      buf += "<td> <div class=\"accordion\" id=\"accordionExample\"> <button class=\"btn btn-danger\" type=\"button\" data-toggle=\"collapse\" data-target=\"#collapseTwo\" aria-expanded=\"false\" aria-controls=\"collapseTwo\"> Desli. Alarme </button></td> <div id=\"collapseTwo\" class=\"collapse\" aria-labelledby=\"headingTwo\" data-parent=\"#accordionExample\"> <form name=\"calcform\" method=\"post\" action=\"\"> <fieldset> <input type=\"password\" name=\"visor\" id=\"visor\" /> <table id=\"calc\"> <tr> <td> <input type=\"button\" name=\"num1\" class=\"num\" value=\"1\" onclick=\"calcNum(1)\" /> </td> <td> <input type=\"button\" name=\"num2\" class=\"num\" value=\"2\" onclick=\"calcNum(2)\" /> </td> <td> <input type=\"button\" name=\"num3\" class=\"num\" value=\"3\" onclick=\"calcNum(3)\" /> </td> </tr> <tr> <td> <input type=\"button\" name=\"num4\" class=\"num\" value=\"4\" onclick=\"calcNum(4)\" /> </td> <td> <input type=\"button\" name=\"num5\" class=\"num\" value=\"5\" onclick=\"calcNum(5)\" /> </td> <td> <input type=\"button\" name=\"num6\" class=\"num\" value=\"6\" onclick=\"calcNum(6)\" /> </td> </tr> <tr> <td> <input type=\"button\" name=\"num7\" class=\"num\" value=\"7\" onclick=\"calcNum(7)\" /> </td> <td> <input type=\"button\" name=\"num8\" class=\"num\" value=\"8\" onclick=\"calcNum(8)\" /> </td> <td> <input type=\"button\" name=\"num9\" class=\"num\" value=\"9\" onclick=\"calcNum(9)\" /> </td> </tr> <tr> <td> <input type=\"button\" name=\"limpar\" class=\"num\" value=\"X\" onclick=\"calcLimpar()\" /> </td> <td> <input type=\"button\" name=\"num0\" class=\"num\" value=\"0\" onclick=\"calcNum(0)\" /> </td> <td> <input type=\"button\" name=\"igual\" class=\"num\" value=\"=\" onclick=\"calcParse('resultado')\" /> </td> </tr></table> </fieldset> </form> </div> </div> </td>";
-    }
+    /*     if (b_status_alarme == 0) {
+          buf += " <td> <a href=\"?00117\" title=\"Desligar\"> <button type=\"button\" class=\"btn btn-success\">Ligar Alarme</button> </a> </td>";
+        } else {
+          buf += "<td> <div class=\"accordion\" id=\"accordionExample\"> <button class=\"btn btn-danger\" type=\"button\" data-toggle=\"collapse\" data-target=\"#collapseTwo\" aria-expanded=\"false\" aria-controls=\"collapseTwo\"> Desli. Alarme </button></td> <div id=\"collapseTwo\" class=\"collapse\" aria-labelledby=\"headingTwo\" data-parent=\"#accordionExample\"> <form name=\"calcform\" method=\"post\" action=\"\"> <fieldset> <input type=\"password\" name=\"visor\" id=\"visor\" /> <table id=\"calc\"> <tr> <td> <input type=\"button\" name=\"num1\" class=\"num\" value=\"1\" onclick=\"calcNum(1)\" /> </td> <td> <input type=\"button\" name=\"num2\" class=\"num\" value=\"2\" onclick=\"calcNum(2)\" /> </td> <td> <input type=\"button\" name=\"num3\" class=\"num\" value=\"3\" onclick=\"calcNum(3)\" /> </td> </tr> <tr> <td> <input type=\"button\" name=\"num4\" class=\"num\" value=\"4\" onclick=\"calcNum(4)\" /> </td> <td> <input type=\"button\" name=\"num5\" class=\"num\" value=\"5\" onclick=\"calcNum(5)\" /> </td> <td> <input type=\"button\" name=\"num6\" class=\"num\" value=\"6\" onclick=\"calcNum(6)\" /> </td> </tr> <tr> <td> <input type=\"button\" name=\"num7\" class=\"num\" value=\"7\" onclick=\"calcNum(7)\" /> </td> <td> <input type=\"button\" name=\"num8\" class=\"num\" value=\"8\" onclick=\"calcNum(8)\" /> </td> <td> <input type=\"button\" name=\"num9\" class=\"num\" value=\"9\" onclick=\"calcNum(9)\" /> </td> </tr> <tr> <td> <input type=\"button\" name=\"limpar\" class=\"num\" value=\"X\" onclick=\"calcLimpar()\" /> </td> <td> <input type=\"button\" name=\"num0\" class=\"num\" value=\"0\" onclick=\"calcNum(0)\" /> </td> <td> <input type=\"button\" name=\"igual\" class=\"num\" value=\"=\" onclick=\"calcParse('resultado')\" /> </td> </tr></table> </fieldset> </form> </div> </div> </td>";
+        } */
     buf += "</p>";
     buf += "</div></div>";
     /*
-     * 
-     */
-    
+
+    */
+
     /*
-     * TELA DE CONFIGURAÇÕES
+       TELA DE CONFIGURAÇÕES
     */
     buf += "<div class=\"tab-pane fade\" id=\"pills-profile\" role=\"tabpanel\" aria-labelledby=\"pills-profile-tab\">";
     buf += "<form class=\"form-group\" action=\"?00012\">";
@@ -764,31 +1203,41 @@ void loop()
     buf +=  "       <strong>Servidor</strong><input maxlength=\"15\" style=\"width:130px\" type=\"text\"   name=\"servidor\" value=\"" + serv + "\">";
     buf +=  "   </div>";
     buf +=  "   <div class=\"col-sm-2\">";
-    buf +=  "       <input style=\"border:0px;width:80px\" type=\"time\" value=\"" + relogio_ntp(3) + "\" disabled><a href='?00018' title='Atualizar data e hora da central'>" + refresh + "</a>";
+    buf +=  "       <input style=\"border:0px;width:80px\" type=\"time\" value=\"" + relogio_ntp(4) + "\" disabled><a href='?00018' title='Atualizar data e hora da central'>" + refresh + "</a>";
     buf +=  "   </div>";
     buf +=  " </div>";
     buf +=  "<hr>";
-    
-    buf += gpio_html (1, botao1.entrada, botao1.nomeInter, botao1.tipo, botao1.modelo, botao1.agenda_in, botao1.agenda_out);
-    buf += gpio_html (2, botao2.entrada, botao2.nomeInter, botao2.tipo, botao2.modelo, botao2.agenda_in, botao2.agenda_out);
-    buf += gpio_html (3, botao3.entrada, botao3.nomeInter, botao3.tipo, botao3.modelo, botao3.agenda_in, botao3.agenda_out);
-    buf += gpio_html (4, botao4.entrada, botao4.nomeInter, botao4.tipo, botao4.modelo, botao4.agenda_in, botao4.agenda_out);
+
+    buf += gpio_html (1, botao1.entrada, botao1.rele, botao1.nomeInter, botao1.tipo, botao1.modelo, botao1.agenda_in, botao1.agenda_out);
+    buf += gpio_html (2, botao2.entrada, botao2.rele, botao2.nomeInter, botao2.tipo, botao2.modelo, botao2.agenda_in, botao2.agenda_out);
+    buf += gpio_html (3, botao3.entrada, botao3.rele, botao3.nomeInter, botao3.tipo, botao3.modelo, botao3.agenda_in, botao3.agenda_out);
+    buf += gpio_html (4, botao4.entrada, botao4.rele, botao4.nomeInter, botao4.tipo, botao4.modelo, botao4.agenda_in, botao4.agenda_out);
     buf +=  "<hr>";
 
     buf +=  " <div class=\"row\">";
-    buf +=  "   <div class=\"col-sm-4\">";
+    buf +=  "   <div class=\"col-sm-8\">";
     buf += "        <strong>LOG</strong> <select class='' style='width:100%x' name='log'> <option value='sim' " + selectedHTNL(conslog, "sim ") + "> Sim</option> <option value='nao' " + selectedHTNL(conslog, "nao ") + ">Não</option> </select> <select class='' style='width:100%x' name='nivel' title='Nível do log'> <option value='1' " + selectedHTNL(nivelLog, "1") + ">1</option> <option value='2' " + selectedHTNL(nivelLog, "2") + ">2</option> <option value='3' " + selectedHTNL(nivelLog, "3") + ">3</option> <option value='4' " + selectedHTNL(nivelLog, "4") + ">4</option> </select>";
     buf += "        <a href='?00013' title='APAGAR TODOS OS REGISTROS!'><button type='button' class='btn btn-danger btn-sm'> X </button></a>";
     buf += "        <button class=\"btn btn-primary btn-sm\" type=\"button\" data-toggle=\"collapse\" data-target=\"#collapseExample\" aria-expanded=\"false\" aria-controls=\"collapseExample\">Log</button></td>";
+    buf += "        <button class=\"btn btn-primary btn-sm\" type=\"button\" data-toggle=\"collapse\" data-target=\"#collapseExample2\" aria-expanded=\"false\" aria-controls=\"collapseExample2\">Comandos</button></td>";
     buf += "    </div>";
+    buf += " <div class='collapse' id='collapseExample'> <div class='card card-body'> ";
+    buf +=    lerLog();
+    buf += " </div> </div>";
+    buf += " <div class='collapse' id='collapseExample2'> <div class='card card-body'> ";
+    buf +=    comandos_txt;
+    buf += " </div> </div>";
     buf += "  </div>";
+    buf += "  <hr>";
+    /* 
     buf +=  " <div class=\"row\">";
     buf +=  "   <div class=\"col-sm-6\">";
     buf += "        <strong>Senha</strong></td><td><input maxlength=\"10\" style=\"width:80px\" type=\"password\"   name=\"senhaAlarme\" value=\"\">";
     buf += "    </div>";
-    buf += "  </div>";
+    buf += "  </div>"; 
+    */
     buf +=  " <div class=\"row\">";
-    buf +=  "   <div class=\"col-sm-8\">";
+    buf +=  "   <div class=\"col-sm-6\">";
     buf += "        <strong>MQ2 </strong>";
     buf += "        <sup>GAS </sup><input maxlength=\"3\" style=\"width:35px\" type=\"text\" name=\"v_mq\" value=\"" + String(LIMITE_MQ2) + "\">";
     buf += "        <sup>Fuma&ccedil;a </sup><input maxlength=\"3\" style=\"width:35px\" type=\"text\" name=\"v_mq_fu\" value=\"" + String(LIMITE_MQ2_FU) + "\">";
@@ -797,22 +1246,19 @@ void loop()
     buf += "         </a>";
     buf += "    </div>";
     buf += "  </div>";
+    buf += "  <hr>";
     buf +=  " <div class=\"row\">";
-    buf +=  "   <div class=\"col-sm-2\">";
-    buf += "         <input class=\"btn btn-info\" type=\"submit\" value=\"Salvar\">";
+    buf +=  "   <div class=\"col-sm-4\">";
+    buf += "         <input class=\"btn btn-info btn-sm\" type=\"submit\" value=\"Salvar\">";
     buf += "         <a href='?00000' title=''>";
-    buf += "         <button type='button' class='btn btn-danger btn-sm'> Reiniciar Central </button>";
+    buf += "         <button type='button' class='btn btn-danger btn-sm'> Reiniciar</button>";
     buf += "         </a>";
     buf += "    </div>";
     buf += "  </div>";
     buf += "</div>";
-
     buf += "</form> ";
-
-    buf += "<div class='collapse' id='collapseExample'> <div class='card card-body'> ";
-    buf += lerArquivo();
-    buf += "</div> </div> </div> </div> ";
-    buf += "<a href=\"http://" + ipLocalString + "\"><p style=\"text-align:center\"><p style=\"text-align:right\"> <span class=\"badge badge-pill badge-primary\">IP: " + ipLocalString + " " + VERSAO + "</span></span></a></p>";
+    buf += "</div> </div>";
+    buf += "<a href=\"http://" + ipLocalString + "\"><p style=\"text-align:center\"><p style=\"text-align:right\"> <span class=\"badge badge-pill badge-primary\">SSID: " + WiFi.SSID() + " " + VERSAO + "</span></span></a></p>";
     buf += "<script src=\"https://code.jquery.com/jquery-3.3.1.slim.min.js\" integrity=\"sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo\" crossorigin=\"anonymous\"></script>";
     buf += "<script src=\"https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js\" integrity=\"sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy\" crossorigin=\"anonymous\"></script>";
     buf += "</body></html>";
@@ -823,11 +1269,10 @@ void loop()
     client.flush();
     client.stop();
   }
-  /*
+
+/*
      ROTINA DO SENSOR MQ-2
   */
-
-  //---------------------------------------
   if (millis() >= timeMq2 + timeMq2Param)
   {
     sensorMq2 = analogRead(PIN_MQ2);
@@ -842,25 +1287,24 @@ void loop()
 
     String CO = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, GAS_CO)  );
     if (CO == "2147483647") CO = "0";
-
     contarParaGravar1++;
     gravaLog(" " + relogio_ntp(1) + " - MQ2 A: " + String(sensorMq2) + " GLP:" + GLP + " " + "CO:" + CO + " " + "FU:" + FUMACA + " " + "L:" + contarParaGravar1, logtxt, 4);
     timeMq2 = millis();
-    //buff = "sensor=mq-2&valor=mq-2;" + String(GLP) + ";&central=" + String(ipLocalString) + "&p=" + String(PIN_MQ2);
     if ((GLP.toInt() >= String(LIMITE_MQ2).toInt()) || (FUMACA.toInt() > String(LIMITE_MQ2_FU).toInt()))
     {
-      if(P_LEITURAS_MQ == 0)
+      if (P_LEITURAS_MQ == 0)
       {
-        //digitalWrite(BUZZER, true);
         sirene(true);
         digitalWrite(LED_VERMELHO, true);
       }
-
     } else
     {
       digitalWrite(LED_VERMELHO, false);
       sirene(false);
-      digitalWrite(BUZZER, false);
+    }
+    if (P_LEITURAS_MQ == 1)
+    {
+      sirene(false);
     }
     //GRAVA NO BANCO O VALOR LIDO APOS X LEITURAS
     if ((contarParaGravar1 == 20) || (GLP.toInt() >= String(LIMITE_MQ2).toInt()) || (FUMACA.toInt() > String(LIMITE_MQ2_FU).toInt()) )
@@ -868,39 +1312,39 @@ void loop()
       buff = "sensor=mq-2&valor=mq-2;" + String(GLP) + ";&central=" + String(ipLocalString) + "&p=" + String(PIN_MQ2);
       gravarBanco (buff);
       contarParaGravar1 = 0;
+      buff = "";
     }
   }
 
   /*
      ROTINA DO SENSOR DHT11
   */
-//  umidade = dht.readHumidity();
-//  if(umidade >= 100) umidade = 0;
-//  temperatura = dht.readTemperature();
-//  if(temperatura >= 100) temperatura = 0;
-  
-  if (millis() >= timeDht + (240000)) 
+  if (millis() >= timeDht + (240000) || ler_dht == true)
   {
     umidade = dht.readHumidity();
-    if(umidade >= 100) umidade = 0;
     temperatura = dht.readTemperature();
-    if(temperatura >= 100) temperatura = 0;
-      digitalWrite(LED_AZUL, HIGH);
-      delay(100);
-      digitalWrite(LED_AZUL, LOW);
-      t++;
-      if ((temperatura == int(temperatura)) && (umidade == int(umidade))  )
-      {
-        timeDht = millis();
-        buff = "sensor=dht11&valor=dht11;" + String(temperatura) + ";" + String(umidade) + ";&central=" + String(ipLocalString) + "&p=" + String(DHTPIN);
-        gravarBanco(buff);
-        t = 0;
-      } else {
-        gravaLog(" " + relogio_ntp(1) + " - ERRO 0109 - Sensor DHT erro de leitura", logtxt, 1);
-        t = 0;
-        temperatura = 0;
-        umidade = 0;
-        timeDht = millis();
-      }
+    if (umidade >= 100) umidade = 0;
+    if (temperatura >= 100) temperatura = 0;
+    digitalWrite(LED_AZUL, HIGH);
+    delay(70);
+    digitalWrite(LED_AZUL, LOW);
+    delay(70);
+    digitalWrite(LED_AZUL, HIGH);
+    delay(70);
+    digitalWrite(LED_AZUL, LOW);
+    ler_dht = false;
+    gravaLog(" " + relogio_ntp(1) + " - Temp = " + String(int(temperatura)) + " Umid = " + String(int(umidade)), logtxt, 1);
+    if ((temperatura == int(temperatura)) && (umidade == int(umidade))  )
+    {
+      timeDht = millis();
+      buff = "sensor=dht11&valor=dht11;" + String(temperatura) + ";" + String(umidade) + ";&central=" + String(ipLocalString) + "&p=" + String(DHTPIN);
+      gravarBanco(buff);
+      buff = "";
+    } else {
+      gravaLog(" " + relogio_ntp(1) + " - ERRO 0109 - Sensor DHT erro de leitura", logtxt, 1);
+      temperatura = 0;
+      umidade = 0;
+      timeDht = millis();
+    }
   }
 }
