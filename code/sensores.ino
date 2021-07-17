@@ -47,7 +47,7 @@ float sensorTemp(int sensor) {
       t_temp = temperatura;
       u_temp = umidade;
     }
-    gravaLog(" " + relogio_ntp(1) + " - T:" + String(int(temperatura)) + " U:" + String(int(umidade)), logtxt, 4);
+    gravaLog(" " + relogio_ntp(1) + " - T:" + temperatura + " U:" + String(int(umidade)), logtxt, 4);
 
     //Verifique se alguma leitura falhou e saia mais cedo (para tentar novamente)
     if (isnan(umidade) || isnan(temperatura)) {
@@ -118,7 +118,7 @@ void sensorMQ() {
       buff = "sensor=mq-2&valor=mq-2;" + String(GLP) + ";&central=" + String(ipLocalString) + "&p=" + String(PIN_MQ2);
       gravarBanco (buff);
       contarParaGravar1 = 0;
-      buff = "";
+      buff.remove(0);
     }
   }
 }

@@ -4,13 +4,12 @@
 #include <FS.h>
 #include <NTPClient.h>
 #include <SPIFFS.h>
-#include "soc/rtc_cntl_reg.h"
 #include <Wire.h>
 #include <WiFi.h>
 #include <WiFiUDP.h>
 #include <WiFiManager.h>
 
-String VERSAO = "V09.70 - 14/05/2021";
+String VERSAO = "V10.10 - 02/07/2021";
 
 #define BUZZER                18
 #define PIN_MQ2               34
@@ -26,13 +25,12 @@ String VERSAO = "V09.70 - 14/05/2021";
 #define LED_VERDE             15
 #define LED_VERMELHO          4
 #define LED_AZUL              2
-#define RELE_ILU              5
 #define DS18B20               6
 #define portaServidor         80
 #define PIN_AP                0
 
 struct botao1 {
-  short entrada = 32, rele = 33;
+  const short entrada = 32, rele = 33;
   boolean estado = 0, estado_atual = 0  , estado_antes = 0;
   int contador = 0;
   const char* modelo = "pulso";
@@ -43,7 +41,7 @@ struct botao1 {
   const char* timer;
 } botao1;
 struct botao2 {
-  short entrada = 25, rele = 26;
+  const short entrada = 25, rele = 26;
   boolean estado = 0, estado_atual = 0  , estado_antes = 0;
   int contador = 0;
   const char* modelo = "pulso";
@@ -53,7 +51,7 @@ struct botao2 {
   const char* agenda_out;
 } botao2;
 struct botao3 {
-  short entrada = 14, rele = 27;
+  const short entrada = 14, rele = 27;
   boolean estado = 0, estado_atual = 0  , estado_antes = 0;
   int contador = 0;
   const char* tipo = "0";
@@ -63,7 +61,7 @@ struct botao3 {
   const char* agenda_out;
 } botao3;
 struct botao4 {
-  short entrada = 12, rele = 13;
+  const short entrada = 12, rele = 13;
   boolean estado = 0, estado_atual = 0  , estado_antes = 0;
   int contador = 0;
   const char* tipo = "0";
@@ -74,55 +72,71 @@ struct botao4 {
 } botao4;
 
 String addressMac;
+const String hostname = "ESP32_TESTE";
 long milis = 0;        	// último momento que o LED foi atualizado
-long interval = 500;    // tempo de transição entre estados (milisegundos)
+const char interval = 500;    // tempo de transição entre estados (milisegundos)
 String ipLocalString, buff, URL, linha, GLP, FUMACA, retorno, serv, logtxt = "sim", hora_rtc, buf;
 const char *json, *LIMITE_MQ2 = "99", *LIMITE_MQ2_FU = "99";
 const char *ssid, *password, *servidor, *conslog, *nivelLog = "4";
-int contarParaGravar1 = 0, nContar = 0, cont_ip_banco = 0, P_LEITURAS_MQ = 0, nivel_log = 4, estado_atual = 0, estado_antes = 0, freq = 2000, channel = 0, resolution = 8, n = 0, sensorMq2 = 0, MEM_EEPROM_MQ2 = 20;
+int contarParaGravar1 = 0, nContar = 0, cont_ip_banco = 0, P_LEITURAS_MQ = 0, nivel_log = 4, estado_atual = 0, estado_antes = 0, freq = 2000, channel = 0, resolution = 8, n = 0, sensorMq2 = 0, agenda_ = 0;
 short paramTempo = 60, t = 10, t_temp, u_temp ;
 unsigned long time3, time3Param = 90000, timeDht, timeMq2 , tempo = 0, time_sirene;
-IPAddress ipHost;
-int agenda_ = 0;
-WiFiUDP udp;
-NTPClient ntp(udp, "a.st1.ntp.br", -3 * 3600, 60000);//Cria um objeto "NTP" com as configurações.utilizada no Brasil
-int time_mq2;
 struct tm data;//Cria a estrutura que contem as informacoes da data.
 int hora;
 char data_formatada[64];
 int ATUALIZAR_DH, i_timer_valor;
 String hora_ntp;
-String comandos_txt = "<p><strong>PORTAS ENTRADA SA&Iacute;DA</strong></p><p>entrada 1 = 32, rele 1 = 33<br />entrada 2 = 25, rele 2 = 18<br />entrada 3 = 14, rele 3 = 27<br />entrada 4 = 12, rele 4 = 13</p><p><strong><span class=\"pl-c1\">LED'S PARA MONITORAMENTO</span></strong></p><p><span class=\"pl-c1\">LED_AZUL&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 2<br />LED_VERDE&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;4<br />LED_VERMELHO 16</span></p><p><strong><span class=\"pl-c1\">SENSORES</span></strong></p><p><span class=\"pl-c1\">BUZZER&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 5<br />PIN_MQ2&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;34<br />DHTPIN&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;19</span></p><p><strong>REINCIAR CENTRAL POR COMANDA HTTP</strong>&nbsp;</p><p>HTTP://IP_HOST/?00000</p><p><strong>REINICIAS CONFIGURAÇÕES WIFI</strong>&nbsp;</p><p>HTTP://IP_HOST/?00002</p><p><strong>EXEMPLO NA CHAMADA WEB DESLIGAR LAMPADA</strong>&nbsp;</p><p>HTTP://IP_HOST/?porta=NN&amp;acao=(liga ou&nbsp;desligar)&amp;central=IP_HOST</p><p><strong>CALIBRAR SENSOR MQ2</strong></p><p>HTTP://IP_HOST/?0001</p><p><strong>APAGAR ARQUIVO DE LOG MANUALMENTE</strong></p><p>HTTP://IP_HOST/?00013</p><p><strong>APLICAR CONFIGURA&Ccedil;&Otilde;ES MINIMAS PARA FUNCIONAMENTO DA CENTRAL</strong></p><p>HTTP://IP_HOST/?00014</p><p><strong>DESLIGAR TODOS AS PORTAS OUTPUT DA CENTRAL</strong></p><p>HTTP://IP_HOST/?00015</p><p><strong>APLICAR AS CONFIGURA&Ccedil;&Otilde;ES AP&Oacute;S SEREM GRAVADAS NA CENTRAL</strong>&nbsp;</p><p>HTTP://IP_HOST/?00016</p>";
+//const String comandos_txt = "<p><strong>PORTAS ENTRADA SA&Iacute;DA</strong></p><p>entrada 1 = 32, rele 1 = 33<br />entrada 2 = 25, rele 2 = 18<br />entrada 3 = 14, rele 3 = 27<br />entrada 4 = 12, rele 4 = 13</p><p><strong><span class=\"pl-c1\">LED'S PARA MONITORAMENTO</span></strong></p><p><span class=\"pl-c1\">LED_AZUL&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 2<br />LED_VERDE&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;4<br />LED_VERMELHO 16</span></p><p><strong><span class=\"pl-c1\">SENSORES</span></strong></p><p><span class=\"pl-c1\">BUZZER&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 5<br />PIN_MQ2&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;34<br />DHTPIN&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;19</span></p><p><strong>REINCIAR CENTRAL POR COMANDA HTTP</strong>&nbsp;</p><p>HTTP://IP_HOST/?00000</p><p><strong>REINICIAS CONFIGURAÇÕES WIFI</strong>&nbsp;</p><p>HTTP://IP_HOST/?00002</p><p><strong>EXEMPLO NA CHAMADA WEB DESLIGAR LAMPADA</strong>&nbsp;</p><p>HTTP://IP_HOST/?porta=NN&amp;acao=(liga ou&nbsp;desligar)&amp;central=IP_HOST</p><p><strong>CALIBRAR SENSOR MQ2</strong></p><p>HTTP://IP_HOST/?0001</p><p><strong>APAGAR ARQUIVO DE LOG MANUALMENTE</strong></p><p>HTTP://IP_HOST/?00013</p><p><strong>APLICAR CONFIGURA&Ccedil;&Otilde;ES MINIMAS PARA FUNCIONAMENTO DA CENTRAL</strong></p><p>HTTP://IP_HOST/?00014</p><p><strong>DESLIGAR TODOS AS PORTAS OUTPUT DA CENTRAL</strong></p><p>HTTP://IP_HOST/?00015</p><p><strong>APLICAR AS CONFIGURA&Ccedil;&Otilde;ES AP&Oacute;S SEREM GRAVADAS NA CENTRAL</strong>&nbsp;</p><p>HTTP://IP_HOST/?00016</p>";
 boolean estado_inter, cont_timer, ler_dht = true;
-int sistema_solar = 0;
+const int sistema_solar = 0;
 
-float corrente_s1 = 0.00, tensao_s1 = 0.00, corrente_s2 = 0.00, tensao_s2 = 0.00, corrente_s3 = 0.00, tensao_s3 = 0.00;
+//float corrente_s1 = 0.00, tensao_s1 = 0.00, corrente_s2 = 0.00, tensao_s2 = 0.00, corrente_s3 = 0.00, tensao_s3 = 0.00;
 float LPGCurve[3]   =  {2.3, 0.20, -0.47};
 float COCurve[3]    =  {2.3, 0.72, -0.34};
 float SmokeCurve[3] =  {2.3, 0.53, -0.44};
 float Ro = 10;
 
+IPAddress ipHost;
+
+WiFiUDP udp;
+
+NTPClient ntp(udp, "a.st1.ntp.br", -3 * 3600, 60000);//Cria um objeto "NTP" com as configurações.utilizada no Brasil
+
 DHT dht(DHTPIN, DHTTYPE);
+
 WiFiServer server(80);
 
 void setup() {
-  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
+  //setCpuFrequencyMhz(80);
   Serial.begin(115200);
-
+  delay(1000);
+  Serial.println("-----------------------------------------");
+  Serial.print(" SDK: "); Serial.println(ESP.getSdkVersion());
+  Serial.print(" FREQUENCIA DA CPU:        "); Serial.print(getCpuFrequencyMhz()); Serial.println("MHz");
+  Serial.print(" APB FREQ:                 "); Serial.print(getApbFrequency() / 1000000.0, 1); Serial.println("MHz");
+  Serial.print(" MEMORIA FLASH:            "); Serial.print(ESP.getFlashChipSize() / (1024.0 * 1024), 2); Serial.println("MB");
+  Serial.print(" MEMORIA FLASH VELOCIDADE: "); Serial.print(ESP.getFlashChipSpeed()/ 1000000.0, 1); Serial.println("MHz");
+  Serial.print(" MEMORIA RAM:              "); Serial.print(ESP.getHeapSize() / 1024.0, 2); Serial.println("KB");
+  Serial.print(" MEMORIA RAM LIVRE:        "); Serial.print(ESP.getFreeHeap() / 1024.0, 2); Serial.println("KB");
+  Serial.print(" MEMORIA RAM ALOCADA:      "); Serial.print(ESP.getMaxAllocHeap() / 1024.0, 2); Serial.println("KB");
+  Serial.print(" TAMANHO DO CODIGO:        "); Serial.print(ESP.getSketchSize() / 1024.0, 2);Serial.println("KB");
+  Serial.print(" MD5 DO SKET:              "); Serial.println(ESP.getSketchMD5());
+  Serial.print(" Chip Mode:                "); Serial.println(ESP.getFlashChipMode());
+  Serial.println("-----------------------------------------");
   //---------------------------------------
   //    CONECTANDO A REDE WIFI
   //---------------------------------------
+ 
   WiFiManager wifiManager;
+  WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);
+  WiFi.setHostname(hostname.c_str()); //define hostname
+  WiFi.getHostname();
   wifiManager.setAPCallback(configModeCallback);
   wifiManager.setSaveConfigCallback(saveConfigCallback);
   if (!wifiManager.autoConnect("AUTOMACAO_ESP32", "")) {
     Serial.println(" FALHA NA CONEXÃO! ");
     ESP.restart();
   }
-
-  server.begin();
-  dht.begin();
-
   pinMode(PIN_AP, INPUT_PULLUP);
   pinMode(botao1.rele, OUTPUT);
   pinMode(botao1.entrada, INPUT_PULLUP);
@@ -147,18 +161,21 @@ void setup() {
   criarArquivo("/param.txt");
   criarArquivo("/log.txt");
 
+  server.begin();
+  dht.begin();
   ntp.begin();
   ntp.forceUpdate();
   relogio_ntp(0);
 
   ipHost = WiFi.localIP();
   addressMac = WiFi.macAddress();
-  Serial.print(" MAC Adress: "+addressMac);
+  Serial.println(" MAC Adress: "+addressMac);
   ipLocalString = String(ipHost[0]) + "." + String(ipHost[1]) + "." + String(ipHost[2]) + "." + String(ipHost[3]);
 
   calibrarSensor();
 
   arduino_ota();
+  
   ArduinoOTA.begin();
 
   retorno = "SERVIDOR_CONECT";
@@ -233,15 +250,12 @@ void loop()
 
     String recebido = leStringSerial();                                                     // Lê toda string recebida
     gravaLog(" " + relogio_ntp(1) + " - Serial: " + recebido, logtxt, 2);
-    digitalWrite(LED_AZUL, HIGH);
-    delay(50);
-    digitalWrite(LED_AZUL, LOW);
-
+    
     /*
        EXEMPLO DE DADOS RECEBIDO NA SERIAL:
        sc_1=1.20&sv_1=12&sc_2=1.30&sv_2=13
     */
-    if (quebraString( "sc_1", recebido))
+/*     if (quebraString( "sc_1", recebido))
     {
       corrente_s1 = quebraString( "sc_1", recebido).toFloat();
     }
@@ -264,33 +278,14 @@ void loop()
     if (quebraString( "sv_3", recebido))
     {
       tensao_s3 = quebraString( "sv_3", recebido).toFloat();
-    }
-  }
-
-  /*
-    ------------------------------------------------------------------------------
-    SE FOR PRESSIONADO BOTÃO PIN_AP, TODAS AS CONFIGURAÇÕES DA CENTRAL
-    SERÃO DELETADAS(WIFI, PARAMETROS, ETC). VARIAVEL DO BOTÃO É PIN_AP.
-    ------------------------------------------------------------------------------
-  */
-  if ( digitalRead(PIN_AP) == LOW )
-  {
-    /*
-       ---------------------------------------
-       Apagando dados de conexão WIFI da central
-       ---------------------------------------
-    */
-    esp_wifi_restore();
-    Serial.println("\n Apagando configurações WIFI..."); //tenta abrir o portal
-    if (!wifiManager.startConfigPortal(" WIFI_AUT", "12345678") )
+    } */
+    if(quebraString( "rede",recebido))
     {
-      gravaLog(" " + relogio_ntp(1) + " - E0102:Falha no modo AP", logtxt, 1);
-      ESP.restart();
+      printWifiData();
     }
-    Serial.println(" Modo config WIFI...");
-
+    recebido.remove(0);
   }
-
+ 
   /*
     ---------------------------------------
      ENTRADA E SAIDA DE GPIO 1
@@ -864,22 +859,18 @@ void loop()
     if ( digitalRead(PIN_AP) == LOW || requisicao == "00002" )
     {
 
-      gravaLog(" " + relogio_ntp(1) + " - Modo AP Ativado ", logtxt, 1);
       /*
         ------------------------------------------------------------------------------
         Apagando dados de conexão WIFI da central
         ------------------------------------------------------------------------------
       */
       esp_wifi_restore();
-      //Serial.println("\n Apagando configurações WIFI..."); //tenta abrir o portal
       gravaLog(" " + relogio_ntp(1) + " - Apagando config WIFI", logtxt, 1);
       if (!wifiManager.startConfigPortal(" WIFI_AUT", "12345678") )
       {
-        gravaLog(" " + relogio_ntp(1) + " - E0102:Falha no modo AP", logtxt, 1);
+        gravaLog(" " + relogio_ntp(1) + " - E0102: Modo AP", logtxt, 1);
         ESP.restart();
       }
-      Serial.println(" Modo config WIFI...");
-
     }
     /*
       ------------------------------------------------------------------------------
@@ -902,6 +893,7 @@ void loop()
     {
       deletarArquivo("/log.txt");
       criarArquivo("/log.txt");
+      gravaLog(" " + relogio_ntp(1) + " - Apagando log...", logtxt, 2);
     }
     /*
       ------------------------------------------------------------------------------
@@ -964,6 +956,7 @@ void loop()
       String valor_hora_fim = s_hora + ":" + String(i_minutos);
       P_LEITURAS_MQ =1;
     }
+    requisicao.remove(0);
 
     /*
       ------------------------------------------------------------------------------
@@ -1014,6 +1007,8 @@ void loop()
                     + "\"}", "param.txt");
       cont_ip_banco = 0;
       closeFS();
+      stringUrl.remove(0);
+      
     }
 
     /*
@@ -1025,6 +1020,7 @@ void loop()
     client.print(buf);
     client.flush();
     client.stop();
+    buf.remove(0);
     /*
       --------------------------------
       --------------------------------

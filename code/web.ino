@@ -1,13 +1,12 @@
-const char WEB_HEAD[] PROGMEM            = "<!DOCTYPE html><html lan8g=\"pt-br\"><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=no\"/><meta charset=\"utf-8\"><link rel=\"stylesheet\" href=\"https://use.fontawesome.com/releases/v5.7.2/css/all.css\" integrity=\"sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr\" crossorigin=\"anonymous\"><link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css\"><script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js\"></script><title>{v}</title>";
+const char WEB_HEAD[] PROGMEM            = "<!DOCTYPE html><html lan8g=\"pt-br\"><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=no\"/><meta charset=\"utf-8\"><link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css\"><script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js\"></script><title>{v}</title>";
 const char WEB_STYLE[] PROGMEM           = "<style type=\"text/css\">body .form-control{font-size:12px}input,button,select,optgroup,textarea {  margin: 5px;}.table td, .table th {padding:0px;}.th {width:100px;}.shadow-lg {box-shadow: 0px } #collapseExample {font-size:10px}</style>";
-const char WEB_SCRIPT[] PROGMEM          = "<script>function c(l){document.getElementById('s').value=l.innerText||l.textContent;document.getElementById('p').focus();}</script>";
+/*const char WEB_SCRIPT[] PROGMEM          = "<script>function c(l){document.getElementById('s').value=l.innerText||l.textContent;document.getElementById('p').focus();}</script>"; */
 const char WEB_HEAD_END[] PROGMEM        = "</head><body>";
 const char WEB_END[] PROGMEM             = "</div></body></html>";
 const char WEB_DIV_CONTAINER[] PROGMEM   = "<div class=\"container shadow-lg p-3 mb-5 bg-white rounded\">";
 const char WEB_NAV_MENU[] PROGMEM        = "<ul class=\"nav nav-pills mb-3\" id=\"pills-tab\" role=\"tablist\"><li class=\"nav-item\"><a class=\"nav-link active\" id=\"pills-home-tab\" data-toggle=\"pill\" href=\"#pills-home\" role=\"tab\" aria-controls=\"pills-home\" aria-selected=\"true\">Home</a></li> <li class=\"nav-item\"><a class=\"nav-link\" id=\"pills-profile-tab\" data-toggle=\"pill\" href=\"#pills-profile\" role=\"tab\" aria-controls=\"pills-profile\" aria-selected=\"false\">Configuração</a></li></ul>";
 const char WEB_BOTAO_SUCCESS[] PROGMEM   = "<a href=\"?porta=\"{A}\" title=\"Porta:\"{B}\"><button type=\"button\"  class=\"btn btn-success\">\"{C}\"</button></a>";
 const char A_HREF[] PROGMEM              = "  <a href=\"?porta={A}&acao={G}&central={B}\" title=\"Porta:{C} Botão:{D}\"><button type=\"button\"  class=\"{E}\">{F}</button></a>";
-const char refresh[] PROGMEM             = "<img width=\"16px\" src=\"data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTkuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDUxMiA1MTIiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDUxMiA1MTI7IiB4bWw6c3BhY2U9InByZXNlcnZlIiB3aWR0aD0iNTEycHgiIGhlaWdodD0iNTEycHgiPgo8cGF0aCBzdHlsZT0iZmlsbDojMTdBQ0U4OyIgZD0iTTQ0Ni44LDE2Ni44OTljLTQuNzk5LTcuNS0xNC43LTktMjEuODk5LTMuOUwzNzYuMywxOTkuNmMtNiw0LjQ5OS03LjgsMTIuOS0zLjksMTkuNDk5ICBjMTIuMjk5LDIxLDE4LjYsNDMuNSwxOC42LDY2LjkwMWMwLDc0LjM5OS02MC42MDEsMTM1LTEzNSwxMzVzLTEzNS02MC42MDEtMTM1LTEzNWMwLTY5LjMsNTIuNS0xMjYuNjAxLDEyMC0xMzQuMTAxVjE5NiAgYzAsOSw3LjIsMTQuNywxNSwxNWMyLjk5OSwwLDYuMzAxLTAuOTAxLDktMy4wMDFsMTIwLTg5Ljk5OGM4LjEwMS02LDguMTAxLTE4LjAwMSwwLTI0LjAwMUwyNjUsM2MtMi42OTktMi4wOTgtNi0yLjk5OS05LTIuOTk5ICBjLTcuOCwwLTE1LDYuMzAxLTE1LDE1djQ2LjYwMUMxMjMuOTk5LDY5LjEwMSwzMSwxNjYuODk5LDMxLDI4NmMwLDEyNC4yLDEwMC44LDIyNiwyMjUsMjI2czIyNS0xMDEuOCwyMjUtMjI2ICBDNDgxLDI0My45OTksNDY4Ljk5OSwyMDIuODk5LDQ0Ni44LDE2Ni44OTl6Ii8+CjxnPgoJPHBhdGggc3R5bGU9ImZpbGw6IzE2ODlGQzsiIGQ9Ik0yNjUsMjA3Ljk5OWMtMi42OTksMi4xLTYsMy4wMDEtOSwzLjAwMVYwYzIuOTk5LDAsNi4zMDEsMC45MDEsOSwyLjk5OWwxMjAsOTEgICBjOC4xMDEsNiw4LjEwMSwxOC4wMDEsMCwyNC4wMDFMMjY1LDIwNy45OTl6Ii8+Cgk8cGF0aCBzdHlsZT0iZmlsbDojMTY4OUZDOyIgZD0iTTQ4MSwyODZjMCwxMjQuMi0xMDAuOCwyMjYtMjI1LDIyNnYtOTFjNzQuMzk5LDAsMTM1LTYwLjYwMSwxMzUtMTM1ICAgYzAtMjMuNDAxLTYuMzAxLTQ1LjkwMS0xOC42LTY2LjkwMWMtMy45LTYuNTk5LTIuMS0xNSwzLjktMTkuNDk5bDQ4LjYtMzYuNjAxYzcuMi01LjA5OSwxNy4xLTMuNiwyMS44OTksMy45ICAgQzQ2OC45OTksMjAyLjg5OSw0ODEsMjQzLjk5OSw0ODEsMjg2eiIvPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+Cjwvc3ZnPgo=\" />";
 
 String pagina() {
   /*
@@ -17,7 +16,7 @@ String pagina() {
   */
   String buf = FPSTR(WEB_HEAD);
   buf.replace("{v}", "Central Automação");
-  buf += FPSTR(WEB_SCRIPT);
+  //buf += FPSTR(WEB_SCRIPT);
   buf += FPSTR(WEB_STYLE);
   buf += FPSTR(WEB_HEAD_END);
   buf += FPSTR(WEB_DIV_CONTAINER);
@@ -30,7 +29,7 @@ String pagina() {
   */
   buf += "<div class=\"tab-content\" id=\"pills-tabContent\">";
   buf += "<div class=\"tab-pane fade show active\" id=\"pills-home\" role=\"tabpanel\" aria-labelledby=\"pills-home-tab\">";
-
+  buf += "<div style=\"float: right;\"><a href='?00018' title='Atualizar data e hora da central'><input style=\"border:0px;width:150px\" value=\"" + relogio_ntp(1) + "\" disabled>&#8634;</a></div>";
   /*
      --------------------------------
      PAINEL DE SENSORES
@@ -38,50 +37,44 @@ String pagina() {
   */
   buf += "<hr />";
   buf += "<div class=\"row\">";
+  
+  //SENSOR DE TEMPERATURA DHTXX
   buf += "<div class=\"col-sm-2\">";
   int temp = sensorTemp(2);
-  buf += "<h1><i class=\"fas fa-thermometer-half\" style=\"color:#059e8a;\"></i> " + String(temp) + "<sup class=\"units\">&deg;C</sup></h1>";
+  buf += "<h1>&#127777;" + String(temp) + "<sup class=\"units\">&deg;C</sup></h1><sup>DHT11</sup>";
   buf += "</div>";
+
+  //SENSOR DE UMIDADE DHTXX
   buf += "<div class=\"col-sm-2\">";
   int umid = sensorTemp(1);
-  buf += "<h3><i class=\"fas fa-tint\" style=\"color:#00add6;\"></i> " + String(umid) + "<sup class=\"units\">%</sup></h3>";
-  //buf +="<div class=\"progress\">";
+  buf += "<h3>&#128167; " + String(umid) + "<sup class=\"units\">%</sup></h3>";
   if (umid >= 60)
   {
-    //buf +="<div class=\"progress-bar bg-success\" data-toggle=\"tooltip\" title=\"Nível recomendado\" style=\"width:"+String(umid)+"%\">Ideal </div>";
     buf += "<span class=\"badge badge-pill badge-success\" data-toggle=\"tooltip\" title=\"Nível recomendado\"> Recomendado </span>";
   } else if (umid > 31 && umid < 60)
   {
-    //buf +="<div class=\"progress-bar bg-danger\" data-toggle=\"tooltip\" title=\"Perigo, risco respiratório!!!\" style=\"width:"+String(umid)+"%\">Atenção</div>";
     buf += "<span class=\"badge badge-pill badge-warning\"> Cuidado </span>";
   } else if (umid <= 30)
   {
-    //buf +="<div class=\"progress-bar bg-warning\" style=\"width:"+String(umid)+"%\">Cuidado </div>";
     buf += "<span class=\"badge badge-pill badge-danger\"> Perigo </span>";
   }
-  //buf +="</div>";
   buf += "</div>";
   buf += "<div class=\"col-sm-2\">";
   int limit_glp = String(LIMITE_MQ2).toInt();
   int glp = GLP.toInt();
-  buf += "<h3><i class=\"fas fa-burn\" style=\"color:#fb0102;\"></i> " + String(GLP) + "/" + String(FUMACA) + "<sup class=\"units\">ppm</sup></h3>";
+  buf += "<h3>&#128293;" + String(GLP) + "/" + String(FUMACA) + "<sup class=\"units\">ppm</sup></h3>";
   if (glp >= limit_glp )
   {
-    //buf +="<div class=\"progress-bar bg-success\" data-toggle=\"tooltip\" title=\"Nível recomendado\" style=\"width:"+String(umid)+"%\">Ideal </div>";
     buf += "<span class=\"badge badge-pill badge-danger\"> Perigo </span>";
-
   } else if (glp <= (limit_glp / 3))
   {
-    //buf +="<div class=\"progress-bar bg-warning\" style=\"width:"+String(umid)+"%\">Cuidado </div>";
     buf += "<span class=\"badge badge-pill badge-success\"> Recomendado </span>";
   }
   else {
-    //buf +="<div class=\"progress-bar bg-danger\" data-toggle=\"tooltip\" title=\"Perigo, risco respiratório!!!\" style=\"width:"+String(umid)+"%\">Atenção</div>";
     buf += "<span class=\"badge badge-pill badge-warning\"> Cuidado </span>";
   }
   int limit_fu = String(LIMITE_MQ2_FU).toInt();
   int fu = FUMACA.toInt();
-
   
   buf += "</div>";
   buf += "</div>";
@@ -90,51 +83,51 @@ String pagina() {
   buf += "  <div class=\"col-xl-6\">";
   if(sistema_solar == 1)
   {
-    buf +=  "  <table cellpadding=\"1\" cellspacing=\"1\" class=\"table\" id=\"T1\" style=\"min-width:300px;font-size: 10px;\">";
-    buf +=  " <thead style=\"background:#007bff;color:white\">  ";
-    buf +=  " <tr> ";
-    buf +=  " <th rowspan=\"1\" scope=\"col\" style=\"text-align: center;\">  ";
-    buf +=  " <h6>        ";
-    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">Paineis </span></big><i class=\"fas fa-solar-panel\"></i></h6>";
-    buf +=  " </th>";
-    buf +=  " <th rowspan=\"1\" scope=\"col\" style=\"text-align: center;\">";
-    buf +=  " <h6>";
-    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">Bateria </span></big> <i class=\"fas fa-car-battery\"></i></h6>";
-    buf +=  " </th>";
-    buf +=  " <th rowspan=\"1\" scope=\"col\" style=\"text-align: center;\">";
-    buf +=  " <h6>";
-    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">Inversor </span></big> <i class=\"fas fa-charging-station\"></i></h6>";
-    buf +=  " </th>";
-    buf +=  " </tr>";
-    buf +=  " </thead>";
-    buf +=  " <tbody>";
-    buf +=  " <tr>";
-    buf +=  " <td style=\"text-align: center;\">      ";
-    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">" + String(tensao_s1) + " V</span></big></td> ";
-    buf +=  " <td style=\"text-align: center;\">      ";
-    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">" + String(tensao_s2) + " V</span></big></td> ";
-    buf +=  " <td style=\"text-align: center;\">      ";
-    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">" + String(tensao_s3) + " V</span></big></td> ";
-    buf +=  " </tr>";
-    buf +=  " <tr>";
-    buf +=  " <td style=\"text-align: center;\">      ";
-    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">" + String(corrente_s1, 2) + "A</span></big></td> ";
-    buf +=  " <td style=\"text-align: center;\">      ";
-    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">" + String(corrente_s2, 2) + "A</span></big></td>  ";
-    buf +=  " <td style=\"text-align: center;\">      ";
-    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">" + String(corrente_s3, 2) + "A</span></big></td>  ";
-    buf +=  " </tr>";
-    buf +=  " <tr>";
-    buf +=  " <td style=\"text-align: center;\">      ";
-    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">" + String(corrente_s1 * tensao_s1, 2) + "W</span></big></td> ";
-    buf +=  " <td style=\"text-align: center;\">      ";
-    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">" + String(corrente_s2 * tensao_s2, 2) + "W</span></big></td> ";
-    buf +=  "   <td style=\"text-align: center;\">      ";
-    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">" + String(corrente_s3 * tensao_s3, 2) + " W</span></big></td> ";
-    buf +=  " </tr>";
-    buf +=  " <tr><td></td><td></td><td></td></tr>";
-    buf +=  " </tbody>";
-    buf +=  " </table>";
+//    buf +=  "  <table cellpadding=\"1\" cellspacing=\"1\" class=\"table\" id=\"T1\" style=\"min-width:300px;font-size: 10px;\">";
+//    buf +=  " <thead style=\"background:#007bff;color:white\">  ";
+//    buf +=  " <tr> ";
+//    buf +=  " <th rowspan=\"1\" scope=\"col\" style=\"text-align: center;\">  ";
+//    buf +=  " <h6>        ";
+//    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">Paineis </span></big><i class=\"fas fa-solar-panel\"></i></h6>";
+//    buf +=  " </th>";
+//    buf +=  " <th rowspan=\"1\" scope=\"col\" style=\"text-align: center;\">";
+//    buf +=  " <h6>";
+//    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">Bateria </span></big> <i class=\"fas fa-car-battery\"></i></h6>";
+//    buf +=  " </th>";
+//    buf +=  " <th rowspan=\"1\" scope=\"col\" style=\"text-align: center;\">";
+//    buf +=  " <h6>";
+//    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">Inversor </span></big> <i class=\"fas fa-charging-station\"></i></h6>";
+//    buf +=  " </th>";
+//    buf +=  " </tr>";
+//    buf +=  " </thead>";
+//    buf +=  " <tbody>";
+//    buf +=  " <tr>";
+//    buf +=  " <td style=\"text-align: center;\">      ";
+//    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">" + String(tensao_s1) + " V</span></big></td> ";
+//    buf +=  " <td style=\"text-align: center;\">      ";
+//    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">" + String(tensao_s2) + " V</span></big></td> ";
+//    buf +=  " <td style=\"text-align: center;\">      ";
+//    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">" + String(tensao_s3) + " V</span></big></td> ";
+//    buf +=  " </tr>";
+//    buf +=  " <tr>";
+//    buf +=  " <td style=\"text-align: center;\">      ";
+//    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">" + String(corrente_s1, 2) + "A</span></big></td> ";
+//    buf +=  " <td style=\"text-align: center;\">      ";
+//    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">" + String(corrente_s2, 2) + "A</span></big></td>  ";
+//    buf +=  " <td style=\"text-align: center;\">      ";
+//    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">" + String(corrente_s3, 2) + "A</span></big></td>  ";
+//    buf +=  " </tr>";
+//    buf +=  " <tr>";
+//    buf +=  " <td style=\"text-align: center;\">      ";
+//    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">" + String(corrente_s1 * tensao_s1, 2) + "W</span></big></td> ";
+//    buf +=  " <td style=\"text-align: center;\">      ";
+//    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">" + String(corrente_s2 * tensao_s2, 2) + "W</span></big></td> ";
+//    buf +=  "   <td style=\"text-align: center;\">      ";
+//    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">" + String(corrente_s3 * tensao_s3, 2) + " W</span></big></td> ";
+//    buf +=  " </tr>";
+//    buf +=  " <tr><td></td><td></td><td></td></tr>";
+//    buf +=  " </tbody>";
+//    buf +=  " </table>";
   }
   buf += "</div>";
   buf += "<hr />";
@@ -258,7 +251,7 @@ String pagina() {
 
   if (conta_botao > 1)
   {
-    buf += "<a href=\"?00015\" title=\"Desligar\"><button type=\"button\"  class=\"btn btn-danger\">Desli. Tudo</button></a>";
+    buf += "<a href=\"?00015\" title=\"Desligar\"><button type=\"button\"  class=\"btn btn-danger\"> OFF </button></a>";
   }
   buf += "</p>";
   buf += "</div></div>";
@@ -270,17 +263,28 @@ String pagina() {
   */
   buf += "<div class=\"tab-pane fade\" id=\"pills-profile\" role=\"tabpanel\" aria-labelledby=\"pills-profile-tab\">";
   buf += "<form class=\"form-group\" action=\"?00012\">";
-  //buf += "<table border='0px'>";
   buf += "<input type=\"hidden\" name=\"cod\" value=\"00012\">";
   buf +=  "<div class=\"container\">";
   buf +=  "<hr>";
   buf +=  " <div class=\"row\">";
-  buf +=  "   <div class=\"col-sm-4\">";
-  buf +=  "       <strong>Servidor</strong><input maxlength=\"15\" style=\"width:130px\" type=\"text\"   name=\"servidor\" value=\"" + serv + "\">";
-  buf +=  "   </div>";
-  buf +=  "   <div class=\"col-sm-2\">";
-  buf +=  "       <input style=\"border:0px;width:80px\" type=\"time\" value=\"" + relogio_ntp(4) + "\" disabled><a href='?00018' title='Atualizar data e hora da central'>" + refresh + "</a>";
-  buf +=  "   </div>";
+  buf +=  "   <div class=\"col-sm-8\">";
+  buf +=  "<div>";
+  IPAddress mascara = WiFi.subnetMask();
+  String masc_String = String(mascara[0]) + "." + String(mascara[1]) + "." +String(mascara[2]) + "." +String(mascara[3]);
+  IPAddress router_gatway = WiFi.gatewayIP();
+  String ssid = WiFi .SSID();
+  int8_t rssi = WiFi.RSSI();
+  String router_gatway_String = String(router_gatway[0]) + "." + String(router_gatway[1]) + "." +String(router_gatway[2]) + "." +String(router_gatway[3]);
+
+  String html_samp = "<samp><span dir=\"rtl\"><span style=\"font-size:16px;\"><span style=\"font-family:courier new,courier,monospace;\">";
+  buf +=  "    <div>"+html_samp+"<strong>Srv </strong></span></span></span><input maxlength=\"15\" style=\"width:130px\" type=\"text\"   name=\"servidor\" value=\"" + serv + "\"></samp></div>";
+  buf +=  "    <div>"+html_samp+"<strong>MAC </strong> "+addressMac+" - "+masc_String+"</span></span></span></samp></div>";
+  buf +=  "    <div>"+html_samp+"<strong>WIFI </strong>"+router_gatway_String+" "+ssid+" "+String(rssi)+"dBm</span></span></span></samp></div>";
+  buf +=  "    <div>"+html_samp+"<strong>RAM disp.: </strong>"+ESP.getFreeHeap()+"KB</span></span></span></samp></div>"; 
+  Serial.println(ESP.getFreeHeap());
+  
+  buf +=  "  </div>";
+  buf +=  " </div>";
   buf +=  " </div>";
   buf +=  "<hr>";
 
@@ -295,14 +299,14 @@ String pagina() {
   buf += "        <strong>LOG</strong> <select class='' style='width:100%x' name='log'> <option value='sim' " + selectedHTNL(conslog, "sim ") + "> Sim</option> <option value='nao' " + selectedHTNL(conslog, "nao ") + ">Não</option> </select> <select class='' style='width:100%x' name='nivel' title='Nível do log'> <option value='1' " + selectedHTNL(nivelLog, "1") + ">1</option> <option value='2' " + selectedHTNL(nivelLog, "2") + ">2</option> <option value='3' " + selectedHTNL(nivelLog, "3") + ">3</option> <option value='4' " + selectedHTNL(nivelLog, "4") + ">4</option> </select>";
   buf += "        <a href='?00013' title='APAGAR TODOS OS REGISTROS!'><button type='button' class='btn btn-danger btn-sm'> X </button></a>";
   buf += "        <button class=\"btn btn-primary btn-sm\" type=\"button\" data-toggle=\"collapse\" data-target=\"#collapseExample\" aria-expanded=\"false\" aria-controls=\"collapseExample\">Log</button></td>";
-  buf += "        <button class=\"btn btn-primary btn-sm\" type=\"button\" data-toggle=\"collapse\" data-target=\"#collapseExample2\" aria-expanded=\"false\" aria-controls=\"collapseExample2\">Comandos</button></td>";
+  //buf += "        <button class=\"btn btn-primary btn-sm\" type=\"button\" data-toggle=\"collapse\" data-target=\"#collapseExample2\" aria-expanded=\"false\" aria-controls=\"collapseExample2\">Comandos</button></td>";
   buf += "    </div>";
   buf += " <div class='collapse' id='collapseExample'> <div class='card card-body'> ";
   buf +=    lerLog();
   buf += " </div> </div>";
-  buf += " <div class='collapse' id='collapseExample2'> <div class='card card-body'> ";
-  buf +=    comandos_txt;
-  buf += " </div> </div>";
+//  buf += " <div class='collapse' id='collapseExample2'> <div class='card card-body'> ";
+//  buf +=    comandos_txt;
+//  buf += " </div> </div>";
   buf += "  </div>";
   buf += "  <hr>";
   buf +=  " <div class=\"row\">";
@@ -327,7 +331,7 @@ String pagina() {
   buf += "</div>";
   buf += "</form> ";
   buf += "</div> </div>";
-  buf += "<a href=\"http://" + ipLocalString + "\"><p style=\"text-align:center\"><p style=\"text-align:right\"> <span class=\"badge badge-pill badge-primary\">MAC:" + addressMac + " SSID: " + WiFi.SSID() + " " + VERSAO + "</span></span></a></p>";
+  buf += "<a href=\"http://" + ipLocalString + "\"><p style=\"text-align:center\"><p style=\"text-align:right\"> <span class=\"badge badge-pill badge-primary\">" + VERSAO + "</span></span></a></p>";
   buf += "<script src=\"https://code.jquery.com/jquery-3.3.1.slim.min.js\" integrity=\"sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo\" crossorigin=\"anonymous\"></script>";
   buf += "<script src=\"https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js\" integrity=\"sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy\" crossorigin=\"anonymous\"></script>";
   buf += "</body></html>";
@@ -335,4 +339,5 @@ String pagina() {
   //buf += " function calcNum(num) { document.calcform.visor.type = 'password'; document.calcform.visor.value = document.calcform.visor.value + num; } var delay = 1500;  function calcParse(oper) { var valor = document.calcform.visor.value; if (valor == '') { document.calcform.visor.value = ''; } else { var senha = '" + String(s_senha_alarme) + "'; document.calcform.visor.type = 'text'; if (senha == valor) { document.calcform.visor.value = 'Senha Correta       '; window.location.href = \"?00017\"; valor = ''; } else { document.calcform.visor.value = 'Senha Incorreta      '; valor = ''; setTimeout(function() { calcLimpar(); }, delay); } } }  function calcLimpar() { document.calcform.visor.value = ''; } </script> ";
   buf += " </body>  </html> ";
   return buf;
+  buf.remove(0);
 }
