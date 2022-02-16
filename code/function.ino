@@ -1,3 +1,13 @@
+bool analogRead_bt(int bt)
+{
+  int v_bt[N_BOTAO] = {0, 50, 350, 770, 1775};
+  int campo = v_bt[1] - v_bt[0];
+  int valor = analogRead(ENTRADA);
+
+  if (valor > (v_bt[bt] - campo) && valor < (v_bt[bt] + campo))
+  if (valor > (v_bt[0] - campo)) return 1;
+  return 0;
+}
 String leStringSerial() {
   String conteudo = "";
   char caractere;
@@ -43,9 +53,9 @@ String gpio_html (int numero, int botao_entrada, int botao_rele, String botao_no
   buff += "   <div class=\"col-sm-2\">";
   buff += "     <strong>GPIO</strong><sup>" + String(botao_entrada) + "/" + String(botao_rele) + "</sup><input maxlength=\"10\" style=\"width:100px\" type=\"text\"   name=\"int_" + String(numero) + "\" value=\"" + String(botao_nomeInter) + "\">";
   buff += "   </div>";
-//  buff += "   <div class=\"col-sm-2\">";
-//  buff += "      <strong> Sinal </strong><select   style=\"width:80px\"  name=\"tipo_" + String(numero) + "\"><option value=\"0\" " + selectedHTNL(botao_tipo, "0") + "> - </option><option value=\"1\" " + selectedHTNL(botao_tipo, "1") + "> + </option></select>";
-//  buff += "   </div>";
+  //  buff += "   <div class=\"col-sm-2\">";
+  //  buff += "      <strong> Sinal </strong><select   style=\"width:80px\"  name=\"tipo_" + String(numero) + "\"><option value=\"0\" " + selectedHTNL(botao_tipo, "0") + "> - </option><option value=\"1\" " + selectedHTNL(botao_tipo, "1") + "> + </option></select>";
+  //  buff += "   </div>";
   buff += "   <div class=\"col-sm-2\">";
   buff += "      <strong>Tipo </strong><select   style=\"width:100px\" name=\"sinal_" + String(numero) + "\"><option value=\"pulso\" " + selectedHTNL(botao_modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao_modelo, "interruptor") + ">Interrup.</option><option value=\"pir\" " + selectedHTNL(botao_modelo, "pir") + ">Presença</option></select>";
   buff += "   </div>";
@@ -57,10 +67,10 @@ String gpio_html (int numero, int botao_entrada, int botao_rele, String botao_no
   buff += input_text_ + "name=\"hora" + String(numero) + "_out_1\" value=\"" + opcao_agenda(botao_agenda_in, botao_agenda_out, 3) + "\">:";
   buff += input_text_ + "name=\"hora" + String(numero) + "_out_2\" value=\"" + opcao_agenda(botao_agenda_in, botao_agenda_out, 4) + "\">";
   buff += "   </div>";
-//  buff += "   <div class=\"col-sm-2\">";
-//  buff += "     <strong>Timer</strong>";
-//  buff += "     <input maxlength=\"4\" style=\"width:80px\" type=\"text\" name=\"timer_" + String(numero) + "\">";
-//  buff += "   </div>";
+  //  buff += "   <div class=\"col-sm-2\">";
+  //  buff += "     <strong>Timer</strong>";
+  //  buff += "     <input maxlength=\"4\" style=\"width:80px\" type=\"text\" name=\"timer_" + String(numero) + "\">";
+  //  buff += "   </div>";
   buff += "</div>";
   return buff;
   buff.remove(0);
@@ -249,8 +259,8 @@ String quebraString(String txtMsg, String string)
 //    GPIO
 //---------------------------------------
 void acionaPorta(int numeroF, String portaF, String acaoF) {
-  gravaLog(" " + relogio_ntp(1) + " - Comando:" + String(numeroF) + "/" + acaoF, logtxt, 4);
-  String acao_porta,linha;
+  gravaLog(" " + relogio_ntp(1) + " - " + String(numeroF) + "/" + acaoF, logtxt, 4);
+  String acao_porta, linha;
   if (acaoF == "liga") {
     digitalWrite(numeroF, HIGH );
     acao_porta = "&acao=liga&central=";
@@ -293,7 +303,7 @@ void acionaPorta(int numeroF, String portaF, String acaoF) {
     }
   }
   return retorno;
-} */
+  } */
 
 //---------------------------------------
 //    FUNÇÃO PARA GRAVAR NO BANCO
@@ -306,14 +316,14 @@ void gravarBanco (String buffer) {
     WiFi.reconnect();
   }
   //pisca_led(LED_VERMELHO,false);
-  if(servidor != 0){
-    if ((client.connect(servidor, portaServidor) == true)){
-      client.println("GET /web/gravar.php?" + buffer);
+  if (servidor != "0") {
+    if ((client.connect(servidor, portaServidor) == true)) {
+      client.println("GET /automa/gravar.php?" + buffer);
       gravaLog(" " + relogio_ntp(1) + " - BD: " + buffer, logtxt, 4);
       client.println();
       buffer = "";
     } else {
-      gravaLog(" " + relogio_ntp(1) + " - E0104:Servidor Desconectado", logtxt, 1);
+      gravaLog(" " + relogio_ntp(1) + " - E0104:SVR Desc", logtxt, 1);
       buffer = "";
     }
   }
@@ -417,7 +427,7 @@ void formatFS() {
 void criarArquivo(String nomeArquivo) {
   File wFile;
   //Cria o arquivo se ele não existir
-  if (SPIFFS.exists(nomeArquivo)) 
+  if (SPIFFS.exists(nomeArquivo))
   {
     gravaLog(" " + relogio_ntp(1) + " - Arquivo " + nomeArquivo + " existe", logtxt, 1);
   } else {
@@ -606,4 +616,51 @@ void printWifiData() {
   Serial.print(" Memoria disp: ");
   Serial.println(ESP.getFreeHeap());
   Serial.println("******************************");
+}
+void lcd_temp_umid() {
+  lcd.setCursor(0, 0);
+  lcd.print("Temp : ");
+  lcd.print(" ");
+  lcd.setCursor(7, 0);
+  
+  // USANDO SENSOR BMP280
+  lcd.print(sensorTemp(2));
+  lcd.setCursor(12, 0);
+
+  //Mostra o simbolo do grau formado pelo array
+  lcd.write((byte)0);
+
+  //Mostra o simbolo do grau quadrado
+  //lcd.print((char)223);
+
+  lcd.setCursor(0, 1);
+  lcd.print("Umid : ");
+  lcd.print(" ");
+  lcd.setCursor(7, 1);
+  lcd.print(sensorTemp(1), 1);
+  lcd.setCursor(12, 1);
+  lcd.print("%");
+}
+void lcd_mq() {
+  lcd.setCursor(0, 0);
+  lcd.print("GLP : ");
+  lcd.print(" ");
+  lcd.setCursor(7, 0);
+  lcd.print(20, 1);
+  lcd.setCursor(12, 0);
+  lcd.print("ppm");
+
+  //Mostra o simbolo do grau formado pelo array
+  lcd.write((byte)0);
+
+  //Mostra o simbolo do grau quadrado
+  //lcd.print((char)223);
+
+  lcd.setCursor(0, 1);
+  lcd.print("FUMA : ");
+  lcd.print(" ");
+  lcd.setCursor(7, 1);
+  lcd.print(20, 1);
+  lcd.setCursor(12, 1);
+  lcd.print("ppm");
 }

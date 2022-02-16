@@ -4,30 +4,54 @@
 #include <FS.h>
 #include <NTPClient.h>
 #include <SPIFFS.h>
+#include <SPI.h>
 #include <Wire.h>
 #include <WiFi.h>
 #include <WiFiUDP.h>
 #include <WiFiManager.h>
+#include <LiquidCrystal_I2C.h>
+#include <Adafruit_BMP280.h>
+#include "EmonLib.h"                  // USANDO PINO 36 NO SENSOR
 
-String VERSAO = "V10.10 - 02/07/2021";
+//-----------------------------------
+//  BMP280
+//-----------------------------------
+#define BMP_SCK  (13)
+#define BMP_MISO (12)
+#define BMP_MOSI (11)
+#define BMP_CS   (10)
+//-----------------------------------
 
-#define BUZZER                18
-#define PIN_MQ2               34
-#define DHTPIN                19
-#define DHTTYPE               DHT11
+String VERSAO = "10.14 26/09/2021";
+#define PIN_AP                0
+#define BUZZER                18      //SIRENE
+
+#define DHTPIN                19      //PINO ENTRADA SENSOR DHT11
+#define DHTTYPE               DHT11   //TIPO DE SENSOR
+
+#define PIN_MQ2               34      //PINO ENTRADA SENSOR GAS
 #define VRL_VALOR             5       //resistência de carga
 #define RO_FATOR_AR_LIMPO     9.83    //resistência do sensor em ar limpo 9.83 de acordo com o datasheet
 #define ITERACOES_CALIBRACAO  25      //numero de leituras para calibracao
 #define ITERACOES_LEITURA     5       //numero de leituras para analise
-#define GAS_LPG               0
+#define GAS_LPG               0   
 #define GAS_CO                1
 #define SMOKE                 2
+
 #define LED_VERDE             15
 #define LED_VERMELHO          4
 #define LED_AZUL              2
-#define DS18B20               6
+
 #define portaServidor         80
-#define PIN_AP                0
+
+#define N_BOTAO               5
+#define ENTRADA               35
+int bt_select;
+int bt_lido;
+int bt_repete = 3;
+int bt_conta;
+
+#define VOLT_CAL              115.0     //VALOR DE CALIBRAÇÃO (DEVE SER AJUSTADO EM PARALELO COM UM MULTÍMETRO)
 
 struct botao1 {
   const short entrada = 32, rele = 33;
@@ -39,6 +63,11 @@ struct botao1 {
   const char* agenda_in;
   const char* agenda_out;
   const char* timer;
+  int pin_pir_1     = 32;
+  int led_pir_1     = 2;
+  unsigned long tempo_pir_1;
+  bool conta_pir_1  = 0;
+
 } botao1;
 struct botao2 {
   const short entrada = 25, rele = 26;
@@ -73,7 +102,7 @@ struct botao4 {
 
 String addressMac;
 const String hostname = "ESP32_TESTE";
-long milis = 0;        	// último momento que o LED foi atualizado
+long milis = 0, cont_sensor_tensao;        	// último momento que o LED foi atualizado
 const char interval = 500;    // tempo de transição entre estados (milisegundos)
 String ipLocalString, buff, URL, linha, GLP, FUMACA, retorno, serv, logtxt = "sim", hora_rtc, buf;
 const char *json, *LIMITE_MQ2 = "99", *LIMITE_MQ2_FU = "99";
@@ -89,6 +118,7 @@ String hora_ntp;
 //const String comandos_txt = "<p><strong>PORTAS ENTRADA SA&Iacute;DA</strong></p><p>entrada 1 = 32, rele 1 = 33<br />entrada 2 = 25, rele 2 = 18<br />entrada 3 = 14, rele 3 = 27<br />entrada 4 = 12, rele 4 = 13</p><p><strong><span class=\"pl-c1\">LED'S PARA MONITORAMENTO</span></strong></p><p><span class=\"pl-c1\">LED_AZUL&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 2<br />LED_VERDE&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;4<br />LED_VERMELHO 16</span></p><p><strong><span class=\"pl-c1\">SENSORES</span></strong></p><p><span class=\"pl-c1\">BUZZER&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 5<br />PIN_MQ2&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;34<br />DHTPIN&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;19</span></p><p><strong>REINCIAR CENTRAL POR COMANDA HTTP</strong>&nbsp;</p><p>HTTP://IP_HOST/?00000</p><p><strong>REINICIAS CONFIGURAÇÕES WIFI</strong>&nbsp;</p><p>HTTP://IP_HOST/?00002</p><p><strong>EXEMPLO NA CHAMADA WEB DESLIGAR LAMPADA</strong>&nbsp;</p><p>HTTP://IP_HOST/?porta=NN&amp;acao=(liga ou&nbsp;desligar)&amp;central=IP_HOST</p><p><strong>CALIBRAR SENSOR MQ2</strong></p><p>HTTP://IP_HOST/?0001</p><p><strong>APAGAR ARQUIVO DE LOG MANUALMENTE</strong></p><p>HTTP://IP_HOST/?00013</p><p><strong>APLICAR CONFIGURA&Ccedil;&Otilde;ES MINIMAS PARA FUNCIONAMENTO DA CENTRAL</strong></p><p>HTTP://IP_HOST/?00014</p><p><strong>DESLIGAR TODOS AS PORTAS OUTPUT DA CENTRAL</strong></p><p>HTTP://IP_HOST/?00015</p><p><strong>APLICAR AS CONFIGURA&Ccedil;&Otilde;ES AP&Oacute;S SEREM GRAVADAS NA CENTRAL</strong>&nbsp;</p><p>HTTP://IP_HOST/?00016</p>";
 boolean estado_inter, cont_timer, ler_dht = true;
 const int sistema_solar = 0;
+byte grau[8] ={ B00001100,B00010010,B00010010,B00001100,B00000000,B00000000,B00000000,B00000000,};
 
 //float corrente_s1 = 0.00, tensao_s1 = 0.00, corrente_s2 = 0.00, tensao_s2 = 0.00, corrente_s3 = 0.00, tensao_s3 = 0.00;
 float LPGCurve[3]   =  {2.3, 0.20, -0.47};
@@ -96,14 +126,13 @@ float COCurve[3]    =  {2.3, 0.72, -0.34};
 float SmokeCurve[3] =  {2.3, 0.53, -0.44};
 float Ro = 10;
 
+Adafruit_BMP280 bmp;                    //  I2C Adafruit_BMP280
+EnergyMonitor emon1;                    //  CRIA UMA INSTÂNCIA
+LiquidCrystal_I2C lcd(0x27, 16, 2);     //  FUNÇÃO DO TIPO "LiquidCrystal_I2C"
 IPAddress ipHost;
-
 WiFiUDP udp;
-
 NTPClient ntp(udp, "a.st1.ntp.br", -3 * 3600, 60000);//Cria um objeto "NTP" com as configurações.utilizada no Brasil
-
 DHT dht(DHTPIN, DHTTYPE);
-
 WiFiServer server(80);
 
 void setup() {
@@ -113,23 +142,26 @@ void setup() {
   Serial.println("-----------------------------------------");
   Serial.print(" SDK: "); Serial.println(ESP.getSdkVersion());
   Serial.print(" FREQUENCIA DA CPU:        "); Serial.print(getCpuFrequencyMhz()); Serial.println("MHz");
-  Serial.print(" APB FREQ:                 "); Serial.print(getApbFrequency() / 1000000.0, 1); Serial.println("MHz");
   Serial.print(" MEMORIA FLASH:            "); Serial.print(ESP.getFlashChipSize() / (1024.0 * 1024), 2); Serial.println("MB");
-  Serial.print(" MEMORIA FLASH VELOCIDADE: "); Serial.print(ESP.getFlashChipSpeed()/ 1000000.0, 1); Serial.println("MHz");
+  Serial.print(" MEMORIA FLASH VELOCIDADE: "); Serial.print(ESP.getFlashChipSpeed() / 1000000.0, 1); Serial.println("MHz");
   Serial.print(" MEMORIA RAM:              "); Serial.print(ESP.getHeapSize() / 1024.0, 2); Serial.println("KB");
   Serial.print(" MEMORIA RAM LIVRE:        "); Serial.print(ESP.getFreeHeap() / 1024.0, 2); Serial.println("KB");
   Serial.print(" MEMORIA RAM ALOCADA:      "); Serial.print(ESP.getMaxAllocHeap() / 1024.0, 2); Serial.println("KB");
-  Serial.print(" TAMANHO DO CODIGO:        "); Serial.print(ESP.getSketchSize() / 1024.0, 2);Serial.println("KB");
+  Serial.print(" TAMANHO DO CODIGO:        "); Serial.print(ESP.getSketchSize() / 1024.0, 2); Serial.println("KB");
   Serial.print(" MD5 DO SKET:              "); Serial.println(ESP.getSketchMD5());
-  Serial.print(" Chip Mode:                "); Serial.println(ESP.getFlashChipMode());
   Serial.println("-----------------------------------------");
   //---------------------------------------
-  //    CONECTANDO A REDE WIFI
+  //    INICIALIZA O DISPLAY LCD
   //---------------------------------------
- 
+  lcd.init();                                                        // INICIALIZA O DISPLAY LCD
+  lcd.setBacklight(HIGH);
+  lcd.createChar(0, grau);
+  //---------------------------------------
+  //    CONECTANDO A REDE WIFI
+  //---------------------------------------  
   WiFiManager wifiManager;
   WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);
-  WiFi.setHostname(hostname.c_str()); //define hostname
+  WiFi.setHostname(hostname.c_str());                                //define hostname
   WiFi.getHostname();
   wifiManager.setAPCallback(configModeCallback);
   wifiManager.setSaveConfigCallback(saveConfigCallback);
@@ -137,6 +169,9 @@ void setup() {
     Serial.println(" FALHA NA CONEXÃO! ");
     ESP.restart();
   }
+  //---------------------------------------
+  //    INICIALIZANDO PORTAS I\O
+  //---------------------------------------   
   pinMode(PIN_AP, INPUT_PULLUP);
   pinMode(botao1.rele, OUTPUT);
   pinMode(botao1.entrada, INPUT_PULLUP);
@@ -169,13 +204,31 @@ void setup() {
 
   ipHost = WiFi.localIP();
   addressMac = WiFi.macAddress();
-  Serial.println(" MAC Adress: "+addressMac);
+  Serial.println(" MAC Adress: " + addressMac);
   ipLocalString = String(ipHost[0]) + "." + String(ipHost[1]) + "." + String(ipHost[2]) + "." + String(ipHost[3]);
 
+  emon1.voltage(36, VOLT_CAL, 1.7);                    //PASSA PARA A FUNÇÃO OS PARÂMETROS (PINO ANALÓGIO / VALOR DE CALIBRAÇÃO / MUDANÇA DE FASE)
+
+  // ----------------------------------------------  
+  //  Verifica se o sensor BMP280 está conectado.
+  // ----------------------------------------------
+  if (!bmp.begin(0x76)) {
+    Serial.println(F("Could not find a valid BMP280 sensor, check wiring or "
+                      "try a different address!"));
+    while (1) delay(10);
+  }
+  /* Default settings from datasheet. */
+  bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
+                  Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
+                  Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
+                  Adafruit_BMP280::FILTER_X16,      /* Filtering. */
+                  Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
+  // ----------------------------------------------
+  
   calibrarSensor();
 
   arduino_ota();
-  
+
   ArduinoOTA.begin();
 
   retorno = "SERVIDOR_CONECT";
@@ -183,11 +236,19 @@ void setup() {
   ledcSetup(channel, freq, resolution);
   ledcAttachPin(5, channel);
   gravarArquivo("\n *** INICIANDO SISTEMA *** \n \n " + VERSAO, "log.txt");
+
+  lcd.setCursor(0, 0);lcd.print("    BEM VINDO   ");  //SETA A POSIÇÃO EM QUE O CURSOR INCIALIZA(LINHA 1)
+  lcd.setCursor(0, 1);lcd.print(VERSAO);              //SETA A POSIÇÃO EM QUE O CURSOR RECEBE O TEXTO A SER MOSTRADO(LINHA 2)      
+  
   digitalWrite(BUZZER, HIGH);
   delay(500);
   digitalWrite(BUZZER, LOW);
+  delay(2500);
+  lcd.clear();
+  lcd.setCursor(2, 1);lcd.print(ipLocalString);       //SETA A POSIÇÃO EM QUE O CURSOR RECEBE O TEXTO A SER MOSTRADO(LINHA 2)
+  delay(2500);
+  lcd.clear();
 }
-
 void loop()
 {
 
@@ -244,48 +305,84 @@ void loop()
     gravaLog(" " + relogio_ntp(1) + " - BD:" + String(servidor), logtxt, 2);
     doc.clear();
     root.clear();
+  }
+  /*
+   * LEITURA DO TELADO DE 5 BOTOES
+   */
+  for (int i = 0; i < N_BOTAO; i++) {
+    if (analogRead_bt(i)) {
+      bt_lido = i;
+      if(bt_repete == bt_lido){
+        if(bt_lido == 3){
+          bt_conta++;
+          delay(200);
+          bt_repete = bt_lido;
+        }
+        if(bt_conta > 2){
+          bt_conta = 0;
+        }
+      }
     }
+  }
+  lcd_temp_umid();
+//  switch (bt_lido) {
+//  case 0:
+//    lcd.clear();
+//    lcd_temp_umid();
+//    break;
+//  case 1:
+//    
+//    lcd.clear();
+//    lcd_mq();
+//    break;
+//  default:
+//    // comando(s)
+//    break;
+//}
+  /*
+   * LEITURA DE COMANDOS TRANSMITIDO PELA SERIAL
+   */
   WiFiClient client = server.available();
-  if (Serial.available() > 0) {                                                             // Se receber algo pela serial
-
-    String recebido = leStringSerial();                                                     // Lê toda string recebida
+  if (Serial.available() > 0) {                                                             
+    // Lê toda string recebida
+    String recebido = leStringSerial();                                                     
     gravaLog(" " + relogio_ntp(1) + " - Serial: " + recebido, logtxt, 2);
-    
+
     /*
        EXEMPLO DE DADOS RECEBIDO NA SERIAL:
        sc_1=1.20&sv_1=12&sc_2=1.30&sv_2=13
     */
-/*     if (quebraString( "sc_1", recebido))
-    {
-      corrente_s1 = quebraString( "sc_1", recebido).toFloat();
-    }
-    if (quebraString( "sv_1", recebido))
-    {
-      tensao_s1 = quebraString( "sv_1", recebido).toFloat();
-    }
-    if (quebraString( "sc_2", recebido))
-    {
-      corrente_s2 = quebraString( "sc_2", recebido).toFloat();
-    }
-    if (quebraString( "sv_2", recebido))
-    {
-      tensao_s2 = quebraString( "sv_2", recebido).toFloat();
-    }
-    if (quebraString( "sc_3", recebido))
-    {
-      corrente_s3 = quebraString( "sc_3", recebido).toFloat();
-    }
-    if (quebraString( "sv_3", recebido))
-    {
-      tensao_s3 = quebraString( "sv_3", recebido).toFloat();
-    } */
-    if(quebraString( "rede",recebido))
+    /*     if (quebraString( "sc_1", recebido))
+        {
+          corrente_s1 = quebraString( "sc_1", recebido).toFloat();
+        }
+        if (quebraString( "sv_1", recebido))
+        {
+          tensao_s1 = quebraString( "sv_1", recebido).toFloat();
+        }
+        if (quebraString( "sc_2", recebido))
+        {
+          corrente_s2 = quebraString( "sc_2", recebido).toFloat();
+        }
+        if (quebraString( "sv_2", recebido))
+        {
+          tensao_s2 = quebraString( "sv_2", recebido).toFloat();
+        }
+        if (quebraString( "sc_3", recebido))
+        {
+          corrente_s3 = quebraString( "sc_3", recebido).toFloat();
+        }
+        if (quebraString( "sv_3", recebido))
+        {
+          tensao_s3 = quebraString( "sv_3", recebido).toFloat();
+        } */
+    if (quebraString( "rede", recebido) == "1")
     {
       printWifiData();
     }
     recebido.remove(0);
   }
- 
+
   /*
     ---------------------------------------
      ENTRADA E SAIDA DE GPIO 1
@@ -370,52 +467,52 @@ void loop()
       botao1.estado_antes = botao1.estado_atual;
       botao1.contador = 3;
     }
-    /*
-      ---------------------------------------
-      FIM DA FUNÇÃO BOTÃO POR INTERRUPTOR
-      ---------------------------------------
-      ---------------------------------------
-      INICIO DA FUNÇÃO POR PRESENÇA
-      ---------------------------------------
-    */
-    //    boolean PIR_1_STATUS = digitalRead(PIR_1);
-    //    if(PIR_1_STATUS)
-    //    {
-    //      Serial.print(".");
-    //      digitalWrite(LED_AZUL, !digitalRead(LED_AZUL));
-    //      delay(80);
-    //      MV_DETC = true;
-    //      MV_DETC_CONTAR = 0;
-    //    }
-    //    if(MV_DETC == true)
-    //      {
-    //        if (millis() - TEMP_4 > 1000)
-    //        {
-    //          TEMP_4 = millis();
-    //          MV_DETC_CONTAR++;
-    //          Serial.println( " "+String(MV_DETC_CONTAR)+"s");
-    //          if(MV_DETC_CONTAR == PIR_1_INTRVL)
-    //          {
-    //            MV_DETC_CONTAR = 0;
-    //            MV_DETC = false;
-    //            if(botao1.estado_antes == true)
-    //            {
-    //              //Desligar lampada
-    //              botao1.estado_antes = botao1.estado_atual;
-    //              botao1.contador = 3;
-    //            }
-    //          }
-    //        }
-    //     }
-    //  } else if (s_modelo_1 == "pir")
-    //  {
-    //    boolean PIR_1_STATUS = digitalRead(PIR_1);
-    //    if(PIR_1_STATUS)
-    //    {
-    //      Serial.println(" Mov. Detec.");
-    //      digitalWrite(LED_AZUL, !digitalRead(LED_AZUL));
-    //      delay(80);
-    //    }
+  }
+  /*
+    ---------------------------------------
+    FIM DA FUNÇÃO BOTÃO POR INTERRUPTOR
+    ---------------------------------------
+    ---------------------------------------
+    INICIO DA FUNÇÃO POR PRESENÇA
+    ---------------------------------------
+  */
+  if (String(botao1.modelo) == "pir")
+  {
+    bool isDetected = digitalRead(botao1.pin_pir_1);
+
+    //Verifica se o sensor detectou presença, se detectado, altera
+    //  variavel de contagem e liga led do pir
+    if (isDetected) {
+      botao1.tempo_pir_1 = millis();
+      digitalWrite(botao1.led_pir_1, HIGH);
+      if (botao1.conta_pir_1 == 0) {
+        gravaLog(" " + relogio_ntp(1) + " - Prensença Detectada...", logtxt, 4);
+        botao1.conta_pir_1 = 1;
+        if (botao1.estado == false) {
+          botao1.estado = true;
+          acionaPorta(botao1.rele, "", "liga");
+        }
+      }
+    } else {
+      digitalWrite(botao1.led_pir_1, LOW);
+    }
+    //Variavel de contagem
+    if (botao1.conta_pir_1 == 1) {
+      //Se passar X' segundos muda variavel de contagem e desliga o led do pir
+      if ((millis() - botao1.tempo_pir_1) >= 1200000)
+      {
+        botao1.tempo_pir_1 = millis();
+        botao1.conta_pir_1 = 0;
+        int temp_pir = botao1.tempo_pir_1 / 1000;
+        gravaLog(" " + relogio_ntp(1) + " - " + temp_pir + " s", logtxt, 4);
+        digitalWrite(botao1.led_pir_1, LOW);
+        if (botao1.estado == true) {
+          botao1.estado = false;
+          acionaPorta(botao1.rele, "", "desl");
+        }
+      }
+    }
+
     /*
       ---------------------------------------
       FIM DA FUNÇÃO BOTÃO PRESENÇA
@@ -801,7 +898,8 @@ void loop()
         {
           botao1.estado = true;
         } else {
-          botao1.estado = false;
+          botao1.estado       = false;
+          botao1.conta_pir_1  = 0;
         }
       }
       if (numeroInt == botao2.rele)
@@ -857,6 +955,7 @@ void loop()
       ------------------------------------------------------------------------------
     */
     if ( digitalRead(PIN_AP) == LOW || requisicao == "00002" )
+    if (requisicao == "00002")
     {
 
       /*
@@ -920,6 +1019,7 @@ void loop()
     if (requisicao == "00015") //
     {
       botao1.contador = 11;
+      botao1.conta_pir_1  = 0;
     }
     /*
       ------------------------------------------------------------------------------
@@ -952,9 +1052,9 @@ void loop()
       String s_hora_min = relogio_ntp(4);                     //armazenda data e hora 00:00
       String s_hora = String(s_hora_min).substring(0, 2);     //separa o valor da hora
       String s_minuto = String(s_hora_min).substring(3, 5);   //separa o valor do minuto
-      int i_minutos = s_minuto.toInt()+1;                     //adiciona minutos ao valor encontrado em s_minuto e converte em inteiro
+      int i_minutos = s_minuto.toInt() + 1;                   //adiciona minutos ao valor encontrado em s_minuto e converte em inteiro
       String valor_hora_fim = s_hora + ":" + String(i_minutos);
-      P_LEITURAS_MQ =1;
+      P_LEITURAS_MQ = 1;
     }
     requisicao.remove(0);
 
@@ -1008,7 +1108,7 @@ void loop()
       cont_ip_banco = 0;
       closeFS();
       stringUrl.remove(0);
-      
+
     }
 
     /*

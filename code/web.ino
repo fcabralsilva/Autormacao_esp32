@@ -38,10 +38,11 @@ String pagina() {
   buf += "<hr />";
   buf += "<div class=\"row\">";
   
-  //SENSOR DE TEMPERATURA DHTXX
+  //SENSOR DE TEMPERATURA
   buf += "<div class=\"col-sm-2\">";
-  int temp = sensorTemp(2);
-  buf += "<h1>&#127777;" + String(temp) + "<sup class=\"units\">&deg;C</sup></h1><sup>DHT11</sup>";
+  buf += "<h1>&#127777;";
+  buf += sensorTemp(2);
+  buf += "<sup class=\"units\">&deg;C</sup></h1><sup>DHT11</sup>";
   buf += "</div>";
 
   //SENSOR DE UMIDADE DHTXX
@@ -281,7 +282,7 @@ String pagina() {
   buf +=  "    <div>"+html_samp+"<strong>MAC </strong> "+addressMac+" - "+masc_String+"</span></span></span></samp></div>";
   buf +=  "    <div>"+html_samp+"<strong>WIFI </strong>"+router_gatway_String+" "+ssid+" "+String(rssi)+"dBm</span></span></span></samp></div>";
   buf +=  "    <div>"+html_samp+"<strong>RAM disp.: </strong>"+ESP.getFreeHeap()+"KB</span></span></span></samp></div>"; 
-  Serial.println(ESP.getFreeHeap());
+  //Serial.println(ESP.getFreeHeap());
   
   buf +=  "  </div>";
   buf +=  " </div>";
