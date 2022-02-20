@@ -22,12 +22,12 @@
 #define BMP_CS   (10)
 //-----------------------------------
 
-String VERSAO = "10.14 26/09/2021";
+String VERSAO = "10.15 20/02/2022";
 #define PIN_AP                0
 #define BUZZER                18      //SIRENE
 
 #define DHTPIN                19      //PINO ENTRADA SENSOR DHT11
-#define DHTTYPE               DHT11   //TIPO DE SENSOR
+#define DHTTYPE               DHT22   //TIPO DE SENSOR
 
 #define PIN_MQ2               34      //PINO ENTRADA SENSOR GAS
 #define VRL_VALOR             5       //resistência de carga
@@ -143,12 +143,12 @@ void setup() {
   Serial.print(" SDK: "); Serial.println(ESP.getSdkVersion());
   Serial.print(" FREQUENCIA DA CPU:        "); Serial.print(getCpuFrequencyMhz()); Serial.println("MHz");
   Serial.print(" MEMORIA FLASH:            "); Serial.print(ESP.getFlashChipSize() / (1024.0 * 1024), 2); Serial.println("MB");
-  Serial.print(" MEMORIA FLASH VELOCIDADE: "); Serial.print(ESP.getFlashChipSpeed() / 1000000.0, 1); Serial.println("MHz");
+  //Serial.print(" MEMORIA FLASH VELOCIDADE: "); Serial.print(ESP.getFlashChipSpeed() / 1000000.0, 1); Serial.println("MHz");
   Serial.print(" MEMORIA RAM:              "); Serial.print(ESP.getHeapSize() / 1024.0, 2); Serial.println("KB");
   Serial.print(" MEMORIA RAM LIVRE:        "); Serial.print(ESP.getFreeHeap() / 1024.0, 2); Serial.println("KB");
   Serial.print(" MEMORIA RAM ALOCADA:      "); Serial.print(ESP.getMaxAllocHeap() / 1024.0, 2); Serial.println("KB");
   Serial.print(" TAMANHO DO CODIGO:        "); Serial.print(ESP.getSketchSize() / 1024.0, 2); Serial.println("KB");
-  Serial.print(" MD5 DO SKET:              "); Serial.println(ESP.getSketchMD5());
+  //Serial.print(" MD5 DO SKET:              "); Serial.println(ESP.getSketchMD5());
   Serial.println("-----------------------------------------");
   //---------------------------------------
   //    INICIALIZA O DISPLAY LCD
@@ -215,7 +215,7 @@ void setup() {
   if (!bmp.begin(0x76)) {
     Serial.println(F("Could not find a valid BMP280 sensor, check wiring or "
                       "try a different address!"));
-    while (1) delay(10);
+    //while (1) delay(10);
   }
   /* Default settings from datasheet. */
   bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
