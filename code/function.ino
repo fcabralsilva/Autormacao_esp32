@@ -1,12 +1,49 @@
-bool analogRead_bt(int bt)
-{
-  int v_bt[N_BOTAO] = {0, 50, 350, 770, 1775};
-  int campo = v_bt[1] - v_bt[0];
-  int valor = analogRead(ENTRADA);
+int capturaIr() {
+  /*
+   *  #include <IRremote.h> //INCLUSÃO DE BIBLIOTECA
 
-  if (valor > (v_bt[bt] - campo) && valor < (v_bt[bt] + campo))
-  if (valor > (v_bt[0] - campo)) return 1;
-  return 0;
+      int RECV_PIN = 23; //PINO DIGITAL UTILIZADO PELO FOTORRECEPTOR KY-022
+      
+      IRrecv irrecv(RECV_PIN); //PASSA O PARÂMETRO PARA A FUNÇÃO irrecv
+      
+      decode_results results; //VARIÁVEL QUE ARMAZENA OS RESULTADOS (SINAL IR RECEBIDO)
+      void setup() 
+      {
+       irrecv.enableIRIn(); //INICIALIZA A RECEPÇÃO DE SINAIS IR}
+       }
+
+   */
+  int valorLido = 0;
+  if (irrecv.decode(&results))
+  {
+//    Serial.print("Código HEX: "); //IMPRIME O TEXTO NO MONITOR SERIAL
+//    Serial.println(results.value, HEX); //IMPRIME NO MONITOR SERIAL O CÓDIGO IR EM FORMATO HEXADECIMAL
+//    Serial.print("Código DEC: "); //IMPRIME O TEXTO NO MONITOR SERIAL
+//    Serial.println(results.value); //IMPRIME NO MONITOR SERIAL O CÓDIGO IR EM FORMATO DECIMAL
+    //Serial.println(""); //QUEBRA DE LINHA NA SERIAL
+    valorLido = results.value;
+    irrecv.resume(); //AGUARDA O RECEBIMENTO DE UM NOVO SINAL IR
+  }
+  return valorLido;
+}
+
+
+String getMacAddress()
+{
+   uint8_t baseMac[6];
+
+   // Get MAC address for WiFi station
+   esp_read_mac(baseMac, ESP_MAC_WIFI_STA);
+
+   char baseMacChr[18] = {0};
+   sprintf(baseMacChr, "%02X:%02X:%02X:%02X:%02X:%02X", baseMac[0], baseMac[1], baseMac[2], baseMac[3], baseMac[4], baseMac[5]);
+
+   String macAddress = String(baseMacChr);
+
+   Serial.print("MAC Address :: ");
+   Serial.println(macAddress);
+
+   return String(baseMacChr);
 }
 String leStringSerial() {
   String conteudo = "";
@@ -53,9 +90,9 @@ String gpio_html (int numero, int botao_entrada, int botao_rele, String botao_no
   buff += "   <div class=\"col-sm-2\">";
   buff += "     <strong>GPIO</strong><sup>" + String(botao_entrada) + "/" + String(botao_rele) + "</sup><input maxlength=\"10\" style=\"width:100px\" type=\"text\"   name=\"int_" + String(numero) + "\" value=\"" + String(botao_nomeInter) + "\">";
   buff += "   </div>";
-  //  buff += "   <div class=\"col-sm-2\">";
-  //  buff += "      <strong> Sinal </strong><select   style=\"width:80px\"  name=\"tipo_" + String(numero) + "\"><option value=\"0\" " + selectedHTNL(botao_tipo, "0") + "> - </option><option value=\"1\" " + selectedHTNL(botao_tipo, "1") + "> + </option></select>";
-  //  buff += "   </div>";
+//  buff += "   <div class=\"col-sm-2\">";
+//  buff += "      <strong> Sinal </strong><select   style=\"width:80px\"  name=\"tipo_" + String(numero) + "\"><option value=\"0\" " + selectedHTNL(botao_tipo, "0") + "> - </option><option value=\"1\" " + selectedHTNL(botao_tipo, "1") + "> + </option></select>";
+//  buff += "   </div>";
   buff += "   <div class=\"col-sm-2\">";
   buff += "      <strong>Tipo </strong><select   style=\"width:100px\" name=\"sinal_" + String(numero) + "\"><option value=\"pulso\" " + selectedHTNL(botao_modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao_modelo, "interruptor") + ">Interrup.</option><option value=\"pir\" " + selectedHTNL(botao_modelo, "pir") + ">Presença</option></select>";
   buff += "   </div>";
@@ -67,10 +104,10 @@ String gpio_html (int numero, int botao_entrada, int botao_rele, String botao_no
   buff += input_text_ + "name=\"hora" + String(numero) + "_out_1\" value=\"" + opcao_agenda(botao_agenda_in, botao_agenda_out, 3) + "\">:";
   buff += input_text_ + "name=\"hora" + String(numero) + "_out_2\" value=\"" + opcao_agenda(botao_agenda_in, botao_agenda_out, 4) + "\">";
   buff += "   </div>";
-  //  buff += "   <div class=\"col-sm-2\">";
-  //  buff += "     <strong>Timer</strong>";
-  //  buff += "     <input maxlength=\"4\" style=\"width:80px\" type=\"text\" name=\"timer_" + String(numero) + "\">";
-  //  buff += "   </div>";
+//  buff += "   <div class=\"col-sm-2\">";
+//  buff += "     <strong>Timer</strong>";
+//  buff += "     <input maxlength=\"4\" style=\"width:80px\" type=\"text\" name=\"timer_" + String(numero) + "\">";
+//  buff += "   </div>";
   buff += "</div>";
   return buff;
   buff.remove(0);
@@ -112,9 +149,9 @@ boolean agendamento(int gpio, String hora_ini, String hora_fim, String hora_atua
 {
   boolean estado_fim;
   /*
-  	char agenda[2][12] = {"21:04:00", "21:05:00"};
-  	String timer = timeClient.getFormattedTime();
-  	agendamento(led, agenda[0], agenda[1], timer);
+    char agenda[2][12] = {"21:04:00", "21:05:00"};
+    String timer = timeClient.getFormattedTime();
+    agendamento(led, agenda[0], agenda[1], timer);
   */
   if ((hora_atual == hora_ini) && (estado == false) )
   {
@@ -163,6 +200,10 @@ void arduino_ota()
 
 String relogio_ntp(int retorno)
 {
+  char data_formatada[64];
+  int ATUALIZAR_DH;
+  int hora;
+  struct tm data;//Cria a estrutura que contem as informacoes da data.
   if (retorno == 0 || ATUALIZAR_DH == 0)
   {
     ntp.update();
@@ -259,8 +300,8 @@ String quebraString(String txtMsg, String string)
 //    GPIO
 //---------------------------------------
 void acionaPorta(int numeroF, String portaF, String acaoF) {
-  gravaLog(" " + relogio_ntp(1) + " - " + String(numeroF) + "/" + acaoF, logtxt, 4);
-  String acao_porta, linha;
+  gravaLog(" " + relogio_ntp(1) + " - Comando:" + String(numeroF) + "/" + acaoF, logtxt, 4);
+  String acao_porta,linha;
   if (acaoF == "liga") {
     digitalWrite(numeroF, HIGH );
     acao_porta = "&acao=liga&central=";
@@ -303,7 +344,7 @@ void acionaPorta(int numeroF, String portaF, String acaoF) {
     }
   }
   return retorno;
-  } */
+} */
 
 //---------------------------------------
 //    FUNÇÃO PARA GRAVAR NO BANCO
@@ -316,14 +357,14 @@ void gravarBanco (String buffer) {
     WiFi.reconnect();
   }
   //pisca_led(LED_VERMELHO,false);
-  if (servidor != "0") {
-    if ((client.connect(servidor, portaServidor) == true)) {
-      client.println("GET /automa/gravar.php?" + buffer);
+  if(servidor != 0){
+    if ((client.connect(servidor, portaServidor) == true)){
+      client.println("GET /web/gravar.php?" + buffer);
       gravaLog(" " + relogio_ntp(1) + " - BD: " + buffer, logtxt, 4);
       client.println();
       buffer = "";
     } else {
-      gravaLog(" " + relogio_ntp(1) + " - E0104:SVR Desc", logtxt, 1);
+      gravaLog(" " + relogio_ntp(1) + " - E0104:Servidor Desconectado", logtxt, 1);
       buffer = "";
     }
   }
@@ -339,6 +380,7 @@ void gravarBanco (String buffer) {
 //---------------------------------------
 void sirene(boolean valor)
 {
+  unsigned long time_sirene;
   if (valor == true)
   {
     if (millis() - time_sirene > 1000)
@@ -361,9 +403,10 @@ void sirene(boolean valor)
 void calibrarSensor()
 {
   //CALIBRACAO INCIAL DO SENSOR DE GAS
-  Serial.print(" Caligrando sensor");
+  gravarArquivo(" " + relogio_ntp(1) + " - Caligrando sensor MQXX", "log.txt");
+  //Serial.print(" Caligrando sensor");
   Ro = MQCalibration(PIN_MQ2);
-  Serial.println("\n Calibrado 'Ro' = " + String(Ro) + " kohm");
+  gravarArquivo(" " + relogio_ntp(1) + "\n - Calibrado 'Ro' = " + String(Ro) + " kohm", "log.txt");
 }
 
 float calcularResistencia(int tensao)   //funcao que recebe o tensao (dado cru) e calcula a resistencia efetuada pelo sensor. O sensor e a resistência de carga forma um divisor de tensão.
@@ -427,7 +470,7 @@ void formatFS() {
 void criarArquivo(String nomeArquivo) {
   File wFile;
   //Cria o arquivo se ele não existir
-  if (SPIFFS.exists(nomeArquivo))
+  if (SPIFFS.exists(nomeArquivo)) 
   {
     gravaLog(" " + relogio_ntp(1) + " - Arquivo " + nomeArquivo + " existe", logtxt, 1);
   } else {
@@ -616,51 +659,4 @@ void printWifiData() {
   Serial.print(" Memoria disp: ");
   Serial.println(ESP.getFreeHeap());
   Serial.println("******************************");
-}
-void lcd_temp_umid() {
-  lcd.setCursor(0, 0);
-  lcd.print("Temp : ");
-  lcd.print(" ");
-  lcd.setCursor(7, 0);
-  
-  // USANDO SENSOR BMP280
-  lcd.print(sensorTemp(2));
-  lcd.setCursor(12, 0);
-
-  //Mostra o simbolo do grau formado pelo array
-  lcd.write((byte)0);
-
-  //Mostra o simbolo do grau quadrado
-  //lcd.print((char)223);
-
-  lcd.setCursor(0, 1);
-  lcd.print("Umid : ");
-  lcd.print(" ");
-  lcd.setCursor(7, 1);
-  lcd.print(sensorTemp(1), 1);
-  lcd.setCursor(12, 1);
-  lcd.print("%");
-}
-void lcd_mq() {
-  lcd.setCursor(0, 0);
-  lcd.print("GLP : ");
-  lcd.print(" ");
-  lcd.setCursor(7, 0);
-  lcd.print(20, 1);
-  lcd.setCursor(12, 0);
-  lcd.print("ppm");
-
-  //Mostra o simbolo do grau formado pelo array
-  lcd.write((byte)0);
-
-  //Mostra o simbolo do grau quadrado
-  //lcd.print((char)223);
-
-  lcd.setCursor(0, 1);
-  lcd.print("FUMA : ");
-  lcd.print(" ");
-  lcd.setCursor(7, 1);
-  lcd.print(20, 1);
-  lcd.setCursor(12, 1);
-  lcd.print("ppm");
 }

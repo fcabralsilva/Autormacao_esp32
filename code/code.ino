@@ -1,6 +1,8 @@
 #include <ArduinoOTA.h>
+#include <Adafruit_Sensor.h>
 #include <ArduinoJson.h>
 #include <DHT.h>
+#include <DHT_U.h>
 #include <FS.h>
 #include <NTPClient.h>
 #include <SPIFFS.h>
@@ -13,22 +15,39 @@
 #include <Adafruit_BMP280.h>
 #include "EmonLib.h"                  // USANDO PINO 36 NO SENSOR
 
-//-----------------------------------
-//  BMP280
-//-----------------------------------
+String VERSAO = "10.18 16/04/2022";
+
+/*
+ * VARIAVEIS DO SENSOR BMP280
+ */
 #define BMP_SCK  (13)
 #define BMP_MISO (12)
 #define BMP_MOSI (11)
 #define BMP_CS   (10)
-//-----------------------------------
 
-String VERSAO = "10.15 20/02/2022";
-#define PIN_AP                0
+#define PIN_AP                0       //BOTÃO DE RESET DO WIFI
 #define BUZZER                18      //SIRENE
+#define VOLT_CAL              115.0     //VALOR DE CALIBRAÇÃO (DEVE SER AJUSTADO EM PARALELO COM UM MULTÍMETRO)
 
+/*
+ * VARIAVEIS DE PARAMETRIZAÇÃO
+ */
+String logtxt           = "sim";
+const char  *nivelLog   = "4";
+int nivel_log           = 4;
+const int sistema_solar = 0;
+boolean ler_dht         = true;
+
+
+/*
+ * VARIAVEIS DO SENSOR DHT11 OU DHT22
+ */
 #define DHTPIN                19      //PINO ENTRADA SENSOR DHT11
-#define DHTTYPE               DHT22   //TIPO DE SENSOR
-
+#define DHTTYPE               DHT22   //TIPO DE SENSOR DHT22 OU DHT11
+unsigned long timeDht;
+/*
+ * VARIAVEIS DO SENSOR MQXX
+ */
 #define PIN_MQ2               34      //PINO ENTRADA SENSOR GAS
 #define VRL_VALOR             5       //resistência de carga
 #define RO_FATOR_AR_LIMPO     9.83    //resistência do sensor em ar limpo 9.83 de acordo com o datasheet
@@ -37,13 +56,29 @@ String VERSAO = "10.15 20/02/2022";
 #define GAS_LPG               0   
 #define GAS_CO                1
 #define SMOKE                 2
+float LPGCurve[3]   =  {2.3, 0.20, -0.47};
+float COCurve[3]    =  {2.3, 0.72, -0.34};
+float SmokeCurve[3] =  {2.3, 0.53, -0.44};
+float Ro = 10;
+String GLP, FUMACA;
+const char *LIMITE_MQ2 = "99", *LIMITE_MQ2_FU = "99";
+int P_LEITURAS_MQ = 0;
+unsigned long timeMq2;
+int sensorMq2 = 0;
+int contarParaGravar1 = 0;
 
+/*
+ * LEDS DE SINALIZAÇÃO
+ */
 #define LED_VERDE             15
 #define LED_VERMELHO          4
 #define LED_AZUL              2
+const char interval = 500;        //VARIAVEL DO TEMPO DE INTERVALO DO PISCALED
+long milis = 0;         
 
-#define portaServidor         80
-
+/*
+ * VARIAVEIS DE MATRIZ DE BOTÕES
+ */
 #define N_BOTAO               5
 #define ENTRADA               35
 int bt_select;
@@ -51,8 +86,9 @@ int bt_lido;
 int bt_repete = 3;
 int bt_conta;
 
-#define VOLT_CAL              115.0     //VALOR DE CALIBRAÇÃO (DEVE SER AJUSTADO EM PARALELO COM UM MULTÍMETRO)
-
+/*
+ * VARIAVEIS DOS BOTOES DE ENTRADA E DOS RELES
+ */
 struct botao1 {
   const short entrada = 32, rele = 33;
   boolean estado = 0, estado_atual = 0  , estado_antes = 0;
@@ -99,32 +135,34 @@ struct botao4 {
   const char* agenda_in;
   const char* agenda_out;
 } botao4;
+int i_timer_valor, estado_atual = 0, estado_antes = 0;
+boolean cont_timer;
+unsigned long tempo = 0;
+short paramTempo = 60;
+int nContar = 0;
+int agenda_ = 0;
 
+/*
+ * VARIAVEIS DE REDE E WIFI
+ */
 String addressMac;
-const String hostname = "ESP32_TESTE";
-long milis = 0, cont_sensor_tensao;        	// último momento que o LED foi atualizado
-const char interval = 500;    // tempo de transição entre estados (milisegundos)
-String ipLocalString, buff, URL, linha, GLP, FUMACA, retorno, serv, logtxt = "sim", hora_rtc, buf;
-const char *json, *LIMITE_MQ2 = "99", *LIMITE_MQ2_FU = "99";
-const char *ssid, *password, *servidor, *conslog, *nivelLog = "4";
-int contarParaGravar1 = 0, nContar = 0, cont_ip_banco = 0, P_LEITURAS_MQ = 0, nivel_log = 4, estado_atual = 0, estado_antes = 0, freq = 2000, channel = 0, resolution = 8, n = 0, sensorMq2 = 0, agenda_ = 0;
-short paramTempo = 60, t = 10, t_temp, u_temp ;
-unsigned long time3, time3Param = 90000, timeDht, timeMq2 , tempo = 0, time_sirene;
-struct tm data;//Cria a estrutura que contem as informacoes da data.
-int hora;
-char data_formatada[64];
-int ATUALIZAR_DH, i_timer_valor;
-String hora_ntp;
-//const String comandos_txt = "<p><strong>PORTAS ENTRADA SA&Iacute;DA</strong></p><p>entrada 1 = 32, rele 1 = 33<br />entrada 2 = 25, rele 2 = 18<br />entrada 3 = 14, rele 3 = 27<br />entrada 4 = 12, rele 4 = 13</p><p><strong><span class=\"pl-c1\">LED'S PARA MONITORAMENTO</span></strong></p><p><span class=\"pl-c1\">LED_AZUL&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 2<br />LED_VERDE&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;4<br />LED_VERMELHO 16</span></p><p><strong><span class=\"pl-c1\">SENSORES</span></strong></p><p><span class=\"pl-c1\">BUZZER&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 5<br />PIN_MQ2&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;34<br />DHTPIN&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;19</span></p><p><strong>REINCIAR CENTRAL POR COMANDA HTTP</strong>&nbsp;</p><p>HTTP://IP_HOST/?00000</p><p><strong>REINICIAS CONFIGURAÇÕES WIFI</strong>&nbsp;</p><p>HTTP://IP_HOST/?00002</p><p><strong>EXEMPLO NA CHAMADA WEB DESLIGAR LAMPADA</strong>&nbsp;</p><p>HTTP://IP_HOST/?porta=NN&amp;acao=(liga ou&nbsp;desligar)&amp;central=IP_HOST</p><p><strong>CALIBRAR SENSOR MQ2</strong></p><p>HTTP://IP_HOST/?0001</p><p><strong>APAGAR ARQUIVO DE LOG MANUALMENTE</strong></p><p>HTTP://IP_HOST/?00013</p><p><strong>APLICAR CONFIGURA&Ccedil;&Otilde;ES MINIMAS PARA FUNCIONAMENTO DA CENTRAL</strong></p><p>HTTP://IP_HOST/?00014</p><p><strong>DESLIGAR TODOS AS PORTAS OUTPUT DA CENTRAL</strong></p><p>HTTP://IP_HOST/?00015</p><p><strong>APLICAR AS CONFIGURA&Ccedil;&Otilde;ES AP&Oacute;S SEREM GRAVADAS NA CENTRAL</strong>&nbsp;</p><p>HTTP://IP_HOST/?00016</p>";
-boolean estado_inter, cont_timer, ler_dht = true;
-const int sistema_solar = 0;
+String ipLocalString;
+const char *ssid, *password, *servidor;
+String buff, URL, serv, buf;
+#define portaServidor         80       //PORTA DE COMUNICAÇÃO USADO NO WIFI
+
+/*
+ * CONTROLE DE ARQUIVO JSON
+ */
+const char *json;
+int cont_ip_banco = 0;
+const char *conslog;          
+
+int freq = 2000, channel = 0, resolution = 8, n = 0;
 byte grau[8] ={ B00001100,B00010010,B00010010,B00001100,B00000000,B00000000,B00000000,B00000000,};
 
+//const String comandos_txt = "<p><strong>PORTAS ENTRADA SA&Iacute;DA</strong></p><p>entrada 1 = 32, rele 1 = 33<br />entrada 2 = 25, rele 2 = 18<br />entrada 3 = 14, rele 3 = 27<br />entrada 4 = 12, rele 4 = 13</p><p><strong><span class=\"pl-c1\">LED'S PARA MONITORAMENTO</span></strong></p><p><span class=\"pl-c1\">LED_AZUL&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 2<br />LED_VERDE&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;4<br />LED_VERMELHO 16</span></p><p><strong><span class=\"pl-c1\">SENSORES</span></strong></p><p><span class=\"pl-c1\">BUZZER&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 5<br />PIN_MQ2&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;34<br />DHTPIN&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;19</span></p><p><strong>REINCIAR CENTRAL POR COMANDA HTTP</strong>&nbsp;</p><p>HTTP://IP_HOST/?00000</p><p><strong>REINICIAS CONFIGURAÇÕES WIFI</strong>&nbsp;</p><p>HTTP://IP_HOST/?00002</p><p><strong>EXEMPLO NA CHAMADA WEB DESLIGAR LAMPADA</strong>&nbsp;</p><p>HTTP://IP_HOST/?porta=NN&amp;acao=(liga ou&nbsp;desligar)&amp;central=IP_HOST</p><p><strong>CALIBRAR SENSOR MQ2</strong></p><p>HTTP://IP_HOST/?0001</p><p><strong>APAGAR ARQUIVO DE LOG MANUALMENTE</strong></p><p>HTTP://IP_HOST/?00013</p><p><strong>APLICAR CONFIGURA&Ccedil;&Otilde;ES MINIMAS PARA FUNCIONAMENTO DA CENTRAL</strong></p><p>HTTP://IP_HOST/?00014</p><p><strong>DESLIGAR TODOS AS PORTAS OUTPUT DA CENTRAL</strong></p><p>HTTP://IP_HOST/?00015</p><p><strong>APLICAR AS CONFIGURA&Ccedil;&Otilde;ES AP&Oacute;S SEREM GRAVADAS NA CENTRAL</strong>&nbsp;</p><p>HTTP://IP_HOST/?00016</p>";
 //float corrente_s1 = 0.00, tensao_s1 = 0.00, corrente_s2 = 0.00, tensao_s2 = 0.00, corrente_s3 = 0.00, tensao_s3 = 0.00;
-float LPGCurve[3]   =  {2.3, 0.20, -0.47};
-float COCurve[3]    =  {2.3, 0.72, -0.34};
-float SmokeCurve[3] =  {2.3, 0.53, -0.44};
-float Ro = 10;
 
 Adafruit_BMP280 bmp;                    //  I2C Adafruit_BMP280
 EnergyMonitor emon1;                    //  CRIA UMA INSTÂNCIA
@@ -132,46 +170,41 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);     //  FUNÇÃO DO TIPO "LiquidCrystal_I2C"
 IPAddress ipHost;
 WiFiUDP udp;
 NTPClient ntp(udp, "a.st1.ntp.br", -3 * 3600, 60000);//Cria um objeto "NTP" com as configurações.utilizada no Brasil
-DHT dht(DHTPIN, DHTTYPE);
+DHT_Unified dht(DHTPIN, DHTTYPE);
 WiFiServer server(80);
 
 void setup() {
-  //setCpuFrequencyMhz(80);
+
   Serial.begin(115200);
-  delay(1000);
   Serial.println("-----------------------------------------");
-  Serial.print(" SDK: "); Serial.println(ESP.getSdkVersion());
-  Serial.print(" FREQUENCIA DA CPU:        "); Serial.print(getCpuFrequencyMhz()); Serial.println("MHz");
-  Serial.print(" MEMORIA FLASH:            "); Serial.print(ESP.getFlashChipSize() / (1024.0 * 1024), 2); Serial.println("MB");
-  //Serial.print(" MEMORIA FLASH VELOCIDADE: "); Serial.print(ESP.getFlashChipSpeed() / 1000000.0, 1); Serial.println("MHz");
-  Serial.print(" MEMORIA RAM:              "); Serial.print(ESP.getHeapSize() / 1024.0, 2); Serial.println("KB");
-  Serial.print(" MEMORIA RAM LIVRE:        "); Serial.print(ESP.getFreeHeap() / 1024.0, 2); Serial.println("KB");
-  Serial.print(" MEMORIA RAM ALOCADA:      "); Serial.print(ESP.getMaxAllocHeap() / 1024.0, 2); Serial.println("KB");
-  Serial.print(" TAMANHO DO CODIGO:        "); Serial.print(ESP.getSketchSize() / 1024.0, 2); Serial.println("KB");
-  //Serial.print(" MD5 DO SKET:              "); Serial.println(ESP.getSketchMD5());
-  Serial.println("-----------------------------------------");
+  Serial.println("");
   //---------------------------------------
   //    INICIALIZA O DISPLAY LCD
   //---------------------------------------
-  lcd.init();                                                        // INICIALIZA O DISPLAY LCD
+  lcd.init();                                  // INICIALIZA O DISPLAY LCD
   lcd.setBacklight(HIGH);
   lcd.createChar(0, grau);
-  //---------------------------------------
-  //    CONECTANDO A REDE WIFI
-  //---------------------------------------  
+  /*
+   * CONECTANDO A REDE WIFI
+   * INICIANDO AS VARIAVEIS MAIS UTEIS NO SISTEMA
+   */
   WiFiManager wifiManager;
-  WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);
-  WiFi.setHostname(hostname.c_str());                                //define hostname
-  WiFi.getHostname();
+  wifiManager.setHostname("ESP_TESTE");
   wifiManager.setAPCallback(configModeCallback);
   wifiManager.setSaveConfigCallback(saveConfigCallback);
-  if (!wifiManager.autoConnect("AUTOMACAO_ESP32", "")) {
+  if (!wifiManager.autoConnect()) {
     Serial.println(" FALHA NA CONEXÃO! ");
     ESP.restart();
   }
-  //---------------------------------------
-  //    INICIALIZANDO PORTAS I\O
-  //---------------------------------------   
+  ipHost = WiFi.localIP();
+  addressMac = WiFi.macAddress();
+  gravarArquivo(" " + relogio_ntp(1) + " MAC: " + addressMac, "log.txt");
+  ipLocalString = String(ipHost[0]) + "." + String(ipHost[1]) + "." + String(ipHost[2]) + "." + String(ipHost[3]);
+  server.begin();
+
+  /*  
+   *  INICIALIZANDO PORTAS DE ENTRADA E SAIDA
+   */
   pinMode(PIN_AP, INPUT_PULLUP);
   pinMode(botao1.rele, OUTPUT);
   pinMode(botao1.entrada, INPUT_PULLUP);
@@ -191,33 +224,39 @@ void setup() {
   digitalWrite(LED_VERDE, LOW);
   pinMode(LED_VERMELHO, OUTPUT);
   pinMode(LED_AZUL, OUTPUT);
-  Serial.println();
+  /*
+   * INICIANDO SISTEMA DE ARQUIVOS 
+   */
   openFS();
   criarArquivo("/param.txt");
   criarArquivo("/log.txt");
-
-  server.begin();
+  
+  gravarArquivo("\n\n +++ INICIANDO SISTEMA +++ Versão: " + VERSAO + "\n\n", "log.txt");
+  
+  /*
+   * INICIANDO SENSOR DHT
+   */
   dht.begin();
+  sensor_t sensor;
+  dht.temperature().getSensor(&sensor);
+  dht.humidity().getSensor(&sensor);
+  /*
+   * INICIANDO NTPClient PARA DATA E HORA NO ESP
+   */
   ntp.begin();
   ntp.forceUpdate();
   relogio_ntp(0);
-
-  ipHost = WiFi.localIP();
-  addressMac = WiFi.macAddress();
-  Serial.println(" MAC Adress: " + addressMac);
-  ipLocalString = String(ipHost[0]) + "." + String(ipHost[1]) + "." + String(ipHost[2]) + "." + String(ipHost[3]);
-
+  /*
+   * INICIANDO SENSOR DE TENSÃO ANALOGICO
+   */
   emon1.voltage(36, VOLT_CAL, 1.7);                    //PASSA PARA A FUNÇÃO OS PARÂMETROS (PINO ANALÓGIO / VALOR DE CALIBRAÇÃO / MUDANÇA DE FASE)
-
-  // ----------------------------------------------  
-  //  Verifica se o sensor BMP280 está conectado.
-  // ----------------------------------------------
+  /*
+   * INICIANDO SENSOR BMP280
+   */
   if (!bmp.begin(0x76)) {
-    Serial.println(F("Could not find a valid BMP280 sensor, check wiring or "
-                      "try a different address!"));
-    //while (1) delay(10);
+    gravarArquivo(" " + relogio_ntp(1) + "Nenhum sensor BMP280 válido, verifique endereço I2C!", "log.txt");
   }
-  /* Default settings from datasheet. */
+	// Default settings from datasheet
   bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
                   Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
                   Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
@@ -231,15 +270,13 @@ void setup() {
 
   ArduinoOTA.begin();
 
-  retorno = "SERVIDOR_CONECT";
-
+  /*
+   * INICIANDO LCD 16X2
+   */
   ledcSetup(channel, freq, resolution);
   ledcAttachPin(5, channel);
-  gravarArquivo("\n *** INICIANDO SISTEMA *** \n \n " + VERSAO, "log.txt");
-
   lcd.setCursor(0, 0);lcd.print("    BEM VINDO   ");  //SETA A POSIÇÃO EM QUE O CURSOR INCIALIZA(LINHA 1)
   lcd.setCursor(0, 1);lcd.print(VERSAO);              //SETA A POSIÇÃO EM QUE O CURSOR RECEBE O TEXTO A SER MOSTRADO(LINHA 2)      
-  
   digitalWrite(BUZZER, HIGH);
   delay(500);
   digitalWrite(BUZZER, LOW);
@@ -309,22 +346,22 @@ void loop()
   /*
    * LEITURA DO TELADO DE 5 BOTOES
    */
-  for (int i = 0; i < N_BOTAO; i++) {
-    if (analogRead_bt(i)) {
-      bt_lido = i;
-      if(bt_repete == bt_lido){
-        if(bt_lido == 3){
-          bt_conta++;
-          delay(200);
-          bt_repete = bt_lido;
-        }
-        if(bt_conta > 2){
-          bt_conta = 0;
-        }
-      }
-    }
-  }
-  lcd_temp_umid();
+//  for (int i = 0; i < N_BOTAO; i++) {
+//    if (analogRead_bt(i)) {
+//      bt_lido = i;
+//      if(bt_repete == bt_lido){
+//        if(bt_lido == 3){
+//          bt_conta++;
+//          delay(200);
+//          bt_repete = bt_lido;
+//        }
+//        if(bt_conta > 2){
+//          bt_conta = 0;
+//        }
+//      }
+//    }
+//  }
+//  lcd_temp_umid();
 //  switch (bt_lido) {
 //  case 0:
 //    lcd.clear();
@@ -885,10 +922,10 @@ void loop()
     String requisicao = stringUrl.substring(6, 11);
     if (requisicao == "porta")
     {
-      String numero 	= stringUrl.substring(12, 14);
-      String acao 		= stringUrl.substring(20, 24);
-      String central 	= stringUrl.substring(33, 40);
-      int numeroInt 	= numero.toInt();
+      String numero   = stringUrl.substring(12, 14);
+      String acao     = stringUrl.substring(20, 24);
+      String central  = stringUrl.substring(33, 40);
+      int numeroInt   = numero.toInt();
       nContar = 0;
       n = 0;
       acionaPorta(numeroInt, requisicao, acao);
@@ -1126,7 +1163,5 @@ void loop()
       --------------------------------
     */
   }
-  sensorTemp(1);
-  sensorTemp(2);
   sensorMQ();
 }
