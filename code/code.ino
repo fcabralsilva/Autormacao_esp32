@@ -15,7 +15,7 @@
 #include <Adafruit_BMP280.h>
 #include "EmonLib.h"                  // USANDO PINO 36 NO SENSOR
 
-String VERSAO = "10.18 16/04/2022";
+String VERSAO = "10.20 15/04/2023";
 
 /*
  * VARIAVEIS DO SENSOR BMP280
@@ -60,7 +60,7 @@ float LPGCurve[3]   =  {2.3, 0.20, -0.47};
 float COCurve[3]    =  {2.3, 0.72, -0.34};
 float SmokeCurve[3] =  {2.3, 0.53, -0.44};
 float Ro = 10;
-String GLP, FUMACA;
+String GLP, FUMACA, CO;
 const char *LIMITE_MQ2 = "99", *LIMITE_MQ2_FU = "99";
 int P_LEITURAS_MQ = 0;
 unsigned long timeMq2;
@@ -93,7 +93,7 @@ struct botao1 {
   const short entrada = 32, rele = 33;
   boolean estado = 0, estado_atual = 0  , estado_antes = 0;
   int contador = 0;
-  const char* modelo = "pulso";
+  const char* modelo = "interruptor";
   const char* nomeInter = "Com1";
   const char* tipo = "0";
   const char* agenda_in;
@@ -109,7 +109,7 @@ struct botao2 {
   const short entrada = 25, rele = 26;
   boolean estado = 0, estado_atual = 0  , estado_antes = 0;
   int contador = 0;
-  const char* modelo = "pulso";
+  const char* modelo = "interruptor";
   const char* tipo = "0";
   const char* nomeInter = "Com2";
   const char* agenda_in;
@@ -120,7 +120,7 @@ struct botao3 {
   boolean estado = 0, estado_atual = 0  , estado_antes = 0;
   int contador = 0;
   const char* tipo = "0";
-  const char* modelo = "pulso";
+  const char* modelo = "interruptor";
   const char* nomeInter = "Com3";
   const char* agenda_in;
   const char* agenda_out;
@@ -130,7 +130,7 @@ struct botao4 {
   boolean estado = 0, estado_atual = 0  , estado_antes = 0;
   int contador = 0;
   const char* tipo = "0";
-  const char* modelo = "pulso";
+  const char* modelo = "interruptor";
   const char* nomeInter = "Com4";
   const char* agenda_in;
   const char* agenda_out;
@@ -169,7 +169,7 @@ EnergyMonitor emon1;                    //  CRIA UMA INSTÂNCIA
 LiquidCrystal_I2C lcd(0x27, 16, 2);     //  FUNÇÃO DO TIPO "LiquidCrystal_I2C"
 IPAddress ipHost;
 WiFiUDP udp;
-NTPClient ntp(udp, "a.st1.ntp.br", -3 * 3600, 60000);//Cria um objeto "NTP" com as configurações.utilizada no Brasil
+NTPClient ntp(udp, "d.st1.ntp.br", -3 * 3600, 60000);//Cria um objeto "NTP" com as configurações.utilizada no Brasil
 DHT_Unified dht(DHTPIN, DHTTYPE);
 WiFiServer server(80);
 
@@ -201,6 +201,14 @@ void setup() {
   gravarArquivo(" " + relogio_ntp(1) + " MAC: " + addressMac, "log.txt");
   ipLocalString = String(ipHost[0]) + "." + String(ipHost[1]) + "." + String(ipHost[2]) + "." + String(ipHost[3]);
   server.begin();
+
+  /*
+  * INICIANDO NTPClient PARA DATA E HORA NO ESP
+  */
+  
+  ntp.begin();
+  ntp.forceUpdate();
+  relogio_ntp(0);
 
   /*  
    *  INICIALIZANDO PORTAS DE ENTRADA E SAIDA
@@ -238,14 +246,9 @@ void setup() {
    */
   dht.begin();
   sensor_t sensor;
-  dht.temperature().getSensor(&sensor);
-  dht.humidity().getSensor(&sensor);
-  /*
-   * INICIANDO NTPClient PARA DATA E HORA NO ESP
-   */
-  ntp.begin();
-  ntp.forceUpdate();
-  relogio_ntp(0);
+  //dht.temperature().getSensor(&sensor);
+  //dht.humidity().getSensor(&sensor);
+
   /*
    * INICIANDO SENSOR DE TENSÃO ANALOGICO
    */

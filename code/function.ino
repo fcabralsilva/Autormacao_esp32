@@ -1,31 +1,31 @@
-int capturaIr() {
-  /*
-   *  #include <IRremote.h> //INCLUSÃO DE BIBLIOTECA
+// int capturaIr() {
+//   /*
+//    *  #include <IRremote.h> //INCLUSÃO DE BIBLIOTECA
 
-      int RECV_PIN = 23; //PINO DIGITAL UTILIZADO PELO FOTORRECEPTOR KY-022
+//       int RECV_PIN = 23; //PINO DIGITAL UTILIZADO PELO FOTORRECEPTOR KY-022
       
-      IRrecv irrecv(RECV_PIN); //PASSA O PARÂMETRO PARA A FUNÇÃO irrecv
+//       IRrecv irrecv(RECV_PIN); //PASSA O PARÂMETRO PARA A FUNÇÃO irrecv
       
-      decode_results results; //VARIÁVEL QUE ARMAZENA OS RESULTADOS (SINAL IR RECEBIDO)
-      void setup() 
-      {
-       irrecv.enableIRIn(); //INICIALIZA A RECEPÇÃO DE SINAIS IR}
-       }
+//       decode_results results; //VARIÁVEL QUE ARMAZENA OS RESULTADOS (SINAL IR RECEBIDO)
+//       void setup() 
+//       {
+//        irrecv.enableIRIn(); //INICIALIZA A RECEPÇÃO DE SINAIS IR}
+//        }
 
-   */
-  int valorLido = 0;
-  if (irrecv.decode(&results))
-  {
-//    Serial.print("Código HEX: "); //IMPRIME O TEXTO NO MONITOR SERIAL
-//    Serial.println(results.value, HEX); //IMPRIME NO MONITOR SERIAL O CÓDIGO IR EM FORMATO HEXADECIMAL
-//    Serial.print("Código DEC: "); //IMPRIME O TEXTO NO MONITOR SERIAL
-//    Serial.println(results.value); //IMPRIME NO MONITOR SERIAL O CÓDIGO IR EM FORMATO DECIMAL
-    //Serial.println(""); //QUEBRA DE LINHA NA SERIAL
-    valorLido = results.value;
-    irrecv.resume(); //AGUARDA O RECEBIMENTO DE UM NOVO SINAL IR
-  }
-  return valorLido;
-}
+//    */
+//   int valorLido = 0;
+//   if (irrecv.decode(&results))
+//   {
+// //    Serial.print("Código HEX: "); //IMPRIME O TEXTO NO MONITOR SERIAL
+// //    Serial.println(results.value, HEX); //IMPRIME NO MONITOR SERIAL O CÓDIGO IR EM FORMATO HEXADECIMAL
+// //    Serial.print("Código DEC: "); //IMPRIME O TEXTO NO MONITOR SERIAL
+// //    Serial.println(results.value); //IMPRIME NO MONITOR SERIAL O CÓDIGO IR EM FORMATO DECIMAL
+//     //Serial.println(""); //QUEBRA DE LINHA NA SERIAL
+//     valorLido = results.value;
+//     irrecv.resume(); //AGUARDA O RECEBIMENTO DE UM NOVO SINAL IR
+//   }
+//   return valorLido;
+// }
 
 
 String getMacAddress()
@@ -402,6 +402,8 @@ void sirene(boolean valor)
 //---------------------------------------
 void calibrarSensor()
 {
+  sensorMq2 = analogRead(PIN_MQ2);
+  Serial.println(sensorMq2);
   //CALIBRACAO INCIAL DO SENSOR DE GAS
   gravarArquivo(" " + relogio_ntp(1) + " - Caligrando sensor MQXX", "log.txt");
   //Serial.print(" Caligrando sensor");

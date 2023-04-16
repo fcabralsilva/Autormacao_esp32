@@ -46,6 +46,7 @@ float sensorTemp(int sensor) {
       dht.temperature().getEvent(&event);
       if (isnan(event.temperature)) {
         gravaLog(" " + relogio_ntp(1) + " - E0109:DHT"+String(DHTTYPE)+"ERRO LEITURA TEMPERATURA", logtxt, 1);
+        temperatura_dht_f = 0.0;
       }
       else {
         temperatura_dht_f = event.temperature;
@@ -56,6 +57,7 @@ float sensorTemp(int sensor) {
       dht.humidity().getEvent(&event);
       if (isnan(event.relative_humidity)) {
         gravaLog(" " + relogio_ntp(1) + " - E0109:DHT"+String(DHTTYPE)+"ERRO LEITURA UMIDADE", logtxt, 1);
+        umidade_dht_f = 0.0;
       }
       else {
         umidade_dht_f = event.relative_humidity;
@@ -101,44 +103,44 @@ void sensorMQ() {
     digitalWrite(LED_AZUL, HIGH);
     delay(100);
     digitalWrite(LED_AZUL, LOW);
-    
     GLP = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, GAS_LPG) );
     FUMACA = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, SMOKE));
-    String CO = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, GAS_CO)  );
-    
+    CO = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, GAS_CO)  );
+
     if ((GLP.toInt())   > 1000) GLP     = "0";
     if ((FUMACA.toInt())> 1000) FUMACA  = "0";
     if ((CO.toInt())    > 1000) CO      = "0";
-    
+
     contarParaGravar1++;
-    
+
     gravaLog(" " + relogio_ntp(1) + " - MQ2:" + String(sensorMq2) + " GLP:" + GLP + " CO:" + CO + " FU:" + FUMACA + " L:" + contarParaGravar1, logtxt, 4);
-    
+
     timeMq2 = millis();
-    
+
     if ((GLP.toInt() >= String(LIMITE_MQ2).toInt()) || (FUMACA.toInt() > String(LIMITE_MQ2_FU).toInt()))
     {
-      if (P_LEITURAS_MQ == 0)
-      {
-        sirene(true);
-        digitalWrite(LED_VERMELHO, true);
-      }
+    if (P_LEITURAS_MQ == 0)
+    {
+    sirene(true);
+    digitalWrite(LED_VERMELHO, true);
+    }
     } else
     {
-      digitalWrite(LED_VERMELHO, false);
-      sirene(false);
+    digitalWrite(LED_VERMELHO, false);
+    sirene(false);
     }
     if (P_LEITURAS_MQ == 1)
     {
-      sirene(false);
+    sirene(false);
     }
     //GRAVA NO BANCO O VALOR LIDO APOS X LEITURAS
     if ((contarParaGravar1 == 20) || (GLP.toInt() >= String(LIMITE_MQ2).toInt()) || (FUMACA.toInt() > String(LIMITE_MQ2_FU).toInt()) )
     {
-      buff = "sensor=mq-2&valor=mq-2;" + String(GLP) + ";&central=" + String(ipLocalString) + "&p=" + String(PIN_MQ2);
-      gravarBanco (buff);
-      contarParaGravar1 = 0;
-      buff.remove(0);
+    buff = "sensor=mq-2&valor=mq-2;" + String(GLP) + ";&central=" + String(ipLocalString) + "&p=" + String(PIN_MQ2);
+    gravarBanco (buff);
+    contarParaGravar1 = 0;
+    buff.remove(0);
     }
+    
   }
 }
