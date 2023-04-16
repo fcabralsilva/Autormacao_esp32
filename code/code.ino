@@ -14,8 +14,12 @@
 #include <LiquidCrystal_I2C.h>
 #include <Adafruit_BMP280.h>
 #include "EmonLib.h"                  // USANDO PINO 36 NO SENSOR
+#include <IRremote.hpp> //INCLUSÃO DE BIBLIOTECA
 
-String VERSAO = "10.20 15/04/2023";
+
+
+
+String VERSAO = "10.30 16/04/2023";
 
 /*
  * VARIAVEIS DO SENSOR BMP280
@@ -75,6 +79,13 @@ int contarParaGravar1 = 0;
 #define LED_AZUL              2
 const char interval = 500;        //VARIAVEL DO TEMPO DE INTERVALO DO PISCALED
 long milis = 0;         
+
+
+/*
+ * VARIAVEIS DO SENSOR VS1868B Infravermelho
+ */
+#define IR_RECEIVE_PIN 23
+#define ENABLE_LED_FEEDBACK LED_VERMELHO
 
 /*
  * VARIAVEIS DE MATRIZ DE BOTÕES
@@ -165,17 +176,25 @@ byte grau[8] ={ B00001100,B00010010,B00010010,B00001100,B00000000,B00000000,B000
 //float corrente_s1 = 0.00, tensao_s1 = 0.00, corrente_s2 = 0.00, tensao_s2 = 0.00, corrente_s3 = 0.00, tensao_s3 = 0.00;
 
 Adafruit_BMP280 bmp;                    //  I2C Adafruit_BMP280
+
 EnergyMonitor emon1;                    //  CRIA UMA INSTÂNCIA
+
 LiquidCrystal_I2C lcd(0x27, 16, 2);     //  FUNÇÃO DO TIPO "LiquidCrystal_I2C"
+
 IPAddress ipHost;
+
 WiFiUDP udp;
-NTPClient ntp(udp, "d.st1.ntp.br", -3 * 3600, 60000);//Cria um objeto "NTP" com as configurações.utilizada no Brasil
-DHT_Unified dht(DHTPIN, DHTTYPE);
 WiFiServer server(80);
+
+NTPClient ntp(udp, "d.st1.ntp.br", -3 * 3600, 60000);//Cria um objeto "NTP" com as configurações.utilizada no Brasil
+
+DHT_Unified dht(DHTPIN, DHTTYPE);
+
+
 
 void setup() {
 
-  Serial.begin(115200);
+  Serial.begin(9600);
   Serial.println("-----------------------------------------");
   Serial.println("");
   //---------------------------------------
@@ -232,6 +251,9 @@ void setup() {
   digitalWrite(LED_VERDE, LOW);
   pinMode(LED_VERMELHO, OUTPUT);
   pinMode(LED_AZUL, OUTPUT);
+
+  IrReceiver.begin(IR_RECEIVE_PIN, ENABLE_LED_FEEDBACK); // Iniciar o receptor IR
+
   /*
    * INICIANDO SISTEMA DE ARQUIVOS 
    */
@@ -297,6 +319,8 @@ void loop()
   WiFiManager wifiManager;
 
   pisca_led(LED_VERDE, true);
+
+  capturaIr();
 
   while (cont_ip_banco < 1)
   {

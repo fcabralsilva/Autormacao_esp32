@@ -1,31 +1,22 @@
-// int capturaIr() {
-//   /*
-//    *  #include <IRremote.h> //INCLUSÃO DE BIBLIOTECA
+int capturaIr() {
+  int valorLido = 0;
+  
+ if (IrReceiver.decode()) {
+      //Serial.print("Hex: ");
+      //Serial.println(IrReceiver.decodedIRData.decodedRawData, HEX); // Imprimir dados brutos "antigos"
+      //Serial.print("Dec: ");
+      //Serial.println(IrReceiver.decodedIRData.decodedRawData, DEC); // Imprimir dados brutos "antigos"
+      /* USE NEW 3.x FUNCTIONS */
+      // Serial.print("Linha 2: ");
+      //IrReceiver.printIRResultShort(&Serial); // Imprimir dados recebidos completos em uma linha
+      // Serial.print("Linha3: ");
+      //IrReceiver.printIRSendUsage(&Serial);   // Imprima o extrato necessário para enviar esses dados
+      valorLido = Serial.println(IrReceiver.decodedIRData.decodedRawData, DEC);
+      IrReceiver.resume(); // Habilita o recebimento do próximo valor
+  }
 
-//       int RECV_PIN = 23; //PINO DIGITAL UTILIZADO PELO FOTORRECEPTOR KY-022
-      
-//       IRrecv irrecv(RECV_PIN); //PASSA O PARÂMETRO PARA A FUNÇÃO irrecv
-      
-//       decode_results results; //VARIÁVEL QUE ARMAZENA OS RESULTADOS (SINAL IR RECEBIDO)
-//       void setup() 
-//       {
-//        irrecv.enableIRIn(); //INICIALIZA A RECEPÇÃO DE SINAIS IR}
-//        }
-
-//    */
-//   int valorLido = 0;
-//   if (irrecv.decode(&results))
-//   {
-// //    Serial.print("Código HEX: "); //IMPRIME O TEXTO NO MONITOR SERIAL
-// //    Serial.println(results.value, HEX); //IMPRIME NO MONITOR SERIAL O CÓDIGO IR EM FORMATO HEXADECIMAL
-// //    Serial.print("Código DEC: "); //IMPRIME O TEXTO NO MONITOR SERIAL
-// //    Serial.println(results.value); //IMPRIME NO MONITOR SERIAL O CÓDIGO IR EM FORMATO DECIMAL
-//     //Serial.println(""); //QUEBRA DE LINHA NA SERIAL
-//     valorLido = results.value;
-//     irrecv.resume(); //AGUARDA O RECEBIMENTO DE UM NOVO SINAL IR
-//   }
-//   return valorLido;
-// }
+  return valorLido;
+}
 
 
 String getMacAddress()

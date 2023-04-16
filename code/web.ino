@@ -40,9 +40,9 @@ String pagina() {
   
   //SENSOR DE TEMPERATURA
   buf += "<div class=\"col-sm-2\">";
-  buf += "<h3>&#127777;";
+  buf += "<h4>&#127777;<font size=\"5\"> ";
   buf += sensorTemp(2);
-  buf += "<sup class=\"units\">&deg;C</sup></h3>";
+  buf += "</font><sup class=\"units\">&deg;c</sup></h4>";
   buf += "</div>";
 
   //SENSOR DE UMIDADE DHTXX
