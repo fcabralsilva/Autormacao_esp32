@@ -19,7 +19,7 @@
 
 
 
-String VERSAO = "10.30 16/04/2023";
+String VERSAO = "10.31 17/04/2023";
 
 /*
  * VARIAVEIS DO SENSOR BMP280
@@ -86,6 +86,7 @@ long milis = 0;
  */
 #define IR_RECEIVE_PIN 23
 #define ENABLE_LED_FEEDBACK LED_VERMELHO
+//int codigoControle[5] = {4077715200,3877175040,2707357440,4144561920,3810328320};
 
 /*
  * VARIAVEIS DE MATRIZ DE BOTÕES
@@ -1003,8 +1004,18 @@ void loop()
     if (requisicao == "00000")
     {
       gravaLog(" " + relogio_ntp(1) + " - REINICIANDO...", logtxt, 1);
-      WiFiClient client = server.available();
-      client.println("HTTP/1.1 200 OK");
+      //WiFiClient client = server.available();
+      //client.println("HTTP/1.1 200 OK");
+      client.println("HTTP/1.1 200 OK"); //ESCREVE PARA O CLIENTE A VERSÃO DO HTTP
+      client.println("Content-Type: text/html"); //ESCREVE PARA O CLIENTE O TIPO DE CONTEÚDO(texto/html)
+      client.println("");
+      client.println("<!DOCTYPE HTML>"); //INFORMA AO NAVEGADOR A ESPECIFICAÇÃO DO HTML
+      //client.println("<span style=\"font-size:20px;\"><strong>Reiniciando Sistema&nbsp;<img alt=\"laugh\" height=\"20\" src=\"https://versadus.com/flavius/editor/plugins/smiley/images/teeth_smile.gif\" title=\"laugh\" width=\"20\" /></strong></span></div>");
+      client.println("<body style=\"background-color: rgb(255, 255, 204);\"><div style=\"text-align: center;\"><p><strong style=\"font-size: 24px;\">Reiniciando Sistema!</strong></p></div><div style=\"text-align: center;\"><strong>Clique em Voltar no navegador para Retornar a Pagina.</strong></div><div style=\"text-align: center;\">");
+      client.println("<strong style=\"font-size: 24px;\"><img alt=\"\" src=\"https://olgacolor.com.br/wp-content/uploads/2021/01/loading-gears-animation-13-3.gif\" style=\"width: 40px; height: 40px;\" /></strong></div><div style=\"text-align: center;\"></div></body>");
+      client.println("</html>");
+      client.stop();
+      delay(5000);
       ESP.restart();
     }
     if (requisicao == "00001")
