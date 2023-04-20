@@ -19,7 +19,7 @@
 
 
 
-String VERSAO = "10.31 17/04/2023";
+String VERSAO = "10.35 20/04/2023";
 
 /*
  * VARIAVEIS DO SENSOR BMP280
@@ -84,9 +84,9 @@ long milis = 0;
 /*
  * VARIAVEIS DO SENSOR VS1868B Infravermelho
  */
-#define IR_RECEIVE_PIN 23
+#define IR_RECEIVE_PIN 36
 #define ENABLE_LED_FEEDBACK LED_VERMELHO
-//int codigoControle[5] = {4077715200,3877175040,2707357440,4144561920,3810328320};
+int codigoControle[5] = {4077715200,3877175040,2707357440,4144561920,3810328320};
 
 /*
  * VARIAVEIS DE MATRIZ DE BOTÕES
@@ -321,7 +321,7 @@ void loop()
 
   pisca_led(LED_VERDE, true);
 
-  capturaIr();
+  //capturaIr();
 
   while (cont_ip_banco < 1)
   {

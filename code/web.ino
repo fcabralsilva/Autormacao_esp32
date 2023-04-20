@@ -277,11 +277,11 @@ String pagina() {
   int8_t rssi = WiFi.RSSI();
   String router_gatway_String = String(router_gatway[0]) + "." + String(router_gatway[1]) + "." +String(router_gatway[2]) + "." +String(router_gatway[3]);
 
-  String html_samp = "<samp><span dir=\"rtl\"><span style=\"font-size:16px;\"><span style=\"font-family:courier new,courier,monospace;\">";
-  buf +=  "    <div>"+html_samp+"<strong>Srv </strong></span></span></span><input maxlength=\"15\" style=\"width:130px\" type=\"text\"   name=\"servidor\" value=\"" + serv + "\"></samp></div>";
-  buf +=  "    <div>"+html_samp+"<strong>MAC </strong> "+addressMac+" - "+masc_String+"</span></span></span></samp></div>";
-  buf +=  "    <div>"+html_samp+"<strong>WIFI </strong>"+router_gatway_String+" "+ssid+" "+String(rssi)+"dBm</span></span></span></samp></div>";
-  buf +=  "    <div>"+html_samp+"<strong>RAM disp.: </strong>"+ESP.getFreeHeap()+"KB</span></span></span></samp></div>"; 
+  String html_samp = "<span dir=\"rtl\"><span style=\"font-size:16px;\"><span style=\"font-family:courier new,courier,monospace;\">";
+  buf +=  "    <div>"+html_samp+"<strong>SERVIDOR</strong></span></span></span><input maxlength=\"15\" style=\"width:130px; outline:0px;\" type=\"text\"   name=\"servidor\" value=\"" + serv + "\"></div>";
+  buf +=  "    <div>"+html_samp+"<strong>MAC: </strong> "+addressMac+" - "+masc_String+"</span></span></span></div>";
+  buf +=  "    <div>"+html_samp+"<strong>WIFI: </strong>"+router_gatway_String+" / <strong>SSID: </strong>"+ssid+" "+String(rssi)+"dBm</span></span></span></div>";
+  buf +=  "    <div>"+html_samp+"<strong>RAM: </strong>"+ESP.getFreeHeap()+"Bytes</span></span></span></div>"; 
   //Serial.println(ESP.getFreeHeap());
   
   buf +=  "  </div>";
@@ -298,7 +298,7 @@ String pagina() {
   buf +=  " <div class=\"row\">";
   buf +=  "   <div class=\"col-sm-8\">";
   buf += "        <strong>LOG</strong> <select class='' style='width:100%x' name='log'> <option value='sim' " + selectedHTNL(conslog, "sim ") + "> Sim</option> <option value='nao' " + selectedHTNL(conslog, "nao ") + ">Não</option> </select> <select class='' style='width:100%x' name='nivel' title='Nível do log'> <option value='1' " + selectedHTNL(nivelLog, "1") + ">1</option> <option value='2' " + selectedHTNL(nivelLog, "2") + ">2</option> <option value='3' " + selectedHTNL(nivelLog, "3") + ">3</option> <option value='4' " + selectedHTNL(nivelLog, "4") + ">4</option> </select>";
-  buf += "        <a href='?00013' title='APAGAR TODOS OS REGISTROS!'><button type='button' class='btn btn-danger btn-sm'> X </button></a>";
+  buf += "        <a href='?00013' title='APAGAR TODOS OS REGISTROS!'> x </a>";
   buf += "        <button class=\"btn btn-primary btn-sm\" type=\"button\" data-toggle=\"collapse\" data-target=\"#collapseExample\" aria-expanded=\"false\" aria-controls=\"collapseExample\">Log</button></td>";
   //buf += "        <button class=\"btn btn-primary btn-sm\" type=\"button\" data-toggle=\"collapse\" data-target=\"#collapseExample2\" aria-expanded=\"false\" aria-controls=\"collapseExample2\">Comandos</button></td>";
   buf += "    </div>";
@@ -313,11 +313,11 @@ String pagina() {
   buf +=  " <div class=\"row\">";
   buf +=  "   <div class=\"col-sm-6\">";
   buf += "        <strong>MQ2 </strong>";
-  buf += "        <sup>GAS </sup><input maxlength=\"3\" style=\"width:35px\" type=\"text\" name=\"v_mq\" value=\"" + String(LIMITE_MQ2) + "\">";
-  buf += "        <sup>Fuma&ccedil;a </sup><input maxlength=\"3\" style=\"width:35px\" type=\"text\" name=\"v_mq_fu\" value=\"" + String(LIMITE_MQ2_FU) + "\">";
-  buf += "         <a href='?00019' title=''>";
-  buf += "          <button type='button' class='btn btn-danger btn-sm'> Pausar Leitura </button>";
-  buf += "         </a>";
+  buf += "        <sup>GAS </sup><input maxlength=\"4\" style=\"width:45px\" type=\"text\" name=\"v_mq\" value=\"" + String(LIMITE_MQ2) + "\">";
+  buf += "        <sup>Fuma&ccedil;a </sup><input maxlength=\"4\" style=\"width:45px\" type=\"text\" name=\"v_mq_fu\" value=\"" + String(LIMITE_MQ2_FU) + "\">";
+  //buf += "         <a href='?00019' title=''>";
+  //buf += "          <button type='button' class='btn btn-danger btn-sm'> Pausar Leitura </button>";
+  //buf += "         </a>";
   buf += "    </div>";
   buf += "  </div>";
   buf += "  <hr>";
@@ -338,7 +338,7 @@ String pagina() {
   buf += "</body></html>";
   buf += "<script>$(document).ready(function(){$('[data-toggle=\"tooltip\"]').tooltip();});";
   //buf += " function calcNum(num) { document.calcform.visor.type = 'password'; document.calcform.visor.value = document.calcform.visor.value + num; } var delay = 1500;  function calcParse(oper) { var valor = document.calcform.visor.value; if (valor == '') { document.calcform.visor.value = ''; } else { var senha = '" + String(s_senha_alarme) + "'; document.calcform.visor.type = 'text'; if (senha == valor) { document.calcform.visor.value = 'Senha Correta       '; window.location.href = \"?00017\"; valor = ''; } else { document.calcform.visor.value = 'Senha Incorreta      '; valor = ''; setTimeout(function() { calcLimpar(); }, delay); } } }  function calcLimpar() { document.calcform.visor.value = ''; } </script> ";
-  buf += " </body>  </html> ";
+  buf += "</script> </body>  </html> ";
   return buf;
   buf.remove(0);
 }

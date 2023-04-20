@@ -1,3 +1,6 @@
+/*
+  FUNÇÃO DE LEITURA DE CONTROLES INFRAVERMELHO
+*/
 int capturaIr() {
   int valorLido = 0;
   
@@ -19,23 +22,24 @@ int capturaIr() {
 }
 
 
-String getMacAddress()
-{
-   uint8_t baseMac[6];
+// String getMacAddress()
+// {
+//    uint8_t baseMac[6];
 
-   // Get MAC address for WiFi station
-   esp_read_mac(baseMac, ESP_MAC_WIFI_STA);
+//    // Get MAC address for WiFi station
+//    esp_read_mac(baseMac, ESP_MAC_WIFI_STA);
 
-   char baseMacChr[18] = {0};
-   sprintf(baseMacChr, "%02X:%02X:%02X:%02X:%02X:%02X", baseMac[0], baseMac[1], baseMac[2], baseMac[3], baseMac[4], baseMac[5]);
+//    char baseMacChr[18] = {0};
+//    sprintf(baseMacChr, "%02X:%02X:%02X:%02X:%02X:%02X", baseMac[0], baseMac[1], baseMac[2], baseMac[3], baseMac[4], baseMac[5]);
 
-   String macAddress = String(baseMacChr);
+//    String macAddress = String(baseMacChr);
 
-   Serial.print("MAC Address :: ");
-   Serial.println(macAddress);
+//    Serial.print("MAC Address :: ");
+//    Serial.println(macAddress);
 
-   return String(baseMacChr);
-}
+//    return String(baseMacChr);
+// }
+
 String leStringSerial() {
   String conteudo = "";
   char caractere;
@@ -79,7 +83,7 @@ String gpio_html (int numero, int botao_entrada, int botao_rele, String botao_no
   String buff;
   buff += "<div class=\"row\">";
   buff += "   <div class=\"col-sm-2\">";
-  buff += "     <strong>GPIO</strong><sup>" + String(botao_entrada) + "/" + String(botao_rele) + "</sup><input maxlength=\"10\" style=\"width:100px\" type=\"text\"   name=\"int_" + String(numero) + "\" value=\"" + String(botao_nomeInter) + "\">";
+  buff += "     <strong>Porta </strong><sup><font color=\"green\">" + String(botao_entrada) + "</font> / <font color=\"blue\">" + String(botao_rele) + "</font></sup><input maxlength=\"10\" style=\"width:100px\" type=\"text\"   name=\"int_" + String(numero) + "\" value=\"" + String(botao_nomeInter) + "\">";
   buff += "   </div>";
 //  buff += "   <div class=\"col-sm-2\">";
 //  buff += "      <strong> Sinal </strong><select   style=\"width:80px\"  name=\"tipo_" + String(numero) + "\"><option value=\"0\" " + selectedHTNL(botao_tipo, "0") + "> - </option><option value=\"1\" " + selectedHTNL(botao_tipo, "1") + "> + </option></select>";
