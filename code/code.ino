@@ -13,11 +13,11 @@
 #include <WiFiManager.h>
 #include <LiquidCrystal_I2C.h>
 #include <Adafruit_BMP280.h>
-#include "EmonLib.h"                  // USANDO PINO 36 NO SENSOR
+//#include "EmonLib.h"                  // USANDO PINO 36 NO SENSOR
 #include <IRremote.hpp> //INCLUSÃO DE BIBLIOTECA
 
 
-String VERSAO = "10.36 05/06/2023";
+String VERSAO = "10.37 05/06/2023";
 
 /*
  * VARIAVEIS DO SENSOR BMP280
@@ -47,6 +47,7 @@ boolean ler_dht         = true;
 #define DHTPIN                19      //PINO ENTRADA SENSOR DHT11
 #define DHTTYPE               DHT22   //TIPO DE SENSOR DHT22 OU DHT11
 unsigned long timeDht;
+
 /*
  * VARIAVEIS DO SENSOR MQXX
  */
@@ -75,16 +76,16 @@ int contarParaGravar1 = 0;
 #define LED_VERDE             15
 #define LED_VERMELHO          4
 #define LED_AZUL              2
-const char interval = 500;        //VARIAVEL DO TEMPO DE INTERVALO DO PISCALED
-long milis = 0;         
+const char interval =         500;        //VARIAVEL DO TEMPO DE INTERVALO DO PISCALED
+long milis =                  0;         
 
 
 /*
  * VARIAVEIS DO SENSOR VS1868B Infravermelho
  */
-#define IR_RECEIVE_PIN 36
-#define ENABLE_LED_FEEDBACK LED_VERMELHO
-int codigoControle[5] = {4077715200,3877175040,2707357440,4144561920,3810328320};
+#define IR_RECEIVE_PIN        36
+#define ENABLE_LED_FEEDBACK   LED_VERMELHO
+int codigoControle[5] =       {4077715200,3877175040,2707357440,4144561920,3810328320};
 
 /*
  * VARIAVEIS DE MATRIZ DE BOTÕES
@@ -113,8 +114,8 @@ struct botao1 {
   int led_pir_1     = 2;
   unsigned long tempo_pir_1;
   bool conta_pir_1  = 0;
-
 } botao1;
+
 struct botao2 {
   const short entrada = 25, rele = 26;
   boolean estado = 0, estado_atual = 0  , estado_antes = 0;
@@ -125,6 +126,7 @@ struct botao2 {
   const char* agenda_in;
   const char* agenda_out;
 } botao2;
+
 struct botao3 {
   const short entrada = 14, rele = 27;
   boolean estado = 0, estado_atual = 0  , estado_antes = 0;
@@ -135,6 +137,7 @@ struct botao3 {
   const char* agenda_in;
   const char* agenda_out;
 } botao3;
+
 struct botao4 {
   const short entrada = 12, rele = 13;
   boolean estado = 0, estado_atual = 0  , estado_antes = 0;
@@ -145,6 +148,7 @@ struct botao4 {
   const char* agenda_in;
   const char* agenda_out;
 } botao4;
+
 int i_timer_valor, estado_atual = 0, estado_antes = 0;
 boolean cont_timer;
 unsigned long tempo = 0;
@@ -176,7 +180,7 @@ byte grau[8] ={ B00001100,B00010010,B00010010,B00001100,B00000000,B00000000,B000
 
 Adafruit_BMP280 bmp;                    //  I2C Adafruit_BMP280
 
-EnergyMonitor emon1;                    //  CRIA UMA INSTÂNCIA
+//EnergyMonitor emon1;                    //  CRIA UMA INSTÂNCIA
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);     //  FUNÇÃO DO TIPO "LiquidCrystal_I2C"
 
@@ -267,13 +271,11 @@ void setup() {
    */
   dht.begin();
   sensor_t sensor;
-  //dht.temperature().getSensor(&sensor);
-  //dht.humidity().getSensor(&sensor);
 
   /*
    * INICIANDO SENSOR DE TENSÃO ANALOGICO
    */
-  emon1.voltage(36, VOLT_CAL, 1.7);                    //PASSA PARA A FUNÇÃO OS PARÂMETROS (PINO ANALÓGIO / VALOR DE CALIBRAÇÃO / MUDANÇA DE FASE)
+  //emon1.voltage(36, VOLT_CAL, 1.7);                    //PASSA PARA A FUNÇÃO OS PARÂMETROS (PINO ANALÓGIO / VALOR DE CALIBRAÇÃO / MUDANÇA DE FASE)
   /*
    * INICIANDO SENSOR BMP280
    */
