@@ -17,9 +17,7 @@
 #include <IRremote.hpp> //INCLUSÃO DE BIBLIOTECA
 
 
-
-
-String VERSAO = "10.35 20/04/2023";
+String VERSAO = "10.36 05/06/2023";
 
 /*
  * VARIAVEIS DO SENSOR BMP280
@@ -187,7 +185,7 @@ IPAddress ipHost;
 WiFiUDP udp;
 WiFiServer server(80);
 
-NTPClient ntp(udp, "d.st1.ntp.br", -3 * 3600, 60000);//Cria um objeto "NTP" com as configurações.utilizada no Brasil
+NTPClient ntp(udp, "a.st1.ntp.br", -3 * 3600, 60000);//Cria um objeto "NTP" com as configurações.utilizada no Brasil
 
 DHT_Unified dht(DHTPIN, DHTTYPE);
 
@@ -195,7 +193,7 @@ DHT_Unified dht(DHTPIN, DHTTYPE);
 
 void setup() {
 
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println("-----------------------------------------");
   Serial.println("");
   //---------------------------------------
