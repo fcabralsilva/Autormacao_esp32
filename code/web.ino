@@ -84,51 +84,7 @@ String pagina() {
   buf += "  <div class=\"col-xl-6\">";
   if(sistema_solar == 1)
   {
-//    buf +=  "  <table cellpadding=\"1\" cellspacing=\"1\" class=\"table\" id=\"T1\" style=\"min-width:300px;font-size: 10px;\">";
-//    buf +=  " <thead style=\"background:#007bff;color:white\">  ";
-//    buf +=  " <tr> ";
-//    buf +=  " <th rowspan=\"1\" scope=\"col\" style=\"text-align: center;\">  ";
-//    buf +=  " <h6>        ";
-//    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">Paineis </span></big><i class=\"fas fa-solar-panel\"></i></h6>";
-//    buf +=  " </th>";
-//    buf +=  " <th rowspan=\"1\" scope=\"col\" style=\"text-align: center;\">";
-//    buf +=  " <h6>";
-//    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">Bateria </span></big> <i class=\"fas fa-car-battery\"></i></h6>";
-//    buf +=  " </th>";
-//    buf +=  " <th rowspan=\"1\" scope=\"col\" style=\"text-align: center;\">";
-//    buf +=  " <h6>";
-//    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">Inversor </span></big> <i class=\"fas fa-charging-station\"></i></h6>";
-//    buf +=  " </th>";
-//    buf +=  " </tr>";
-//    buf +=  " </thead>";
-//    buf +=  " <tbody>";
-//    buf +=  " <tr>";
-//    buf +=  " <td style=\"text-align: center;\">      ";
-//    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">" + String(tensao_s1) + " V</span></big></td> ";
-//    buf +=  " <td style=\"text-align: center;\">      ";
-//    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">" + String(tensao_s2) + " V</span></big></td> ";
-//    buf +=  " <td style=\"text-align: center;\">      ";
-//    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">" + String(tensao_s3) + " V</span></big></td> ";
-//    buf +=  " </tr>";
-//    buf +=  " <tr>";
-//    buf +=  " <td style=\"text-align: center;\">      ";
-//    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">" + String(corrente_s1, 2) + "A</span></big></td> ";
-//    buf +=  " <td style=\"text-align: center;\">      ";
-//    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">" + String(corrente_s2, 2) + "A</span></big></td>  ";
-//    buf +=  " <td style=\"text-align: center;\">      ";
-//    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">" + String(corrente_s3, 2) + "A</span></big></td>  ";
-//    buf +=  " </tr>";
-//    buf +=  " <tr>";
-//    buf +=  " <td style=\"text-align: center;\">      ";
-//    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">" + String(corrente_s1 * tensao_s1, 2) + "W</span></big></td> ";
-//    buf +=  " <td style=\"text-align: center;\">      ";
-//    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">" + String(corrente_s2 * tensao_s2, 2) + "W</span></big></td> ";
-//    buf +=  "   <td style=\"text-align: center;\">      ";
-//    buf +=  " <big><span style=\"font-family:arial,helvetica,sans-serif;\">" + String(corrente_s3 * tensao_s3, 2) + " W</span></big></td> ";
-//    buf +=  " </tr>";
-//    buf +=  " <tr><td></td><td></td><td></td></tr>";
-//    buf +=  " </tbody>";
-//    buf +=  " </table>";
+    
   }
   buf += "</div>";
   buf += "<hr />";
@@ -280,7 +236,7 @@ String pagina() {
   String html_samp = "<span dir=\"rtl\"><span style=\"font-size:16px;\"><span style=\"font-family:courier new,courier,monospace;\">";
   buf +=  "    <div>"+html_samp+"<strong>SERVIDOR</strong></span></span></span><input maxlength=\"15\" style=\"width:130px; outline:0px;\" type=\"text\"   name=\"servidor\" value=\"" + serv + "\"></div>";
   buf +=  "    <div>"+html_samp+"<strong>MAC: </strong> "+addressMac+" - "+masc_String+"</span></span></span></div>";
-  buf +=  "    <div>"+html_samp+"<strong>WIFI: </strong>"+router_gatway_String+" / <strong>SSID: </strong>"+ssid+" "+String(rssi)+"dBm</span></span></span></div>";
+  buf +=  "    <div>"+html_samp+"<strong>Roteador: </strong>"+router_gatway_String+" / <strong>SSID: </strong>"+ssid+" "+String(rssi)+"dBm</span></span></span></div>";
   buf +=  "    <div>"+html_samp+"<strong>RAM: </strong>"+ESP.getFreeHeap()+"Bytes</span></span></span></div>"; 
   //Serial.println(ESP.getFreeHeap());
   

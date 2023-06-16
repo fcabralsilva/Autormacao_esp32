@@ -193,47 +193,76 @@ void arduino_ota()
   });
 }
 
-String relogio_ntp(int retorno)
-{
+// String relogio_ntp(int retorno)
+// {
+//   char data_formatada[64];
+//   int ATUALIZAR_DH;
+//   int hora;
+//   struct tm data;//Cria a estrutura que contem as informacoes da data.
+//   //if (retorno == 0 || ATUALIZAR_DH == 0)
+//   //{
+//     ntp.update();
+//     hora = ntp.getEpochTime(); //Atualizar data e hora usando NTP online
+//     ntp.getFormattedTime();
+//     timeval tv;//Cria a estrutura temporaria para funcao abaixo.
+//     tv.tv_sec = hora;//Atribui minha data atual. Voce pode usar o NTP para isso ou o site citado no artigo!
+//     settimeofday(&tv, NULL);//Configura o RTC para manter a data atribuida atualizada.
+//     //ATUALIZAR_DH = 1;
+//   //}
+//   time_t tt = time(NULL);//Obtem o tempo atual em segundos. Utilize isso sempre que precisar obter o tempo atual
+//   data = *gmtime(&tt);//Converte o tempo atual e atribui na estruturaacao_porta
+//   if (retorno == 1)
+//   {
+//     strftime(data_formatada, 64, "%d/%m/%y %H:%M:%S", &data);//Cria uma String formatada da estrutura "data"
+//     //hora_ntp   = data_formatada;
+//   }
+//   if (retorno == 2)
+//   {
+//     strftime(data_formatada, 64, "%d/%m/%Y", &data);//Cria uma String formatada da estrutura "data"
+//     //hora_ntp = data_formatada;
+//   }
+//   if (retorno == 3)
+//   {
+//     strftime(data_formatada, 64, "%H%M", &data);//Cria uma String formatada da estrutura "data"
+//     //hora_ntp = data_formatada;
+//   }
+//   if (retorno == 4)
+//   {
+//     strftime(data_formatada, 64, "%H:%M", &data);//Cria uma String formatada da estrutura "data"
+//     //hora_ntp = data_formatada;
+//   }
+//   //hora_ntp = data_formatada;
+//   return data_formatada;
+// }
+
+String relogio_ntp(int retorno){
+  struct tm data;
   char data_formatada[64];
-  int ATUALIZAR_DH;
-  int hora;
-  struct tm data;//Cria a estrutura que contem as informacoes da data.
-  if (retorno == 0 || ATUALIZAR_DH == 0)
-  {
-    ntp.update();
-    hora = ntp.getEpochTime(); //Atualizar data e hora usando NTP online
-    ntp.getFormattedTime();
-    timeval tv;//Cria a estrutura temporaria para funcao abaixo.
-    tv.tv_sec = hora;//Atribui minha data atual. Voce pode usar o NTP para isso ou o site citado no artigo!
-    settimeofday(&tv, NULL);//Configura o RTC para manter a data atribuida atualizada.
-    ATUALIZAR_DH = 1;
+  
+  if(!getLocalTime(&data)){
+    Serial.println("Failed to obtain time");
   }
-  time_t tt = time(NULL);//Obtem o tempo atual em segundos. Utilize isso sempre que precisar obter o tempo atual
-  data = *gmtime(&tt);//Converte o tempo atual e atribui na estruturaacao_porta
-  if (retorno == 1)
+
+  //strftime(data_formatada, 64, "%d/%m/%y %H:%M:%S", &timeinfo);
+if (retorno == 1)
   {
     strftime(data_formatada, 64, "%d/%m/%y %H:%M:%S", &data);//Cria uma String formatada da estrutura "data"
-    //hora_ntp   = data_formatada;
   }
   if (retorno == 2)
   {
     strftime(data_formatada, 64, "%d/%m/%Y", &data);//Cria uma String formatada da estrutura "data"
-    //hora_ntp = data_formatada;
   }
   if (retorno == 3)
   {
     strftime(data_formatada, 64, "%H%M", &data);//Cria uma String formatada da estrutura "data"
-    //hora_ntp = data_formatada;
   }
   if (retorno == 4)
   {
     strftime(data_formatada, 64, "%H:%M", &data);//Cria uma String formatada da estrutura "data"
-    //hora_ntp = data_formatada;
   }
-  //hora_ntp = data_formatada;
   return data_formatada;
 }
+
 
 void pisca_led(int LED, boolean estado)
 {

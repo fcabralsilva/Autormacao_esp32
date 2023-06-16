@@ -1,3 +1,5 @@
+#include <NTP.h>
+#include "time.h"
 #include <ArduinoOTA.h>
 #include <Adafruit_Sensor.h>
 #include <ArduinoJson.h>
@@ -17,7 +19,7 @@
 #include <IRremote.hpp> //INCLUSÃO DE BIBLIOTECA
 
 
-String VERSAO = "10.37 05/06/2023";
+String VERSAO = "10.40 15/06/2023";
 
 /*
  * VARIAVEIS DO SENSOR BMP280
@@ -83,7 +85,7 @@ long milis =                  0;
 /*
  * VARIAVEIS DO SENSOR VS1868B Infravermelho
  */
-#define IR_RECEIVE_PIN        36
+#define IR_RECEIVE_PIN        17
 #define ENABLE_LED_FEEDBACK   LED_VERMELHO
 int codigoControle[5] =       {4077715200,3877175040,2707357440,4144561920,3810328320};
 
@@ -96,6 +98,8 @@ int bt_select;
 int bt_lido;
 int bt_repete = 3;
 int bt_conta;
+
+
 
 /*
  * VARIAVEIS DOS BOTOES DE ENTRADA E DOS RELES
@@ -189,7 +193,11 @@ IPAddress ipHost;
 WiFiUDP udp;
 WiFiServer server(80);
 
-NTPClient ntp(udp, "a.st1.ntp.br", -3 * 3600, 60000);//Cria um objeto "NTP" com as configurações.utilizada no Brasil
+//NTPClient ntp(udp, "a.st1.ntp.br", -3 * 3600, 60000);//Cria um objeto "NTP" com as configurações.utilizada no Brasil
+const char* ntpServer = "a.st1.ntp.br";
+const long  gmtOffset_sec = 0;
+const int   daylightOffset_sec = -3 * 3600;
+
 
 DHT_Unified dht(DHTPIN, DHTTYPE);
 
@@ -227,10 +235,10 @@ void setup() {
   /*
   * INICIANDO NTPClient PARA DATA E HORA NO ESP
   */
-  
-  ntp.begin();
-  ntp.forceUpdate();
-  relogio_ntp(0);
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+  //ntp.begin();
+  //ntp.forceUpdate();
+  //relogio_ntp(0);
 
   /*  
    *  INICIALIZANDO PORTAS DE ENTRADA E SAIDA
