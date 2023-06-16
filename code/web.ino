@@ -7,6 +7,12 @@ const char WEB_DIV_CONTAINER[] PROGMEM   = "<div class=\"container shadow-lg p-3
 const char WEB_NAV_MENU[] PROGMEM        = "<ul class=\"nav nav-pills mb-3\" id=\"pills-tab\" role=\"tablist\"><li class=\"nav-item\"><a class=\"nav-link active\" id=\"pills-home-tab\" data-toggle=\"pill\" href=\"#pills-home\" role=\"tab\" aria-controls=\"pills-home\" aria-selected=\"true\">Home</a></li> <li class=\"nav-item\"><a class=\"nav-link\" id=\"pills-profile-tab\" data-toggle=\"pill\" href=\"#pills-profile\" role=\"tab\" aria-controls=\"pills-profile\" aria-selected=\"false\">Configuração</a></li></ul>";
 const char WEB_BOTAO_SUCCESS[] PROGMEM   = "<a href=\"?porta=\"{A}\" title=\"Porta:\"{B}\"><button type=\"button\"  class=\"btn btn-success\">\"{C}\"</button></a>";
 const char A_HREF[] PROGMEM              = "  <a href=\"?porta={A}&acao={G}&central={B}\" title=\"Porta:{C} Botão:{D}\"><button type=\"button\"  class=\"{E}\">{F}</button></a>";
+const char TABELA_TEMP_UMID[] PROGMEM    = "<table align=\"left\" border=\"0\" cellpadding=\"1\" cellspacing=\"0\" dir=\"ltr\" style=\"width: 400px\"> <thead> <tr style=\"background:#007bff; color:white\"> <th scope=\"col\" style=\"text-align: center;\"> <span style=\"font-family:arial,helvetica,sans-serif;\">Data Hora</span></th> <th scope=\"col\" style=\"text-align: center;\"> <span style=\"font-family:arial,helvetica,sans-serif;\">Temperatura</span></th> <th scope=\"col\" style=\"text-align: center;\"> <span style=\"font-family:arial,helvetica,sans-serif;\">Umidade</span></th> </tr> </thead> <tbody>"; 
+const char TABELA_TEMP_UMID_2[] PROGMEM  = "<tr> <td> <span style=\"font-family:arial,helvetica,sans-serif;\">15/06/2023 17:00</span></td> <td style=\"text-align: center;\"> <span style=\"font-family:arial,helvetica,sans-serif;\">25.0</span></td> <td style=\"text-align: center;\"> <span style=\"font-family:arial,helvetica,sans-serif;\">99</span></td> </tr>";
+const char TABELA_TEMP_UMID_3[] PROGMEM  = "</tbody> </table>";
+
+
+
 
 String pagina() {
   /*
@@ -81,10 +87,10 @@ String pagina() {
   buf += "</div>";
   
   buf += "<div><hr />";
-  buf += "  <div class=\"col-xl-6\">";
+  buf += "  <div class=\"row\">";
   if(sistema_solar == 1)
   {
-    
+    buf +="<p>Texto de exemplo</p>";
   }
   buf += "</div>";
   buf += "<hr />";
@@ -238,8 +244,8 @@ String pagina() {
   buf +=  "    <div>"+html_samp+"<strong>MAC: </strong> "+addressMac+" - "+masc_String+"</span></span></span></div>";
   buf +=  "    <div>"+html_samp+"<strong>Roteador: </strong>"+router_gatway_String+" / <strong>SSID: </strong>"+ssid+" "+String(rssi)+"dBm</span></span></span></div>";
   buf +=  "    <div>"+html_samp+"<strong>RAM: </strong>"+ESP.getFreeHeap()+"Bytes</span></span></span></div>"; 
-  //Serial.println(ESP.getFreeHeap());
-  
+  buf +=  "    <div>"+html_samp+"<strong>Versão : </strong>"+VERSAO+"</span></span></span></div>"; 
+  buf +=       "<strong>Data Hora : </strong><a href='?00018' title='Atualizar data e hora da central'><input style=\"border:0px;width:150px\" value=\"" + relogio_ntp(1) + "\" disabled>&#8634;</a></div>";
   buf +=  "  </div>";
   buf +=  " </div>";
   buf +=  " </div>";
@@ -288,7 +294,7 @@ String pagina() {
   buf += "</div>";
   buf += "</form> ";
   buf += "</div> </div>";
-  buf += "<a href=\"http://" + ipLocalString + "\"><p style=\"text-align:center\"><p style=\"text-align:right\"> <span class=\"badge badge-pill badge-primary\">" + VERSAO + "</span></span></a></p>";
+  //buf += "<a href=\"http://" + ipLocalString + "\"><p style=\"text-align:center\"><p style=\"text-align:right\"> <span class=\"badge badge-pill badge-primary\">" + VERSAO + "</span></span></a></p>";
   buf += "<script src=\"https://code.jquery.com/jquery-3.3.1.slim.min.js\" integrity=\"sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo\" crossorigin=\"anonymous\"></script>";
   buf += "<script src=\"https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js\" integrity=\"sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy\" crossorigin=\"anonymous\"></script>";
   buf += "</body></html>";

@@ -19,7 +19,7 @@
 #include <IRremote.hpp> //INCLUSÃO DE BIBLIOTECA
 
 
-String VERSAO = "10.40 15/06/2023";
+String VERSAO = "10.41 16/06/2023";
 
 /*
  * VARIAVEIS DO SENSOR BMP280
@@ -39,7 +39,7 @@ String VERSAO = "10.40 15/06/2023";
 String logtxt           = "sim";
 const char  *nivelLog   = "4";
 int nivel_log           = 4;
-const int sistema_solar = 0;
+const int sistema_solar = 1;
 boolean ler_dht         = true;
 
 
@@ -219,7 +219,7 @@ void setup() {
    * INICIANDO AS VARIAVEIS MAIS UTEIS NO SISTEMA
    */
   WiFiManager wifiManager;
-  wifiManager.setHostname("ESP_TESTE");
+  wifiManager.setHostname("ESP_CENTRAL");
   wifiManager.setAPCallback(configModeCallback);
   wifiManager.setSaveConfigCallback(saveConfigCallback);
   if (!wifiManager.autoConnect()) {
