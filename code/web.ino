@@ -11,9 +11,6 @@ const char TABELA_TEMP_UMID[] PROGMEM    = "<table align=\"left\" border=\"0\" c
 const char TABELA_TEMP_UMID_2[] PROGMEM  = "<tr> <td> <span style=\"font-family:arial,helvetica,sans-serif;\">15/06/2023 17:00</span></td> <td style=\"text-align: center;\"> <span style=\"font-family:arial,helvetica,sans-serif;\">25.0</span></td> <td style=\"text-align: center;\"> <span style=\"font-family:arial,helvetica,sans-serif;\">99</span></td> </tr>";
 const char TABELA_TEMP_UMID_3[] PROGMEM  = "</tbody> </table>";
 
-
-
-
 String pagina() {
   /*
     --------------------------------
@@ -35,7 +32,7 @@ String pagina() {
   */
   buf += "<div class=\"tab-content\" id=\"pills-tabContent\">";
   buf += "<div class=\"tab-pane fade show active\" id=\"pills-home\" role=\"tabpanel\" aria-labelledby=\"pills-home-tab\">";
-  buf += "<div style=\"float: right;\"><a href='?00018' title='Atualizar data e hora da central'><input style=\"border:0px;width:150px\" value=\"" + relogio_ntp(1) + "\" disabled>&#8634;</a></div>";
+  buf += "<div style=\"float: right;\"></div>";
   /*
      --------------------------------
      PAINEL DE SENSORES
@@ -90,7 +87,11 @@ String pagina() {
   buf += "  <div class=\"row\">";
   if(sistema_solar == 1)
   {
-    buf +="<p>Texto de exemplo</p>";
+    buf += FPSTR(TABELA_TEMP_UMID);
+    for(int i = 0; i<=9 ; i++){
+      buf += temperatura[i];           //LINHAS GERADAS DENTRO DA FUNÇÃO gravaDhtArray()
+    }
+    buf += FPSTR(TABELA_TEMP_UMID_3);
   }
   buf += "</div>";
   buf += "<hr />";

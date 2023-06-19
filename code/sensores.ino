@@ -65,12 +65,13 @@ float sensorTemp(int sensor) {
      */
     //Verifique se alguma leitura falhou e saia mais cedo (para tentar novamente)
     if (isnan(umidade_dht_f) || isnan(temperatura_dht_f)) {
-      gravaLog(" " + relogio_ntp(1) + " - E0109-1:DHT" + String(DHTTYPE), logtxt, 1);
+      //gravaLog(" " + relogio_ntp(1) + " - E0109-1:DHT" + String(DHTTYPE), logtxt, 1);
     } else {
-      gravaLog(" " + relogio_ntp(1) + " - T:" + String(int(temperatura_dht_f)) + " U:" + String(int(umidade_dht_f)), logtxt, 4);
+      //gravaLog(" " + relogio_ntp(1) + " - T:" + String(int(temperatura_dht_f)) + " U:" + String(int(umidade_dht_f)), logtxt, 4);
     }
     timeDht = millis();
   }
+
   /*
    * GERANDO VALOR DE SAIDA
    */
@@ -82,6 +83,40 @@ float sensorTemp(int sensor) {
   }
   return valor_s;
 }
+
+void gravaDhtArray(){
+  contaLeituraDht++;
+  if(conta_temperatura <= 9)
+  {
+    //temperatura[conta_temperatura] = relogio_ntp(1) + "|" + String(sensorTemp(2));
+    linha_tr_tabela = "<tr><td><span style=\"font-family:arial,helvetica,sans-serif;\">";
+    linha_tr_tabela += relogio_ntp(1);
+    linha_tr_tabela += "</span></td><td style=\"text-align: center;\"><span style=\"font-family:arial,helvetica,sans-serif;\">";
+    linha_tr_tabela += String(sensorTemp(2));
+    linha_tr_tabela += "</span></td><td style=\"text-align: center;\"><span style=\"font-family:arial,helvetica,sans-serif;\">";
+    linha_tr_tabela += String(sensorTemp(1));
+    linha_tr_tabela += "</span></td> </tr>";
+    temperatura[conta_temperatura] = linha_tr_tabela;
+    Serial.println( " Valor:"+String(conta_temperatura) + String(temperatura[conta_temperatura]));
+    conta_temperatura++;
+  }else{
+    conta_temperatura = 0;
+    String linha_tr_tabela = "<tr><td><span style=\"font-family:arial,helvetica,sans-serif;\">";
+    linha_tr_tabela += relogio_ntp(1);
+    linha_tr_tabela += "</span></td><td style=\"text-align: center;\"><span style=\"font-family:arial,helvetica,sans-serif;\">";
+    linha_tr_tabela += String(sensorTemp(2));
+    linha_tr_tabela += "</span></td><td style=\"text-align: center;\"><span style=\"font-family:arial,helvetica,sans-serif;\">";
+    linha_tr_tabela += String(sensorTemp(1));
+    linha_tr_tabela += "</span></td> </tr>";
+    temperatura[conta_temperatura] = linha_tr_tabela;
+    Serial.println( " Valor:"+String(conta_temperatura) + String(temperatura[conta_temperatura]));
+    conta_temperatura++;
+  }
+  // somaLeituraDht+= t;
+  // float media = somaLeituraDht / contaLeituraDht; // cálculo da média
+  // Serial.println("Media Temp: " + String(media) + " Quant. Leitura: " + contaLeituraDht);
+}
+
 
 void sensorMQ() {
   /*

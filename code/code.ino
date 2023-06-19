@@ -17,9 +17,10 @@
 #include <Adafruit_BMP280.h>
 //#include "EmonLib.h"                  // USANDO PINO 36 NO SENSOR
 #include <IRremote.hpp> //INCLUSÃO DE BIBLIOTECA
+#include <Ticker.h>
 
 
-String VERSAO = "10.41 16/06/2023";
+String VERSAO = "10.50 19/06/2023";
 
 /*
  * VARIAVEIS DO SENSOR BMP280
@@ -32,6 +33,9 @@ String VERSAO = "10.41 16/06/2023";
 #define PIN_AP                0       //BOTÃO DE RESET DO WIFI
 #define BUZZER                18      //SIRENE
 #define VOLT_CAL              115.0     //VALOR DE CALIBRAÇÃO (DEVE SER AJUSTADO EM PARALELO COM UM MULTÍMETRO)
+
+/* INICIANDO TEMPORIZADORES TICKER */
+Ticker grava_leitura_dht;
 
 /*
  * VARIAVEIS DE PARAMETRIZAÇÃO
@@ -72,6 +76,10 @@ unsigned long timeMq2;
 int sensorMq2 = 0;
 int contarParaGravar1 = 0;
 
+int conta_temperatura = 0, contaLeituraDht = 0;
+String temperatura[10];
+String linha_tr_tabela;
+float somaLeituraDht = 0.00;
 /*
  * LEDS DE SINALIZAÇÃO
  */
@@ -239,6 +247,8 @@ void setup() {
   //ntp.begin();
   //ntp.forceUpdate();
   //relogio_ntp(0);
+
+  grava_leitura_dht.attach_ms(150000, gravaDhtArray);         //GRAVA NO ARRAY OS VALORES DE TEMPERATURA E UMIDADE NO ARRAY
 
   /*  
    *  INICIALIZANDO PORTAS DE ENTRADA E SAIDA
