@@ -287,7 +287,7 @@ void gravaLog(String mensagem, String permissao, int nivel)
     {
       if ( String(nivel) <= String(nivelLog))
       {
-        gravarArquivo(mensagem, "log.txt");
+        gravarArquivo(mensagem, "log.txt");                                                                                                                                                        
       }
     }
   }
@@ -505,7 +505,7 @@ void criarArquivo(String nomeArquivo) {
     if (!wFile) {
       gravaLog(" " + relogio_ntp(1) + " - E0109:Criar arquivo " + nomeArquivo, logtxt, 1);
     } else {
-      gravaLog(" " + relogio_ntp(1) + " - Arquivo " + nomeArquivo + " criado", logtxt, 1);
+      gravaLog(" " + relogio_ntp(1) + " - Arquivo " + nomeArquivo + " criado", logtxt, 3);
     }
   }
   wFile.close();
@@ -552,9 +552,20 @@ void gravarArquivo(String msg, String arq) {
       gravaLog(" " + relogio_ntp(1) + " - E0106:Abrir arquivo " + arq, logtxt, 1);
     } else {
       param1.println(msg);
-      gravaLog(" " + relogio_ntp(1) + " - Gravando: " + msg, logtxt, 1);
+      gravaLog(" " + relogio_ntp(1) + " - Gravando: " + msg, logtxt, 3);
     }
     param1.close();
+  }
+  if(arq == "sensor_dht.txt"){
+    criarArquivo("sensor_dht.txt");
+    File sensor_dht = SPIFFS.open("/sensor_dht.txt","a+");
+    if(!sensor_dht){
+      gravaLog(" " + relogio_ntp(1) + " - E0106:Abrir arquivo " + arq, logtxt, 1);
+    }else {
+      sensor_dht.println(msg);
+      //gravaLog(" " + relogio_ntp(1) + " - Gravando: " + msg, logtxt, 3);
+    }
+    sensor_dht.close();
   }
   msg.remove(0);
   arq.remove(0);

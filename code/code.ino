@@ -16,58 +16,59 @@
 #include <LiquidCrystal_I2C.h>
 #include <Adafruit_BMP280.h>
 //#include "EmonLib.h"                  // USANDO PINO 36 NO SENSOR
-#include <IRremote.hpp> //INCLUSÃO DE BIBLIOTECA
+#include <IRremote.hpp>  //INCLUSÃO DE BIBLIOTECA
 #include <Ticker.h>
 
 
-String VERSAO = "10.50 19/06/2023";
+String VERSAO = "10.51 21/06/2023";
 
 /*
  * VARIAVEIS DO SENSOR BMP280
  */
-#define BMP_SCK  (13)
+#define BMP_SCK (13)
 #define BMP_MISO (12)
 #define BMP_MOSI (11)
-#define BMP_CS   (10)
+#define BMP_CS (10)
 
-#define PIN_AP                0       //BOTÃO DE RESET DO WIFI
-#define BUZZER                18      //SIRENE
-#define VOLT_CAL              115.0     //VALOR DE CALIBRAÇÃO (DEVE SER AJUSTADO EM PARALELO COM UM MULTÍMETRO)
+#define PIN_AP 0        //BOTÃO DE RESET DO WIFI
+#define BUZZER 18       //SIRENE
+#define VOLT_CAL 115.0  //VALOR DE CALIBRAÇÃO (DEVE SER AJUSTADO EM PARALELO COM UM MULTÍMETRO)
 
 /* INICIANDO TEMPORIZADORES TICKER */
 Ticker grava_leitura_dht;
+Ticker grava_leitura_dht_0;
 
 /*
  * VARIAVEIS DE PARAMETRIZAÇÃO
  */
-String logtxt           = "sim";
-const char  *nivelLog   = "4";
-int nivel_log           = 4;
+String logtxt = "sim";
+const char* nivelLog = "4";
+int nivel_log = 4;
 const int sistema_solar = 1;
-boolean ler_dht         = true;
+boolean ler_dht = true;
 
 
 /*
  * VARIAVEIS DO SENSOR DHT11 OU DHT22
  */
-#define DHTPIN                19      //PINO ENTRADA SENSOR DHT11
-#define DHTTYPE               DHT22   //TIPO DE SENSOR DHT22 OU DHT11
+#define DHTPIN 19      //PINO ENTRADA SENSOR DHT11
+#define DHTTYPE DHT22  //TIPO DE SENSOR DHT22 OU DHT11
 unsigned long timeDht;
 
 /*
  * VARIAVEIS DO SENSOR MQXX
  */
-#define PIN_MQ2               34      //PINO ENTRADA SENSOR GAS
-#define VRL_VALOR             5       //resistência de carga
-#define RO_FATOR_AR_LIMPO     9.83    //resistência do sensor em ar limpo 9.83 de acordo com o datasheet
-#define ITERACOES_CALIBRACAO  25      //numero de leituras para calibracao
-#define ITERACOES_LEITURA     5       //numero de leituras para analise
-#define GAS_LPG               0   
-#define GAS_CO                1
-#define SMOKE                 2
-float LPGCurve[3]   =  {2.3, 0.20, -0.47};
-float COCurve[3]    =  {2.3, 0.72, -0.34};
-float SmokeCurve[3] =  {2.3, 0.53, -0.44};
+#define PIN_MQ2 34               //PINO ENTRADA SENSOR GAS
+#define VRL_VALOR 5              //resistência de carga
+#define RO_FATOR_AR_LIMPO 9.83   //resistência do sensor em ar limpo 9.83 de acordo com o datasheet
+#define ITERACOES_CALIBRACAO 25  //numero de leituras para calibracao
+#define ITERACOES_LEITURA 5      //numero de leituras para analise
+#define GAS_LPG 0
+#define GAS_CO 1
+#define SMOKE 2
+float LPGCurve[3] = { 2.3, 0.20, -0.47 };
+float COCurve[3] = { 2.3, 0.72, -0.34 };
+float SmokeCurve[3] = { 2.3, 0.53, -0.44 };
 float Ro = 10;
 String GLP, FUMACA, CO;
 const char *LIMITE_MQ2 = "99", *LIMITE_MQ2_FU = "99";
@@ -80,28 +81,29 @@ int conta_temperatura = 0, contaLeituraDht = 0;
 String temperatura[10];
 String linha_tr_tabela;
 float somaLeituraDht = 0.00;
+
 /*
  * LEDS DE SINALIZAÇÃO
  */
-#define LED_VERDE             15
-#define LED_VERMELHO          4
-#define LED_AZUL              2
-const char interval =         500;        //VARIAVEL DO TEMPO DE INTERVALO DO PISCALED
-long milis =                  0;         
+#define LED_VERDE 15
+#define LED_VERMELHO 4
+#define LED_AZUL 2
+const char interval = 500;  //VARIAVEL DO TEMPO DE INTERVALO DO PISCALED
+long milis = 0;
 
 
 /*
  * VARIAVEIS DO SENSOR VS1868B Infravermelho
  */
-#define IR_RECEIVE_PIN        17
-#define ENABLE_LED_FEEDBACK   LED_VERMELHO
-int codigoControle[5] =       {4077715200,3877175040,2707357440,4144561920,3810328320};
+#define IR_RECEIVE_PIN 17
+#define ENABLE_LED_FEEDBACK LED_VERMELHO
+int codigoControle[5] = { 4077715200, 3877175040, 2707357440, 4144561920, 3810328320 };
 
 /*
  * VARIAVEIS DE MATRIZ DE BOTÕES
  */
-#define N_BOTAO               5
-#define ENTRADA               35
+#define N_BOTAO 5
+#define ENTRADA 35
 int bt_select;
 int bt_lido;
 int bt_repete = 3;
@@ -114,7 +116,7 @@ int bt_conta;
  */
 struct botao1 {
   const short entrada = 32, rele = 33;
-  boolean estado = 0, estado_atual = 0  , estado_antes = 0;
+  boolean estado = 0, estado_atual = 0, estado_antes = 0;
   int contador = 0;
   const char* modelo = "interruptor";
   const char* nomeInter = "Com1";
@@ -122,15 +124,15 @@ struct botao1 {
   const char* agenda_in;
   const char* agenda_out;
   const char* timer;
-  int pin_pir_1     = 32;
-  int led_pir_1     = 2;
+  int pin_pir_1 = 32;
+  int led_pir_1 = 2;
   unsigned long tempo_pir_1;
-  bool conta_pir_1  = 0;
+  bool conta_pir_1 = 0;
 } botao1;
 
 struct botao2 {
   const short entrada = 25, rele = 26;
-  boolean estado = 0, estado_atual = 0  , estado_antes = 0;
+  boolean estado = 0, estado_atual = 0, estado_antes = 0;
   int contador = 0;
   const char* modelo = "interruptor";
   const char* tipo = "0";
@@ -141,7 +143,7 @@ struct botao2 {
 
 struct botao3 {
   const short entrada = 14, rele = 27;
-  boolean estado = 0, estado_atual = 0  , estado_antes = 0;
+  boolean estado = 0, estado_atual = 0, estado_antes = 0;
   int contador = 0;
   const char* tipo = "0";
   const char* modelo = "interruptor";
@@ -152,7 +154,7 @@ struct botao3 {
 
 struct botao4 {
   const short entrada = 12, rele = 13;
-  boolean estado = 0, estado_atual = 0  , estado_antes = 0;
+  boolean estado = 0, estado_atual = 0, estado_antes = 0;
   int contador = 0;
   const char* tipo = "0";
   const char* modelo = "interruptor";
@@ -175,26 +177,35 @@ String addressMac;
 String ipLocalString;
 const char *ssid, *password, *servidor;
 String buff, URL, serv, buf;
-#define portaServidor         80       //PORTA DE COMUNICAÇÃO USADO NO WIFI
+#define portaServidor 80  //PORTA DE COMUNICAÇÃO USADO NO WIFI
 
 /*
  * CONTROLE DE ARQUIVO JSON
  */
-const char *json;
+const char* json;
 int cont_ip_banco = 0;
-const char *conslog;          
+const char* conslog;
 
 int freq = 2000, channel = 0, resolution = 8, n = 0;
-byte grau[8] ={ B00001100,B00010010,B00010010,B00001100,B00000000,B00000000,B00000000,B00000000,};
+byte grau[8] = {
+  B00001100,
+  B00010010,
+  B00010010,
+  B00001100,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+};
 
 //const String comandos_txt = "<p><strong>PORTAS ENTRADA SA&Iacute;DA</strong></p><p>entrada 1 = 32, rele 1 = 33<br />entrada 2 = 25, rele 2 = 18<br />entrada 3 = 14, rele 3 = 27<br />entrada 4 = 12, rele 4 = 13</p><p><strong><span class=\"pl-c1\">LED'S PARA MONITORAMENTO</span></strong></p><p><span class=\"pl-c1\">LED_AZUL&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 2<br />LED_VERDE&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;4<br />LED_VERMELHO 16</span></p><p><strong><span class=\"pl-c1\">SENSORES</span></strong></p><p><span class=\"pl-c1\">BUZZER&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 5<br />PIN_MQ2&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;34<br />DHTPIN&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;19</span></p><p><strong>REINCIAR CENTRAL POR COMANDA HTTP</strong>&nbsp;</p><p>HTTP://IP_HOST/?00000</p><p><strong>REINICIAS CONFIGURAÇÕES WIFI</strong>&nbsp;</p><p>HTTP://IP_HOST/?00002</p><p><strong>EXEMPLO NA CHAMADA WEB DESLIGAR LAMPADA</strong>&nbsp;</p><p>HTTP://IP_HOST/?porta=NN&amp;acao=(liga ou&nbsp;desligar)&amp;central=IP_HOST</p><p><strong>CALIBRAR SENSOR MQ2</strong></p><p>HTTP://IP_HOST/?0001</p><p><strong>APAGAR ARQUIVO DE LOG MANUALMENTE</strong></p><p>HTTP://IP_HOST/?00013</p><p><strong>APLICAR CONFIGURA&Ccedil;&Otilde;ES MINIMAS PARA FUNCIONAMENTO DA CENTRAL</strong></p><p>HTTP://IP_HOST/?00014</p><p><strong>DESLIGAR TODOS AS PORTAS OUTPUT DA CENTRAL</strong></p><p>HTTP://IP_HOST/?00015</p><p><strong>APLICAR AS CONFIGURA&Ccedil;&Otilde;ES AP&Oacute;S SEREM GRAVADAS NA CENTRAL</strong>&nbsp;</p><p>HTTP://IP_HOST/?00016</p>";
 //float corrente_s1 = 0.00, tensao_s1 = 0.00, corrente_s2 = 0.00, tensao_s2 = 0.00, corrente_s3 = 0.00, tensao_s3 = 0.00;
 
-Adafruit_BMP280 bmp;                    //  I2C Adafruit_BMP280
+Adafruit_BMP280 bmp;  //  I2C Adafruit_BMP280
 
 //EnergyMonitor emon1;                    //  CRIA UMA INSTÂNCIA
 
-LiquidCrystal_I2C lcd(0x27, 16, 2);     //  FUNÇÃO DO TIPO "LiquidCrystal_I2C"
+LiquidCrystal_I2C lcd(0x27, 16, 2);  //  FUNÇÃO DO TIPO "LiquidCrystal_I2C"
 
 IPAddress ipHost;
 
@@ -203,8 +214,8 @@ WiFiServer server(80);
 
 //NTPClient ntp(udp, "a.st1.ntp.br", -3 * 3600, 60000);//Cria um objeto "NTP" com as configurações.utilizada no Brasil
 const char* ntpServer = "a.st1.ntp.br";
-const long  gmtOffset_sec = 0;
-const int   daylightOffset_sec = -3 * 3600;
+const long gmtOffset_sec = 0;
+const int daylightOffset_sec = -3 * 3600;
 
 
 DHT_Unified dht(DHTPIN, DHTTYPE);
@@ -219,7 +230,7 @@ void setup() {
   //---------------------------------------
   //    INICIALIZA O DISPLAY LCD
   //---------------------------------------
-  lcd.init();                                  // INICIALIZA O DISPLAY LCD
+  lcd.init();  // INICIALIZA O DISPLAY LCD
   lcd.setBacklight(HIGH);
   lcd.createChar(0, grau);
   /*
@@ -248,7 +259,6 @@ void setup() {
   //ntp.forceUpdate();
   //relogio_ntp(0);
 
-  grava_leitura_dht.attach_ms(150000, gravaDhtArray);         //GRAVA NO ARRAY OS VALORES DE TEMPERATURA E UMIDADE NO ARRAY
 
   /*  
    *  INICIALIZANDO PORTAS DE ENTRADA E SAIDA
@@ -273,7 +283,7 @@ void setup() {
   pinMode(LED_VERMELHO, OUTPUT);
   pinMode(LED_AZUL, OUTPUT);
 
-  IrReceiver.begin(IR_RECEIVE_PIN, ENABLE_LED_FEEDBACK); // Iniciar o receptor IR
+  IrReceiver.begin(IR_RECEIVE_PIN, ENABLE_LED_FEEDBACK);  // Iniciar o receptor IR
 
   /*
    * INICIANDO SISTEMA DE ARQUIVOS 
@@ -281,9 +291,9 @@ void setup() {
   openFS();
   criarArquivo("/param.txt");
   criarArquivo("/log.txt");
-  
+
   gravarArquivo("\n\n +++ INICIANDO SISTEMA +++ Versão: " + VERSAO + "\n\n", "log.txt");
-  
+
   /*
    * INICIANDO SENSOR DHT
    */
@@ -300,14 +310,14 @@ void setup() {
   if (!bmp.begin(0x76)) {
     gravarArquivo(" " + relogio_ntp(1) + "Nenhum sensor BMP280 válido, verifique endereço I2C!", "log.txt");
   }
-	// Default settings from datasheet
+  // Default settings from datasheet
   bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
                   Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
                   Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
                   Adafruit_BMP280::FILTER_X16,      /* Filtering. */
                   Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
   // ----------------------------------------------
-  
+
   calibrarSensor();
 
   arduino_ota();
@@ -319,19 +329,24 @@ void setup() {
    */
   ledcSetup(channel, freq, resolution);
   ledcAttachPin(5, channel);
-  lcd.setCursor(0, 0);lcd.print("    BEM VINDO   ");  //SETA A POSIÇÃO EM QUE O CURSOR INCIALIZA(LINHA 1)
-  lcd.setCursor(0, 1);lcd.print(VERSAO);              //SETA A POSIÇÃO EM QUE O CURSOR RECEBE O TEXTO A SER MOSTRADO(LINHA 2)      
+  lcd.setCursor(0, 0);
+  lcd.print("    BEM VINDO   ");  //SETA A POSIÇÃO EM QUE O CURSOR INCIALIZA(LINHA 1)
+  lcd.setCursor(0, 1);
+  lcd.print(VERSAO);  //SETA A POSIÇÃO EM QUE O CURSOR RECEBE O TEXTO A SER MOSTRADO(LINHA 2)
   digitalWrite(BUZZER, HIGH);
   delay(500);
   digitalWrite(BUZZER, LOW);
   delay(2500);
   lcd.clear();
-  lcd.setCursor(2, 1);lcd.print(ipLocalString);       //SETA A POSIÇÃO EM QUE O CURSOR RECEBE O TEXTO A SER MOSTRADO(LINHA 2)
+  lcd.setCursor(2, 1);
+  lcd.print(ipLocalString);  //SETA A POSIÇÃO EM QUE O CURSOR RECEBE O TEXTO A SER MOSTRADO(LINHA 2)
   delay(2500);
   lcd.clear();
+
+  grava_leitura_dht_0.once_ms(1000, gravaDhtArray);
+  grava_leitura_dht.attach_ms(1800000, gravaDhtArray);  //GRAVA NO ARRAY OS VALORES DE TEMPERATURA E UMIDADE NO ARRAY
 }
-void loop()
-{
+void loop() {
 
   ArduinoOTA.handle();
 
@@ -341,48 +356,46 @@ void loop()
 
   //capturaIr();
 
-  while (cont_ip_banco < 1)
-  {
+  while (cont_ip_banco < 1) {
     // FAZENDO LEITURA DE PARAMETROS DO SISTEMA
     openFS();
     StaticJsonDocument<680> doc;
     json = lerArquivoParam().c_str();
     DeserializationError error = deserializeJson(doc, json);
-    if (error)
-    {
+    if (error) {
       gravaLog(" " + relogio_ntp(1) + " - E0101:Arquivo json: ", logtxt, 1);
       Serial.println(error.c_str());
       cont_ip_banco++;
       return;
     }
     JsonObject root = doc.as<JsonObject>();
-    servidor          = root["sv"];
-    botao1.nomeInter  = root["i_1"];
-    botao1.tipo       = root["ti_1"];
-    botao1.modelo     = root["s_1"];
-    botao1.agenda_in  = root["h_i_1"];
+    servidor = root["sv"];
+    botao1.nomeInter = root["i_1"];
+    botao1.tipo = root["ti_1"];
+    botao1.modelo = root["s_1"];
+    botao1.agenda_in = root["h_i_1"];
     botao1.agenda_out = root["h_o_1"];
-    botao1.timer      = root["t_1"];
-    botao2.nomeInter  = root["i_2"];
-    botao2.tipo       = root["ti_2"];
-    botao2.modelo     = root["s_2"];
-    botao2.agenda_in  = root["h_i_2"];
+    botao1.timer = root["t_1"];
+    botao2.nomeInter = root["i_2"];
+    botao2.tipo = root["ti_2"];
+    botao2.modelo = root["s_2"];
+    botao2.agenda_in = root["h_i_2"];
     botao2.agenda_out = root["h_o_2"];
-    botao3.nomeInter  = root["i_3"];
-    botao3.tipo       = root["ti_3"];
-    botao3.modelo     = root["s_3"];
-    botao3.agenda_in  = root["h_i_3"];
+    botao3.nomeInter = root["i_3"];
+    botao3.tipo = root["ti_3"];
+    botao3.modelo = root["s_3"];
+    botao3.agenda_in = root["h_i_3"];
     botao3.agenda_out = root["h_o_3"];
-    botao4.nomeInter  = root["i_4"];
-    botao4.tipo       = root["ti_4"];
-    botao4.modelo     = root["s_4"];
-    botao4.agenda_in  = root["h_i_4"];
+    botao4.nomeInter = root["i_4"];
+    botao4.tipo = root["ti_4"];
+    botao4.modelo = root["s_4"];
+    botao4.agenda_in = root["h_i_4"];
     botao4.agenda_out = root["h_o_4"];
-    conslog           = root["l"];
-    logtxt            = String(conslog);
-    nivelLog          = root["n"];
-    LIMITE_MQ2        = root["mq"];
-    LIMITE_MQ2_FU     = root["fu"];
+    conslog = root["l"];
+    logtxt = String(conslog);
+    nivelLog = root["n"];
+    LIMITE_MQ2 = root["mq"];
+    LIMITE_MQ2_FU = root["fu"];
     cont_ip_banco++;
     serv = String(servidor);
     gravaLog(" " + relogio_ntp(1) + " - BD:" + String(servidor), logtxt, 2);
@@ -392,43 +405,43 @@ void loop()
   /*
    * LEITURA DO TELADO DE 5 BOTOES
    */
-//  for (int i = 0; i < N_BOTAO; i++) {
-//    if (analogRead_bt(i)) {
-//      bt_lido = i;
-//      if(bt_repete == bt_lido){
-//        if(bt_lido == 3){
-//          bt_conta++;
-//          delay(200);
-//          bt_repete = bt_lido;
-//        }
-//        if(bt_conta > 2){
-//          bt_conta = 0;
-//        }
-//      }
-//    }
-//  }
-//  lcd_temp_umid();
-//  switch (bt_lido) {
-//  case 0:
-//    lcd.clear();
-//    lcd_temp_umid();
-//    break;
-//  case 1:
-//    
-//    lcd.clear();
-//    lcd_mq();
-//    break;
-//  default:
-//    // comando(s)
-//    break;
-//}
+  //  for (int i = 0; i < N_BOTAO; i++) {
+  //    if (analogRead_bt(i)) {
+  //      bt_lido = i;
+  //      if(bt_repete == bt_lido){
+  //        if(bt_lido == 3){
+  //          bt_conta++;
+  //          delay(200);
+  //          bt_repete = bt_lido;
+  //        }
+  //        if(bt_conta > 2){
+  //          bt_conta = 0;
+  //        }
+  //      }
+  //    }
+  //  }
+  //  lcd_temp_umid();
+  //  switch (bt_lido) {
+  //  case 0:
+  //    lcd.clear();
+  //    lcd_temp_umid();
+  //    break;
+  //  case 1:
+  //
+  //    lcd.clear();
+  //    lcd_mq();
+  //    break;
+  //  default:
+  //    // comando(s)
+  //    break;
+  //}
   /*
    * LEITURA DE COMANDOS TRANSMITIDO PELA SERIAL
    */
   WiFiClient client = server.available();
-  if (Serial.available() > 0) {                                                             
+  if (Serial.available() > 0) {
     // Lê toda string recebida
-    String recebido = leStringSerial();                                                     
+    String recebido = leStringSerial();
     gravaLog(" " + relogio_ntp(1) + " - Serial: " + recebido, logtxt, 2);
 
     /*
@@ -459,8 +472,7 @@ void loop()
         {
           tensao_s3 = quebraString( "sv_3", recebido).toFloat();
         } */
-    if (quebraString( "rede", recebido) == "1")
-    {
+    if (quebraString("rede", recebido) == "1") {
       printWifiData();
     }
     recebido.remove(0);
@@ -474,13 +486,11 @@ void loop()
      INICIO DA FUNÇÃO AGENDAMENTO
     --------------------------------------
   */
-  if ((relogio_ntp(3) == botao1.agenda_in) && (botao1.estado == false) )
-  {
+  if ((relogio_ntp(3) == botao1.agenda_in) && (botao1.estado == false)) {
     acionaPorta(botao1.rele, "", "liga");
     botao1.estado = true;
   }
-  if ((relogio_ntp(3) == botao1.agenda_out) && (botao1.estado == true))
-  {
+  if ((relogio_ntp(3) == botao1.agenda_out) && (botao1.estado == true)) {
     acionaPorta(botao1.rele, "", "desl");
     botao1.estado = false;
   }
@@ -493,20 +503,16 @@ void loop()
     ------------------------------------------------
   */
   String s_timer_valor = String(botao1.timer);
-  if (s_timer_valor.toInt() > 0)
-  {
-    if (cont_timer == 1)
-    {
+  if (s_timer_valor.toInt() > 0) {
+    if (cont_timer == 1) {
       i_timer_valor = s_timer_valor.toInt();
       cont_timer = 0;
     }
-    if (botao1.estado)
-    {
-      int i_timer = i_timer_valor-- ;
-      Serial.println( "timer configurado : " + String(i_timer));
+    if (botao1.estado) {
+      int i_timer = i_timer_valor--;
+      Serial.println("timer configurado : " + String(i_timer));
       delay(1000);
-      if (i_timer_valor == 0)
-      {
+      if (i_timer_valor == 0) {
         acionaPorta(botao1.rele, "", "desl");
         cont_timer = 0;
       }
@@ -517,15 +523,12 @@ void loop()
     INICIO DA FUNÇÃO BOTÃO POR PULSO
     ---------------------------------------
   */
-  if (String(botao1.modelo) == "pulso")
-  {
-    if (digitalRead(botao1.entrada) == (String(botao1.tipo).toInt()))
-    {
-      if (nContar == 0)Serial.println("\n"); Serial.println("\n E1 Pulso");
-      while ((digitalRead(botao1.entrada) == (String(botao1.tipo).toInt())) && (nContar <= 300) )
-      {
-        if (millis() >= tempo + paramTempo)
-        {
+  if (String(botao1.modelo) == "pulso") {
+    if (digitalRead(botao1.entrada) == (String(botao1.tipo).toInt())) {
+      if (nContar == 0) Serial.println("\n");
+      Serial.println("\n E1 Pulso");
+      while ((digitalRead(botao1.entrada) == (String(botao1.tipo).toInt())) && (nContar <= 300)) {
+        if (millis() >= tempo + paramTempo) {
           botao1.contador++;
           nContar++;
           Serial.print(botao1.contador, DEC);
@@ -541,12 +544,10 @@ void loop()
       INICIO DA FUNÇÃO BOTÃO POR INTERRUPTOR
       ---------------------------------------
     */
-  } else if (String(botao1.modelo) == "interruptor")
-  {
+  } else if (String(botao1.modelo) == "interruptor") {
     botao1.estado_atual = digitalRead(botao1.entrada);
-    if (botao1.estado_atual != botao1.estado_antes )
-    {
-      if (nContar == 0)Serial.println(" E1 Inter");
+    if (botao1.estado_atual != botao1.estado_antes) {
+      if (nContar == 0) Serial.println(" E1 Inter");
       botao1.estado_antes = botao1.estado_atual;
       botao1.contador = 3;
     }
@@ -559,8 +560,7 @@ void loop()
     INICIO DA FUNÇÃO POR PRESENÇA
     ---------------------------------------
   */
-  if (String(botao1.modelo) == "pir")
-  {
+  if (String(botao1.modelo) == "pir") {
     bool isDetected = digitalRead(botao1.pin_pir_1);
 
     //Verifica se o sensor detectou presença, se detectado, altera
@@ -582,8 +582,7 @@ void loop()
     //Variavel de contagem
     if (botao1.conta_pir_1 == 1) {
       //Se passar X' segundos muda variavel de contagem e desliga o led do pir
-      if ((millis() - botao1.tempo_pir_1) >= 1200000)
-      {
+      if ((millis() - botao1.tempo_pir_1) >= 1200000) {
         botao1.tempo_pir_1 = millis();
         botao1.conta_pir_1 = 0;
         int temp_pir = botao1.tempo_pir_1 / 1000;
@@ -605,8 +604,7 @@ void loop()
       ---------------------------------------
     */
   }
-  if ((botao1.contador >= 1) && (botao1.contador <= 9))
-  {
+  if ((botao1.contador >= 1) && (botao1.contador <= 9)) {
     nContar = 0;
     if (botao1.estado == false) {
       botao1.estado = true;
@@ -635,13 +633,11 @@ void loop()
     INICIO DA FUNÇÃO AGENDAMENTO
     --------------------------------------
   */
-  if ((relogio_ntp(3) == botao2.agenda_in) && (botao2.estado == false) )
-  {
+  if ((relogio_ntp(3) == botao2.agenda_in) && (botao2.estado == false)) {
     acionaPorta(botao2.rele, "", "liga");
     botao2.estado = true;
   }
-  if ((relogio_ntp(3) == botao2.agenda_out) && (botao2.estado == true))
-  {
+  if ((relogio_ntp(3) == botao2.agenda_out) && (botao2.estado == true)) {
     acionaPorta(botao2.rele, "", "desl");
     botao2.estado = false;
   }
@@ -659,15 +655,12 @@ void loop()
     INICIO DA FUNÇÃO BOTÃO POR PULSO
     ---------------------------------------
   */
-  if (String(botao2.modelo) == "pulso")
-  {
-    if (digitalRead(botao2.entrada) == (String(botao2.tipo).toInt()))
-    {
-      if (nContar == 0)Serial.println("\n"); Serial.println(" E2 Pulso");
-      while ((digitalRead(botao2.entrada) == (String(botao2.tipo).toInt())) && (nContar <= 300) )
-      {
-        if (millis() >= tempo + paramTempo)
-        {
+  if (String(botao2.modelo) == "pulso") {
+    if (digitalRead(botao2.entrada) == (String(botao2.tipo).toInt())) {
+      if (nContar == 0) Serial.println("\n");
+      Serial.println(" E2 Pulso");
+      while ((digitalRead(botao2.entrada) == (String(botao2.tipo).toInt())) && (nContar <= 300)) {
+        if (millis() >= tempo + paramTempo) {
           botao2.contador++;
           nContar++;
           Serial.print(botao2.contador, DEC);
@@ -684,12 +677,11 @@ void loop()
      INICIO DA FUNÇÃO BOTÃO POR INTERRUPTOR
      ---------------------------------------
   */
-  if (String(botao2.modelo) == "interruptor")
-  {
+  if (String(botao2.modelo) == "interruptor") {
     botao2.estado_atual = digitalRead(botao2.entrada);
-    if (botao2.estado_atual != botao2.estado_antes )
-    {
-      if (nContar == 0)Serial.println("\n"); Serial.println(" E2 Inter ");
+    if (botao2.estado_atual != botao2.estado_antes) {
+      if (nContar == 0) Serial.println("\n");
+      Serial.println(" E2 Inter ");
       botao2.estado_antes = botao2.estado_atual;
       botao2.contador = 3;
       //Serial.print(botao2.contador, DEC);
@@ -712,8 +704,7 @@ void loop()
      ACIONAMENTO APÓS FUNÇÕES ACIMA
      ---------------------------------------
   */
-  if ((botao2.contador >= 1) && (botao2.contador <= 9))
-  {
+  if ((botao2.contador >= 1) && (botao2.contador <= 9)) {
     nContar = 0;
     if (botao2.estado == false) {
       botao2.estado = true;
@@ -751,15 +742,12 @@ void loop()
     INICIO DA FUNÇÃO BOTÃO POR PULSO
     ---------------------------------------
   */
-  if (String(botao3.modelo) == "pulso")
-  {
-    if (digitalRead(botao3.entrada) == (String(botao3.tipo).toInt()))
-    {
-      if (nContar == 0)Serial.println("\n"); Serial.println(" E3 Pulso");
-      while ((digitalRead(botao3.entrada) == (String(botao3.tipo).toInt())) && (nContar <= 300) )
-      {
-        if (millis() >= tempo + paramTempo)
-        {
+  if (String(botao3.modelo) == "pulso") {
+    if (digitalRead(botao3.entrada) == (String(botao3.tipo).toInt())) {
+      if (nContar == 0) Serial.println("\n");
+      Serial.println(" E3 Pulso");
+      while ((digitalRead(botao3.entrada) == (String(botao3.tipo).toInt())) && (nContar <= 300)) {
+        if (millis() >= tempo + paramTempo) {
           botao3.contador++;
           nContar++;
           Serial.print(botao3.contador, DEC);
@@ -776,12 +764,11 @@ void loop()
      INICIO DA FUNÇÃO BOTÃO POR INTERRUPTOR
      ---------------------------------------
   */
-  if (String(botao3.modelo) == "interruptor")
-  {
+  if (String(botao3.modelo) == "interruptor") {
     botao3.estado_atual = digitalRead(botao3.entrada);
-    if (botao3.estado_atual != botao3.estado_antes )
-    {
-      if (nContar == 0)Serial.println("\n"); Serial.print(" E3 Inter");
+    if (botao3.estado_atual != botao3.estado_antes) {
+      if (nContar == 0) Serial.println("\n");
+      Serial.print(" E3 Inter");
       botao3.estado_antes = botao3.estado_atual;
       botao3.contador = 3;
       //Serial.print(botao3.contador, DEC);
@@ -805,8 +792,7 @@ void loop()
      ACIONAMENTO APÓS FUNÇÕES ACIMA
      ---------------------------------------
   */
-  if ((botao3.contador >= 2) && (botao3.contador <= 9))
-  {
+  if ((botao3.contador >= 2) && (botao3.contador <= 9)) {
     nContar = 0;
     if (botao3.estado == false) {
       botao3.estado = true;
@@ -847,15 +833,12 @@ void loop()
     INICIO DA FUNÇÃO BOTÃO POR PULSO
     ---------------------------------------
   */
-  if (String(botao4.modelo) == "pulso")
-  {
-    if (digitalRead(botao4.entrada) == (String(botao4.tipo).toInt()))
-    {
-      if (nContar == 0)Serial.println("\n"); Serial.println("\n E4 Pulso");
-      while ((digitalRead(botao4.entrada) == (String(botao4.tipo).toInt())) && (nContar <= 300) )
-      {
-        if (millis() >= tempo + paramTempo)
-        {
+  if (String(botao4.modelo) == "pulso") {
+    if (digitalRead(botao4.entrada) == (String(botao4.tipo).toInt())) {
+      if (nContar == 0) Serial.println("\n");
+      Serial.println("\n E4 Pulso");
+      while ((digitalRead(botao4.entrada) == (String(botao4.tipo).toInt())) && (nContar <= 300)) {
+        if (millis() >= tempo + paramTempo) {
           botao4.contador++;
           nContar++;
           Serial.print(botao4.contador, DEC);
@@ -872,12 +855,10 @@ void loop()
     INICIO DA FUNÇÃO BOTÃO POR INTERRUPTOR
     ---------------------------------------
   */
-  if (String(botao4.modelo) == "interruptor")
-  {
+  if (String(botao4.modelo) == "interruptor") {
     botao4.estado_atual = digitalRead(botao4.entrada);
-    if (botao4.estado_atual != botao4.estado_antes )
-    {
-      if (nContar == 0)Serial.println(" E4 Inter");
+    if (botao4.estado_atual != botao4.estado_antes) {
+      if (nContar == 0) Serial.println(" E4 Inter");
       botao4.estado_antes = botao4.estado_atual;
       botao4.contador = 3;
       //Serial.print(botao4.contador, DEC);
@@ -899,8 +880,7 @@ void loop()
     ACIONAMENTO APÓS FUNÇÕES ACIMA
     ---------------------------------------
   */
-  if ((botao4.contador >= 2) && (botao4.contador <= 9))
-  {
+  if ((botao4.contador >= 2) && (botao4.contador <= 9)) {
     nContar = 0;
     if (botao4.estado == false) {
       botao4.estado = true;
@@ -924,8 +904,7 @@ void loop()
   if ((botao1.contador >= 10)
       || (botao2.contador >= 10)
       || (botao3.contador >= 10)
-      || (botao4.contador >= 10))
-  {
+      || (botao4.contador >= 10)) {
     gravaLog(" " + relogio_ntp(1) + "\n - DESL. RELES", logtxt, 2);
     acionaPorta(botao1.rele, "", "desl");
     botao1.estado = false;
@@ -946,16 +925,14 @@ void loop()
     LEITURA DA REQUISIÇÕES DE CHAMADAS HTTP GET
     ---------------------------------------
   */
-  if (client)
-  {
+  if (client) {
     URL = "";
     URL = client.readStringUntil('\r');
   } else {
     URL = "vazio";
   }
 
-  if (URL != "vazio")
-  {
+  if (URL != "vazio") {
     /*
       ------------------------------------------------------------------------------
       EXEMPLO NA CHAMADA WEB DESLIGAR LAMPADA -
@@ -966,47 +943,38 @@ void loop()
     gravaLog(" " + relogio_ntp(1) + " - " + String(URL), logtxt, 4);
     URL = "";
     String requisicao = stringUrl.substring(6, 11);
-    if (requisicao == "porta")
-    {
-      String numero   = stringUrl.substring(12, 14);
-      String acao     = stringUrl.substring(20, 24);
-      String central  = stringUrl.substring(33, 40);
-      int numeroInt   = numero.toInt();
+    if (requisicao == "porta") {
+      String numero = stringUrl.substring(12, 14);
+      String acao = stringUrl.substring(20, 24);
+      String central = stringUrl.substring(33, 40);
+      int numeroInt = numero.toInt();
       nContar = 0;
       n = 0;
       acionaPorta(numeroInt, requisicao, acao);
-      if (numeroInt == botao1.rele)
-      {
-        if (acao == "liga")
-        {
+      if (numeroInt == botao1.rele) {
+        if (acao == "liga") {
           botao1.estado = true;
         } else {
-          botao1.estado       = false;
-          botao1.conta_pir_1  = 0;
+          botao1.estado = false;
+          botao1.conta_pir_1 = 0;
         }
       }
-      if (numeroInt == botao2.rele)
-      {
-        if (acao == "liga")
-        {
+      if (numeroInt == botao2.rele) {
+        if (acao == "liga") {
           botao2.estado = true;
         } else {
           botao2.estado = false;
         }
       }
-      if (numeroInt == botao3.rele)
-      {
-        if (acao == "liga")
-        {
+      if (numeroInt == botao3.rele) {
+        if (acao == "liga") {
           botao3.estado = true;
         } else {
           botao3.estado = false;
         }
       }
-      if (numeroInt == botao4.rele)
-      {
-        if (acao == "liga")
-        {
+      if (numeroInt == botao4.rele) {
+        if (acao == "liga") {
           botao4.estado = true;
         } else {
           botao4.estado = false;
@@ -1019,15 +987,14 @@ void loop()
       REINCIAR CENTRAL POR COMANDA HTTP - CHAMADA HTTP EX: HTTP://IP_HOST/?00000
       ------------------------------------------------------------------------------
     */
-    if (requisicao == "00000")
-    {
+    if (requisicao == "00000") {
       gravaLog(" " + relogio_ntp(1) + " - REINICIANDO...", logtxt, 1);
       //WiFiClient client = server.available();
       //client.println("HTTP/1.1 200 OK");
-      client.println("HTTP/1.1 200 OK"); //ESCREVE PARA O CLIENTE A VERSÃO DO HTTP
-      client.println("Content-Type: text/html"); //ESCREVE PARA O CLIENTE O TIPO DE CONTEÚDO(texto/html)
+      client.println("HTTP/1.1 200 OK");          //ESCREVE PARA O CLIENTE A VERSÃO DO HTTP
+      client.println("Content-Type: text/html");  //ESCREVE PARA O CLIENTE O TIPO DE CONTEÚDO(texto/html)
       client.println("");
-      client.println("<!DOCTYPE HTML>"); //INFORMA AO NAVEGADOR A ESPECIFICAÇÃO DO HTML
+      client.println("<!DOCTYPE HTML>");  //INFORMA AO NAVEGADOR A ESPECIFICAÇÃO DO HTML
       //client.println("<span style=\"font-size:20px;\"><strong>Reiniciando Sistema&nbsp;<img alt=\"laugh\" height=\"20\" src=\"https://versadus.com/flavius/editor/plugins/smiley/images/teeth_smile.gif\" title=\"laugh\" width=\"20\" /></strong></span></div>");
       client.println("<body style=\"background-color: rgb(255, 255, 204);\"><div style=\"text-align: center;\"><p><strong style=\"font-size: 24px;\">Reiniciando Sistema!</strong></p></div><div style=\"text-align: center;\"><strong>Clique em Voltar no navegador para Retornar a Pagina.</strong></div><div style=\"text-align: center;\">");
       client.println("<strong style=\"font-size: 24px;\"><img alt=\"\" src=\"https://olgacolor.com.br/wp-content/uploads/2021/01/loading-gears-animation-13-3.gif\" style=\"width: 40px; height: 40px;\" /></strong></div><div style=\"text-align: center;\"></div></body>");
@@ -1036,8 +1003,7 @@ void loop()
       delay(5000);
       ESP.restart();
     }
-    if (requisicao == "00001")
-    {
+    if (requisicao == "00001") {
       Serial.println(stringUrl);
     }
 
@@ -1047,31 +1013,28 @@ void loop()
       SERÃO DELETADAS(WIFI, PARAMETROS, ETC). VARIAVEL DO BOTÃO É PIN_AP.
       ------------------------------------------------------------------------------
     */
-    if ( digitalRead(PIN_AP) == LOW || requisicao == "00002" )
-    if (requisicao == "00002")
-    {
+    if (digitalRead(PIN_AP) == LOW || requisicao == "00002")
+      if (requisicao == "00002") {
 
-      /*
+        /*
         ------------------------------------------------------------------------------
         Apagando dados de conexão WIFI da central
         ------------------------------------------------------------------------------
       */
-      esp_wifi_restore();
-      gravaLog(" " + relogio_ntp(1) + " - Apagando config WIFI", logtxt, 1);
-      if (!wifiManager.startConfigPortal(" WIFI_AUT", "12345678") )
-      {
-        gravaLog(" " + relogio_ntp(1) + " - E0102: Modo AP", logtxt, 1);
-        ESP.restart();
+        esp_wifi_restore();
+        gravaLog(" " + relogio_ntp(1) + " - Apagando config WIFI", logtxt, 1);
+        if (!wifiManager.startConfigPortal(" WIFI_AUT", "12345678")) {
+          gravaLog(" " + relogio_ntp(1) + " - E0102: Modo AP", logtxt, 1);
+          ESP.restart();
+        }
       }
-    }
     /*
       ------------------------------------------------------------------------------
       CALIBRAR SENSOR MQ2
       CHAMADA HTTP EX: HTTP://IP_HOST/?00010
       ------------------------------------------------------------------------------
     */
-    if (requisicao == "00010")
-    {
+    if (requisicao == "00010") {
       gravaLog(" " + relogio_ntp(1) + " - Recalibrando...", logtxt, 2);
       calibrarSensor();
     }
@@ -1081,8 +1044,7 @@ void loop()
       CHAMADA HTTP EX: HTTP://IP_HOST/?00013
       ------------------------------------------------------------------------------
     */
-    if (requisicao == "00013")
-    {
+    if (requisicao == "00013") {
       deletarArquivo("/log.txt");
       criarArquivo("/log.txt");
       gravaLog(" " + relogio_ntp(1) + " - Apagando log...", logtxt, 2);
@@ -1093,8 +1055,7 @@ void loop()
       CHAMADA HTTP EX: HTTP://IP_HOST/?00014
       ------------------------------------------------------------------------------
     */
-    if (requisicao == "00014")
-    {
+    if (requisicao == "00014") {
       openFS();
       listDir(SPIFFS, "/", 0);
       deletarArquivo("/param.txt");
@@ -1109,10 +1070,10 @@ void loop()
       CHAMADA HTTP EX: HTTP://IP_HOST/?00015
       ------------------------------------------------------------------------------
     */
-    if (requisicao == "00015") //
+    if (requisicao == "00015")  //
     {
       botao1.contador = 11;
-      botao1.conta_pir_1  = 0;
+      botao1.conta_pir_1 = 0;
     }
     /*
       ------------------------------------------------------------------------------
@@ -1120,7 +1081,7 @@ void loop()
       CHAMADA HTTP EX: HTTP://IP_HOST/?00016
       ------------------------------------------------------------------------------
     */
-    if (requisicao == "00016") //
+    if (requisicao == "00016")  //
     {
       cont_ip_banco = 0;
     }
@@ -1131,8 +1092,7 @@ void loop()
       DESATIVAR ALARME - CHAMADA HTTP EX: HTTP://IP_HOST/?00017
       ------------------------------------------------------------------------------
     */
-    if (requisicao == "00018")
-    {
+    if (requisicao == "00018") {
       relogio_ntp(0);
     }
     /*
@@ -1140,12 +1100,11 @@ void loop()
       PAUSAR LEITURAS DO SENSOR DE GAS
       ------------------------------------------------------------------------------
     */
-    if (requisicao == "00019")
-    {
-      String s_hora_min = relogio_ntp(4);                     //armazenda data e hora 00:00
-      String s_hora = String(s_hora_min).substring(0, 2);     //separa o valor da hora
-      String s_minuto = String(s_hora_min).substring(3, 5);   //separa o valor do minuto
-      int i_minutos = s_minuto.toInt() + 1;                   //adiciona minutos ao valor encontrado em s_minuto e converte em inteiro
+    if (requisicao == "00019") {
+      String s_hora_min = relogio_ntp(4);                    //armazenda data e hora 00:00
+      String s_hora = String(s_hora_min).substring(0, 2);    //separa o valor da hora
+      String s_minuto = String(s_hora_min).substring(3, 5);  //separa o valor do minuto
+      int i_minutos = s_minuto.toInt() + 1;                  //adiciona minutos ao valor encontrado em s_minuto e converte em inteiro
       String valor_hora_fim = s_hora + ":" + String(i_minutos);
       P_LEITURAS_MQ = 1;
     }
@@ -1157,8 +1116,7 @@ void loop()
       ------------------------------------------------------------------------------
     */
     String codidoExec = stringUrl.substring(10, 15);
-    if (codidoExec == "00012")
-    {
+    if (codidoExec == "00012") {
       openFS();
       SPIFFS.remove("/param.txt");
       criarArquivo("/param.txt");
@@ -1168,40 +1126,40 @@ void loop()
       stringUrl = i.substring(0, final_s - 1);
       gravarArquivo("{\"sv\":\"" + quebraString("servidor", stringUrl)
 
-                    + "\",\"i_1\":\"" + quebraString("int_1", stringUrl)
-                    + "\",\"ti_1\":\"" + quebraString("tipo_1", stringUrl)
-                    + "\",\"s_1\":\"" + quebraString("sinal_1", stringUrl)
-                    + "\",\"h_i_1\":\"" + quebraString("hora1_in_1", stringUrl) + quebraString("hora1_in_2", stringUrl)
-                    + "\",\"h_o_1\":\"" + quebraString("hora1_out_1", stringUrl) + quebraString("hora1_out_2", stringUrl)
-                    + "\",\"t_1\":\"" + quebraString("timer_1", stringUrl)
+                      + "\",\"i_1\":\"" + quebraString("int_1", stringUrl)
+                      + "\",\"ti_1\":\"" + quebraString("tipo_1", stringUrl)
+                      + "\",\"s_1\":\"" + quebraString("sinal_1", stringUrl)
+                      + "\",\"h_i_1\":\"" + quebraString("hora1_in_1", stringUrl) + quebraString("hora1_in_2", stringUrl)
+                      + "\",\"h_o_1\":\"" + quebraString("hora1_out_1", stringUrl) + quebraString("hora1_out_2", stringUrl)
+                      + "\",\"t_1\":\"" + quebraString("timer_1", stringUrl)
 
-                    + "\",\"i_2\":\"" + quebraString("int_2", stringUrl)
-                    + "\",\"ti_2\":\"" + quebraString("tipo_2", stringUrl)
-                    + "\",\"s_2\":\"" + quebraString("sinal_2", stringUrl)
-                    + "\",\"h_i_2\":\"" + quebraString("hora2_in_1", stringUrl) + quebraString("hora2_in_2", stringUrl)
-                    + "\",\"h_o_2\":\"" + quebraString("hora2_out_1", stringUrl) + quebraString("hora2_out_2", stringUrl)
+                      + "\",\"i_2\":\"" + quebraString("int_2", stringUrl)
+                      + "\",\"ti_2\":\"" + quebraString("tipo_2", stringUrl)
+                      + "\",\"s_2\":\"" + quebraString("sinal_2", stringUrl)
+                      + "\",\"h_i_2\":\"" + quebraString("hora2_in_1", stringUrl) + quebraString("hora2_in_2", stringUrl)
+                      + "\",\"h_o_2\":\"" + quebraString("hora2_out_1", stringUrl) + quebraString("hora2_out_2", stringUrl)
 
-                    + "\",\"i_3\":\"" + quebraString("int_3", stringUrl)
-                    + "\",\"ti_3\":\"" + quebraString("tipo_3", stringUrl)
-                    + "\",\"s_3\":\"" + quebraString("sinal_3", stringUrl)
-                    + "\",\"h_i_3\":\"" + quebraString("hora3_in_1", stringUrl) + quebraString("hora3_in_2", stringUrl)
-                    + "\",\"h_o_3\":\"" + quebraString("hora3_out_1", stringUrl) + quebraString("hora3_out_2", stringUrl)
+                      + "\",\"i_3\":\"" + quebraString("int_3", stringUrl)
+                      + "\",\"ti_3\":\"" + quebraString("tipo_3", stringUrl)
+                      + "\",\"s_3\":\"" + quebraString("sinal_3", stringUrl)
+                      + "\",\"h_i_3\":\"" + quebraString("hora3_in_1", stringUrl) + quebraString("hora3_in_2", stringUrl)
+                      + "\",\"h_o_3\":\"" + quebraString("hora3_out_1", stringUrl) + quebraString("hora3_out_2", stringUrl)
 
-                    + "\",\"i_4\":\"" + quebraString("int_4", stringUrl)
-                    + "\",\"ti_4\":\"" + quebraString("tipo_4", stringUrl)
-                    + "\",\"s_4\":\"" + quebraString("sinal_4", stringUrl)
-                    + "\",\"h_i_4\":\"" + quebraString("hora4_in_1", stringUrl) + quebraString("hora4_in_2", stringUrl)
-                    + "\",\"h_o_4\":\"" + quebraString("hora4_out_1", stringUrl) + quebraString("hora4_out_2", stringUrl)
+                      + "\",\"i_4\":\"" + quebraString("int_4", stringUrl)
+                      + "\",\"ti_4\":\"" + quebraString("tipo_4", stringUrl)
+                      + "\",\"s_4\":\"" + quebraString("sinal_4", stringUrl)
+                      + "\",\"h_i_4\":\"" + quebraString("hora4_in_1", stringUrl) + quebraString("hora4_in_2", stringUrl)
+                      + "\",\"h_o_4\":\"" + quebraString("hora4_out_1", stringUrl) + quebraString("hora4_out_2", stringUrl)
 
-                    + "\",\"l\":\"" + quebraString("log", stringUrl)
-                    + "\",\"n\":\"" + quebraString("nivel", stringUrl)
-                    + "\",\"mq\":\"" + quebraString("v_mq", stringUrl)
-                    + "\",\"fu\":\"" + quebraString("v_mq_fu", stringUrl)
-                    + "\"}", "param.txt");
+                      + "\",\"l\":\"" + quebraString("log", stringUrl)
+                      + "\",\"n\":\"" + quebraString("nivel", stringUrl)
+                      + "\",\"mq\":\"" + quebraString("v_mq", stringUrl)
+                      + "\",\"fu\":\"" + quebraString("v_mq_fu", stringUrl)
+                      + "\"}",
+                    "param.txt");
       cont_ip_banco = 0;
       closeFS();
       stringUrl.remove(0);
-
     }
 
     /*

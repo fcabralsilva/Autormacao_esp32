@@ -86,9 +86,8 @@ float sensorTemp(int sensor) {
 
 void gravaDhtArray(){
   contaLeituraDht++;
-  if(conta_temperatura <= 9)
+  if(conta_temperatura <= 8)
   {
-    //temperatura[conta_temperatura] = relogio_ntp(1) + "|" + String(sensorTemp(2));
     linha_tr_tabela = "<tr><td><span style=\"font-family:arial,helvetica,sans-serif;\">";
     linha_tr_tabela += relogio_ntp(1);
     linha_tr_tabela += "</span></td><td style=\"text-align: center;\"><span style=\"font-family:arial,helvetica,sans-serif;\">";
@@ -100,7 +99,7 @@ void gravaDhtArray(){
     Serial.println( " Valor:"+String(conta_temperatura) + String(temperatura[conta_temperatura]));
     conta_temperatura++;
   }else{
-    conta_temperatura = 0;
+    // conta_temperatura = 0;
     String linha_tr_tabela = "<tr><td><span style=\"font-family:arial,helvetica,sans-serif;\">";
     linha_tr_tabela += relogio_ntp(1);
     linha_tr_tabela += "</span></td><td style=\"text-align: center;\"><span style=\"font-family:arial,helvetica,sans-serif;\">";
@@ -108,15 +107,25 @@ void gravaDhtArray(){
     linha_tr_tabela += "</span></td><td style=\"text-align: center;\"><span style=\"font-family:arial,helvetica,sans-serif;\">";
     linha_tr_tabela += String(sensorTemp(1));
     linha_tr_tabela += "</span></td> </tr>";
-    temperatura[conta_temperatura] = linha_tr_tabela;
-    Serial.println( " Valor:"+String(conta_temperatura) + String(temperatura[conta_temperatura]));
-    conta_temperatura++;
+    //temperatura[conta_temperatura] = linha_tr_tabela;
+    // conta_temperatura++;
+    temperatura[0] = temperatura[1];
+    temperatura[1] = temperatura[2];
+    temperatura[2] = temperatura[3];
+    temperatura[3] = temperatura[4];
+    temperatura[4] = temperatura[5];
+    temperatura[5] = temperatura[6];
+    temperatura[6] = temperatura[7];
+    temperatura[7] = temperatura[8];
+    temperatura[8] = temperatura[9];
+    temperatura[9] = linha_tr_tabela;
+    // String inf_Temp_Umid = "";
+    // for(int i = 0; i<= 8 ; i++ ){
+    //     inf_Temp_Umid += temperatura[i];                // TRANSFORMANDO ARRAY EM STRING PARA SALVAR NA MEMORIA O HISTÓRICO
+    // }
+    // gravarArquivo(inf_Temp_Umid, "sensor_dht.txt");
   }
-  // somaLeituraDht+= t;
-  // float media = somaLeituraDht / contaLeituraDht; // cálculo da média
-  // Serial.println("Media Temp: " + String(media) + " Quant. Leitura: " + contaLeituraDht);
 }
-
 
 void sensorMQ() {
   /*

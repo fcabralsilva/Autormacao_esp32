@@ -7,8 +7,8 @@ const char WEB_DIV_CONTAINER[] PROGMEM   = "<div class=\"container shadow-lg p-3
 const char WEB_NAV_MENU[] PROGMEM        = "<ul class=\"nav nav-pills mb-3\" id=\"pills-tab\" role=\"tablist\"><li class=\"nav-item\"><a class=\"nav-link active\" id=\"pills-home-tab\" data-toggle=\"pill\" href=\"#pills-home\" role=\"tab\" aria-controls=\"pills-home\" aria-selected=\"true\">Home</a></li> <li class=\"nav-item\"><a class=\"nav-link\" id=\"pills-profile-tab\" data-toggle=\"pill\" href=\"#pills-profile\" role=\"tab\" aria-controls=\"pills-profile\" aria-selected=\"false\">Configuração</a></li></ul>";
 const char WEB_BOTAO_SUCCESS[] PROGMEM   = "<a href=\"?porta=\"{A}\" title=\"Porta:\"{B}\"><button type=\"button\"  class=\"btn btn-success\">\"{C}\"</button></a>";
 const char A_HREF[] PROGMEM              = "  <a href=\"?porta={A}&acao={G}&central={B}\" title=\"Porta:{C} Botão:{D}\"><button type=\"button\"  class=\"{E}\">{F}</button></a>";
-const char TABELA_TEMP_UMID[] PROGMEM    = "<table align=\"left\" border=\"0\" cellpadding=\"1\" cellspacing=\"0\" dir=\"ltr\" style=\"width: 400px\"> <thead> <tr style=\"background:#007bff; color:white\"> <th scope=\"col\" style=\"text-align: center;\"> <span style=\"font-family:arial,helvetica,sans-serif;\">Data Hora</span></th> <th scope=\"col\" style=\"text-align: center;\"> <span style=\"font-family:arial,helvetica,sans-serif;\">Temperatura</span></th> <th scope=\"col\" style=\"text-align: center;\"> <span style=\"font-family:arial,helvetica,sans-serif;\">Umidade</span></th> </tr> </thead> <tbody>"; 
-const char TABELA_TEMP_UMID_2[] PROGMEM  = "<tr> <td> <span style=\"font-family:arial,helvetica,sans-serif;\">15/06/2023 17:00</span></td> <td style=\"text-align: center;\"> <span style=\"font-family:arial,helvetica,sans-serif;\">25.0</span></td> <td style=\"text-align: center;\"> <span style=\"font-family:arial,helvetica,sans-serif;\">99</span></td> </tr>";
+const char TABELA_TEMP_UMID[] PROGMEM    = "<table align=\"left\" border=\"0\" cellpadding=\"1\" cellspacing=\"0\" dir=\"ltr\" style=\"width: 400px\"> <thead> <tr style=\"background:#007bff; color:white\"> <th scope=\"col\" style=\"text-align: center;\"> <span style=\"font-family:arial,helvetica,sans-serif;\">Data Hora</span></th> <th scope=\"col\" style=\"text-align: center;\"> <span style=\"font-family:arial,helvetica,sans-serif;\">Temperatura °C</span></th> <th scope=\"col\" style=\"text-align: center;\"> <span style=\"font-family:arial,helvetica,sans-serif;\">Umidade %</span></th> </tr> </thead> <tbody>"; 
+//const char TABELA_TEMP_UMID_2[] PROGMEM  = "<tr> <td> <span style=\"font-family:arial,helvetica,sans-serif;\">15/06/2023 17:00</span></td> <td style=\"text-align: center;\"> <span style=\"font-family:arial,helvetica,sans-serif;\">25.0</span></td> <td style=\"text-align: center;\"> <span style=\"font-family:arial,helvetica,sans-serif;\">99</span></td> </tr>";
 const char TABELA_TEMP_UMID_3[] PROGMEM  = "</tbody> </table>";
 
 String pagina() {
@@ -84,7 +84,7 @@ String pagina() {
   buf += "</div>";
   
   buf += "<div><hr />";
-  buf += "  <div class=\"row\">";
+  buf += "  <div class=\"row col-sm-12\">";
   if(sistema_solar == 1)
   {
     buf += FPSTR(TABELA_TEMP_UMID);
