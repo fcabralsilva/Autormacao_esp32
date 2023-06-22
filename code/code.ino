@@ -5,6 +5,7 @@
 #include <ArduinoJson.h>
 #include <DHT.h>
 #include <DHT_U.h>
+#include <ESPmDNS.h>
 #include <FS.h>
 #include <NTPClient.h>
 #include <SPIFFS.h>
@@ -13,6 +14,9 @@
 #include <WiFi.h>
 #include <WiFiUDP.h>
 #include <WiFiManager.h>
+#include <WebServer.h>
+#include <WiFiClient.h>
+#include <Update.h>
 #include <LiquidCrystal_I2C.h>
 #include <Adafruit_BMP280.h>
 //#include "EmonLib.h"           // USANDO PINO 36 NO SENSOR
@@ -20,7 +24,8 @@
 #include <Ticker.h>
 
 
-String VERSAO = "10.54 22/06/2023";
+String VERSAO = "10.60 22/06/2023";
+const char* hostname = "esp32";
 
 /*
  * VARIAVEIS DO SENSOR BMP280
@@ -242,6 +247,16 @@ void setup() {
   addressMac = WiFi.macAddress();
   gravarArquivo(" " + relogio_ntp(1) + " MAC: " + addressMac, "log.txt");
   ipLocalString = String(ipHost[0]) + "." + String(ipHost[1]) + "." + String(ipHost[2]) + "." + String(ipHost[3]);
+  
+  /*use mdns for host name resolution*/
+  if (!MDNS.begin(hostname)) { //http://esp32.local
+    Serial.println("Error setting up MDNS responder!");
+    while (1) {
+      delay(1000);
+    }
+  }
+  Serial.println("mDNS responder started");
+
   server.begin();
 
   /*
