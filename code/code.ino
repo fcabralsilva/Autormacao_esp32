@@ -15,12 +15,12 @@
 #include <WiFiManager.h>
 #include <LiquidCrystal_I2C.h>
 #include <Adafruit_BMP280.h>
-//#include "EmonLib.h"                  // USANDO PINO 36 NO SENSOR
-#include <IRremote.hpp>  //INCLUSÃO DE BIBLIOTECA
+//#include "EmonLib.h"           // USANDO PINO 36 NO SENSOR
+#include <IRremote.hpp>          //INCLUSÃO DE BIBLIOTECA
 #include <Ticker.h>
 
 
-String VERSAO = "10.52 22/06/2023";
+String VERSAO = "10.54 22/06/2023";
 
 /*
  * VARIAVEIS DO SENSOR BMP280
@@ -30,9 +30,9 @@ String VERSAO = "10.52 22/06/2023";
 #define BMP_MOSI (11)
 #define BMP_CS (10)
 
-#define PIN_AP 0        //BOTÃO DE RESET DO WIFI
-#define BUZZER 18       //SIRENE
-#define VOLT_CAL 115.0  //VALOR DE CALIBRAÇÃO (DEVE SER AJUSTADO EM PARALELO COM UM MULTÍMETRO)
+#define PIN_AP                0               //BOTÃO DE RESET DO WIFI
+#define BUZZER                18              //SIRENE
+#define VOLT_CAL              115.0           //VALOR DE CALIBRAÇÃO (DEVE SER AJUSTADO EM PARALELO COM UM MULTÍMETRO)
 
 /* INICIANDO TEMPORIZADORES TICKER */
 Ticker grava_leitura_dht;
@@ -41,72 +41,72 @@ Ticker grava_leitura_dht_0;
 /*
  * VARIAVEIS DE PARAMETRIZAÇÃO
  */
-String logtxt = "sim";
-const char* nivelLog = "4";
-int nivel_log = 4;
-const int sistema_solar = 1;
-boolean ler_dht = true;
+String logtxt =               "sim";          //GRAVAR LOG DE ERROS 
+const char* nivelLog =        "4";            //DETALHAMENTO DE GRAVAÇÃO DO ERRO ARQUIVO JSON
+//int nivel_log = 4;
+const int sistema_solar =     1;              //DETALHAMENTO DE SENSORES NA PAGINA INICIAL
+boolean ler_dht = true;                       //HABILITA LEITURA DO SENSOR DHT
 
 
 /*
  * VARIAVEIS DO SENSOR DHT11 OU DHT22
  */
-#define DHTPIN 19      //PINO ENTRADA SENSOR DHT11
-#define DHTTYPE DHT22  //TIPO DE SENSOR DHT22 OU DHT11
-unsigned long timeDht;
+#define DHTPIN                19              //PINO ENTRADA SENSOR DHT11
+#define DHTTYPE               DHT22           //TIPO DE SENSOR DHT22 OU DHT11
+unsigned long timeDht; 
 
 /*
  * VARIAVEIS DO SENSOR MQXX
  */
-#define PIN_MQ2 34               //PINO ENTRADA SENSOR GAS
-#define VRL_VALOR 5              //resistência de carga
-#define RO_FATOR_AR_LIMPO 9.83   //resistência do sensor em ar limpo 9.83 de acordo com o datasheet
-#define ITERACOES_CALIBRACAO 12  //numero de leituras para calibracao
-#define ITERACOES_LEITURA 5      //numero de leituras para analise
-#define GAS_LPG 0
-#define GAS_CO 1
-#define SMOKE 2
-float LPGCurve[3] = { 2.3, 0.20, -0.47 };
-float COCurve[3] = { 2.3, 0.72, -0.34 };
-float SmokeCurve[3] = { 2.3, 0.53, -0.44 };
-float Ro = 10;
+#define PIN_MQ2               34              //PINO ENTRADA SENSOR GAS
+#define VRL_VALOR             5               //resistência de carga
+#define RO_FATOR_AR_LIMPO     9.83            //resistência do sensor em ar limpo 9.83 de acordo com o datasheet
+#define ITERACOES_CALIBRACAO  12              //numero de leituras para calibracao
+#define ITERACOES_LEITURA     5               //numero de leituras para analise
+#define GAS_LPG               0
+#define GAS_CO                1
+#define SMOKE                 2
+float LPGCurve[3] =           { 2.3, 0.20, -0.47 };
+float COCurve[3] =            { 2.3, 0.72, -0.34 };
+float SmokeCurve[3] =         { 2.3, 0.53, -0.44 };
+float Ro =                    10;
 String GLP, FUMACA, CO;
 const char *LIMITE_MQ2 = "99", *LIMITE_MQ2_FU = "99";
-int P_LEITURAS_MQ = 0;
+int P_LEITURAS_MQ =           0;
 unsigned long timeMq2;
-int sensorMq2 = 0;
-int contarParaGravar1 = 0;
+int sensorMq2 =               0;
+int contarParaGravar1 =       0;
 
 int conta_temperatura = 0, contaLeituraDht = 0;
 String temperatura[10];
 String linha_tr_tabela;
-float somaLeituraDht = 0.00;
+float somaLeituraDht =        0.00;
 
 /*
  * LEDS DE SINALIZAÇÃO
  */
-#define LED_VERDE 15
-#define LED_VERMELHO 4
-#define LED_AZUL 2
-const char interval = 500;  //VARIAVEL DO TEMPO DE INTERVALO DO PISCALED
-long milis = 0;
+#define LED_VERDE             15
+#define LED_VERMELHO          4
+#define LED_AZUL              2
+const char interval =         500;  //VARIAVEL DO TEMPO DE INTERVALO DO PISCALED
+long milis =                  0;
 
 
 /*
  * VARIAVEIS DO SENSOR VS1868B Infravermelho
  */
-#define IR_RECEIVE_PIN 17
+#define IR_RECEIVE_PIN      17
 #define ENABLE_LED_FEEDBACK LED_VERMELHO
-int codigoControle[5] = { 4077715200, 3877175040, 2707357440, 4144561920, 3810328320 };
+int codigoControle[5] =     { 4077715200, 3877175040, 2707357440, 4144561920, 3810328320 };
 
 /*
  * VARIAVEIS DE MATRIZ DE BOTÕES
  */
-#define N_BOTAO 5
-#define ENTRADA 35
+#define N_BOTAO             5
+#define ENTRADA             35
 int bt_select;
 int bt_lido;
-int bt_repete = 3;
+int bt_repete =             3;
 int bt_conta;
 
 
@@ -165,10 +165,10 @@ struct botao4 {
 
 int i_timer_valor, estado_atual = 0, estado_antes = 0;
 boolean cont_timer;
-unsigned long tempo = 0;
-short paramTempo = 60;
-int nContar = 0;
-int agenda_ = 0;
+unsigned long tempo =           0;
+short paramTempo =              60;
+int nContar =                   0;
+int agenda_ =                   0;
 
 /*
  * VARIAVEIS DE REDE E WIFI
@@ -177,13 +177,13 @@ String addressMac;
 String ipLocalString;
 const char *ssid, *password, *servidor;
 String buff, URL, serv, buf;
-#define portaServidor 80  //PORTA DE COMUNICAÇÃO USADO NO WIFI
+#define portaServidor           80                  //PORTA DE COMUNICAÇÃO USADO NO WIFI
 
 /*
  * CONTROLE DE ARQUIVO JSON
  */
 const char* json;
-int cont_ip_banco = 0;
+int cont_ip_banco =             0;
 const char* conslog;
 
 int freq = 2000, channel = 0, resolution = 8, n = 0;
@@ -201,21 +201,20 @@ byte grau[8] = {
 //const String comandos_txt = "<p><strong>PORTAS ENTRADA SA&Iacute;DA</strong></p><p>entrada 1 = 32, rele 1 = 33<br />entrada 2 = 25, rele 2 = 18<br />entrada 3 = 14, rele 3 = 27<br />entrada 4 = 12, rele 4 = 13</p><p><strong><span class=\"pl-c1\">LED'S PARA MONITORAMENTO</span></strong></p><p><span class=\"pl-c1\">LED_AZUL&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 2<br />LED_VERDE&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;4<br />LED_VERMELHO 16</span></p><p><strong><span class=\"pl-c1\">SENSORES</span></strong></p><p><span class=\"pl-c1\">BUZZER&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 5<br />PIN_MQ2&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;34<br />DHTPIN&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;19</span></p><p><strong>REINCIAR CENTRAL POR COMANDA HTTP</strong>&nbsp;</p><p>HTTP://IP_HOST/?00000</p><p><strong>REINICIAS CONFIGURAÇÕES WIFI</strong>&nbsp;</p><p>HTTP://IP_HOST/?00002</p><p><strong>EXEMPLO NA CHAMADA WEB DESLIGAR LAMPADA</strong>&nbsp;</p><p>HTTP://IP_HOST/?porta=NN&amp;acao=(liga ou&nbsp;desligar)&amp;central=IP_HOST</p><p><strong>CALIBRAR SENSOR MQ2</strong></p><p>HTTP://IP_HOST/?0001</p><p><strong>APAGAR ARQUIVO DE LOG MANUALMENTE</strong></p><p>HTTP://IP_HOST/?00013</p><p><strong>APLICAR CONFIGURA&Ccedil;&Otilde;ES MINIMAS PARA FUNCIONAMENTO DA CENTRAL</strong></p><p>HTTP://IP_HOST/?00014</p><p><strong>DESLIGAR TODOS AS PORTAS OUTPUT DA CENTRAL</strong></p><p>HTTP://IP_HOST/?00015</p><p><strong>APLICAR AS CONFIGURA&Ccedil;&Otilde;ES AP&Oacute;S SEREM GRAVADAS NA CENTRAL</strong>&nbsp;</p><p>HTTP://IP_HOST/?00016</p>";
 //float corrente_s1 = 0.00, tensao_s1 = 0.00, corrente_s2 = 0.00, tensao_s2 = 0.00, corrente_s3 = 0.00, tensao_s3 = 0.00;
 
-Adafruit_BMP280 bmp;  //  I2C Adafruit_BMP280
+Adafruit_BMP280 bmp;                      //  I2C Adafruit_BMP280
 
 //EnergyMonitor emon1;                    //  CRIA UMA INSTÂNCIA
 
-LiquidCrystal_I2C lcd(0x27, 16, 2);  //  FUNÇÃO DO TIPO "LiquidCrystal_I2C"
+LiquidCrystal_I2C lcd(0x27, 16, 2);       //  FUNÇÃO DO TIPO "LiquidCrystal_I2C"
 
 IPAddress ipHost;
 
 WiFiUDP udp;
 WiFiServer server(80);
 
-//NTPClient ntp(udp, "a.st1.ntp.br", -3 * 3600, 60000);//Cria um objeto "NTP" com as configurações.utilizada no Brasil
-const char* ntpServer = "a.st1.ntp.br";
-const long gmtOffset_sec = 0;
-const int daylightOffset_sec = -3 * 3600;
+const char* ntpServer =           "a.st1.ntp.br";
+const long gmtOffset_sec =         0;
+const int daylightOffset_sec =     -3 * 3600;
 
 
 DHT_Unified dht(DHTPIN, DHTTYPE);
@@ -319,27 +318,27 @@ void setup() {
   //---------------------------------------
   //    INICIALIZA O DISPLAY LCD
   //---------------------------------------
-  lcd.init();  // INICIALIZA O DISPLAY LCD
+  lcd.init();                           // INICIALIZA O DISPLAY LCD
   lcd.setBacklight(HIGH);
   lcd.createChar(0, grau);
   ledcSetup(channel, freq, resolution);
   ledcAttachPin(5, channel);
   lcd.setCursor(0, 0);
-  lcd.print("    BEM VINDO   ");  //SETA A POSIÇÃO EM QUE O CURSOR INCIALIZA(LINHA 1)
+  lcd.print("    BEM VINDO   ");        //SETA A POSIÇÃO EM QUE O CURSOR INCIALIZA(LINHA 1)
   lcd.setCursor(0, 1);
-  lcd.print(VERSAO);  //SETA A POSIÇÃO EM QUE O CURSOR RECEBE O TEXTO A SER MOSTRADO(LINHA 2)
+  lcd.print(VERSAO);                    //SETA A POSIÇÃO EM QUE O CURSOR RECEBE O TEXTO A SER MOSTRADO(LINHA 2)
   digitalWrite(BUZZER, HIGH);
   delay(500);
   digitalWrite(BUZZER, LOW);
   delay(2500);
   lcd.clear();
   lcd.setCursor(2, 1);
-  lcd.print(ipLocalString);  //SETA A POSIÇÃO EM QUE O CURSOR RECEBE O TEXTO A SER MOSTRADO(LINHA 2)
+  lcd.print(ipLocalString);             //SETA A POSIÇÃO EM QUE O CURSOR RECEBE O TEXTO A SER MOSTRADO(LINHA 2)
   delay(2500);
   lcd.clear();
 
   grava_leitura_dht_0.once_ms(1000, gravaDhtArray);
-  grava_leitura_dht.attach_ms(1800000, gravaDhtArray);  //GRAVA NO ARRAY OS VALORES DE TEMPERATURA E UMIDADE NO ARRAY
+  grava_leitura_dht.attach_ms(1800000, gravaDhtArray);            //GRAVA NO ARRAY OS VALORES DE TEMPERATURA E UMIDADE NO ARRAY
 
   gravarArquivo("\n\n +++ INICIANDO SISTEMA +++ Versão: " + VERSAO + "\n\n", "log.txt");
 
@@ -987,13 +986,10 @@ void loop() {
     */
     if (requisicao == "00000") {
       gravaLog(" " + relogio_ntp(1) + " - REINICIANDO...", logtxt, 1);
-      //WiFiClient client = server.available();
-      //client.println("HTTP/1.1 200 OK");
       client.println("HTTP/1.1 200 OK");          //ESCREVE PARA O CLIENTE A VERSÃO DO HTTP
       client.println("Content-Type: text/html");  //ESCREVE PARA O CLIENTE O TIPO DE CONTEÚDO(texto/html)
       client.println("");
       client.println("<!DOCTYPE HTML>");  //INFORMA AO NAVEGADOR A ESPECIFICAÇÃO DO HTML
-      //client.println("<span style=\"font-size:20px;\"><strong>Reiniciando Sistema&nbsp;<img alt=\"laugh\" height=\"20\" src=\"https://versadus.com/flavius/editor/plugins/smiley/images/teeth_smile.gif\" title=\"laugh\" width=\"20\" /></strong></span></div>");
       client.println("<body style=\"background-color: rgb(255, 255, 204);\"><div style=\"text-align: center;\"><p><strong style=\"font-size: 24px;\">Reiniciando Sistema!</strong></p></div><div style=\"text-align: center;\"><strong>Clique em Voltar no navegador para Retornar a Pagina.</strong></div><div style=\"text-align: center;\">");
       client.println("<strong style=\"font-size: 24px;\"><img alt=\"\" src=\"https://olgacolor.com.br/wp-content/uploads/2021/01/loading-gears-animation-13-3.gif\" style=\"width: 40px; height: 40px;\" /></strong></div><div style=\"text-align: center;\"></div></body>");
       client.println("</html>");
@@ -1079,15 +1075,13 @@ void loop() {
       CHAMADA HTTP EX: HTTP://IP_HOST/?00016
       ------------------------------------------------------------------------------
     */
-    if (requisicao == "00016")  //
+    if (requisicao == "00016")
     {
       cont_ip_banco = 0;
     }
     /*
       ------------------------------------------------------------------------------
-      FUNÇÃO DE CONTROLE DO ALARME
-      ATIVAR ALARME - CHAMADA HTTP EX: HTTP://IP_HOST/?00117
-      DESATIVAR ALARME - CHAMADA HTTP EX: HTTP://IP_HOST/?00017
+      ATUALIZAÇÃO DE DATA E HORA
       ------------------------------------------------------------------------------
     */
     if (requisicao == "00018") {
@@ -1099,10 +1093,10 @@ void loop() {
       ------------------------------------------------------------------------------
     */
     if (requisicao == "00019") {
-      String s_hora_min = relogio_ntp(4);                    //armazenda data e hora 00:00
-      String s_hora = String(s_hora_min).substring(0, 2);    //separa o valor da hora
-      String s_minuto = String(s_hora_min).substring(3, 5);  //separa o valor do minuto
-      int i_minutos = s_minuto.toInt() + 1;                  //adiciona minutos ao valor encontrado em s_minuto e converte em inteiro
+      String s_hora_min = relogio_ntp(4);                           //armazenda data e hora 00:00
+      String s_hora = String(s_hora_min).substring(0, 2);           //separa o valor da hora
+      String s_minuto = String(s_hora_min).substring(3, 5);         //separa o valor do minuto
+      int i_minutos = s_minuto.toInt() + 1;                         //adiciona minutos ao valor encontrado em s_minuto e converte em inteiro
       String valor_hora_fim = s_hora + ":" + String(i_minutos);
       P_LEITURAS_MQ = 1;
     }
