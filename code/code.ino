@@ -20,7 +20,7 @@
 #include <Ticker.h>
 
 
-String VERSAO = "10.51 21/06/2023";
+String VERSAO = "10.52 22/06/2023";
 
 /*
  * VARIAVEIS DO SENSOR BMP280
@@ -61,7 +61,7 @@ unsigned long timeDht;
 #define PIN_MQ2 34               //PINO ENTRADA SENSOR GAS
 #define VRL_VALOR 5              //resistência de carga
 #define RO_FATOR_AR_LIMPO 9.83   //resistência do sensor em ar limpo 9.83 de acordo com o datasheet
-#define ITERACOES_CALIBRACAO 25  //numero de leituras para calibracao
+#define ITERACOES_CALIBRACAO 12  //numero de leituras para calibracao
 #define ITERACOES_LEITURA 5      //numero de leituras para analise
 #define GAS_LPG 0
 #define GAS_CO 1
@@ -227,12 +227,6 @@ void setup() {
   Serial.begin(115200);
   Serial.println("-----------------------------------------");
   Serial.println("");
-  //---------------------------------------
-  //    INICIALIZA O DISPLAY LCD
-  //---------------------------------------
-  lcd.init();  // INICIALIZA O DISPLAY LCD
-  lcd.setBacklight(HIGH);
-  lcd.createChar(0, grau);
   /*
    * CONECTANDO A REDE WIFI
    * INICIANDO AS VARIAVEIS MAIS UTEIS NO SISTEMA
@@ -292,8 +286,6 @@ void setup() {
   criarArquivo("/param.txt");
   criarArquivo("/log.txt");
 
-  gravarArquivo("\n\n +++ INICIANDO SISTEMA +++ Versão: " + VERSAO + "\n\n", "log.txt");
-
   /*
    * INICIANDO SENSOR DHT
    */
@@ -308,7 +300,7 @@ void setup() {
    * INICIANDO SENSOR BMP280
    */
   if (!bmp.begin(0x76)) {
-    gravarArquivo(" " + relogio_ntp(1) + "Nenhum sensor BMP280 válido, verifique endereço I2C!", "log.txt");
+    gravarArquivo(" " + relogio_ntp(1) + " - BMP280 não encontrado, verifique I2C!", "log.txt");
   }
   // Default settings from datasheet
   bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
@@ -324,9 +316,12 @@ void setup() {
 
   ArduinoOTA.begin();
 
-  /*
-   * INICIANDO LCD 16X2
-   */
+  //---------------------------------------
+  //    INICIALIZA O DISPLAY LCD
+  //---------------------------------------
+  lcd.init();  // INICIALIZA O DISPLAY LCD
+  lcd.setBacklight(HIGH);
+  lcd.createChar(0, grau);
   ledcSetup(channel, freq, resolution);
   ledcAttachPin(5, channel);
   lcd.setCursor(0, 0);
@@ -345,6 +340,9 @@ void setup() {
 
   grava_leitura_dht_0.once_ms(1000, gravaDhtArray);
   grava_leitura_dht.attach_ms(1800000, gravaDhtArray);  //GRAVA NO ARRAY OS VALORES DE TEMPERATURA E UMIDADE NO ARRAY
+
+  gravarArquivo("\n\n +++ INICIANDO SISTEMA +++ Versão: " + VERSAO + "\n\n", "log.txt");
+
 }
 void loop() {
 

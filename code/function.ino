@@ -240,7 +240,7 @@ String relogio_ntp(int retorno){
   char data_formatada[64];
   
   if(!getLocalTime(&data)){
-    Serial.println("Failed to obtain time");
+    Serial.println(" Falha para obter data e hora!");
   }
 
   //strftime(data_formatada, 64, "%d/%m/%y %H:%M:%S", &timeinfo);
@@ -451,6 +451,7 @@ float MQCalibration(int mq_pin)   //funcao que calibra o sensor em um ambiente l
     delay(500);
     digitalWrite(2, !digitalRead(2));//Faz o LED piscar (inverte o estado).
   }
+  Serial.println("");
   digitalWrite(2, false);
   valor = valor / ITERACOES_CALIBRACAO;
   valor = valor / RO_FATOR_AR_LIMPO; //o valor lido dividido pelo R0 do ar limpo resulta no R0 do ambiente
@@ -498,14 +499,14 @@ void criarArquivo(String nomeArquivo) {
   //Cria o arquivo se ele não existir
   if (SPIFFS.exists(nomeArquivo)) 
   {
-    gravaLog(" " + relogio_ntp(1) + " - Arquivo " + nomeArquivo + " existe", logtxt, 1);
+    gravaLog(" " + relogio_ntp(1) + " - Arquivo " + nomeArquivo + " ok!", logtxt, 1);
   } else {
     wFile = SPIFFS.open(nomeArquivo, "w+");
     //Verifica a criação do arquivo
     if (!wFile) {
       gravaLog(" " + relogio_ntp(1) + " - E0109:Criar arquivo " + nomeArquivo, logtxt, 1);
     } else {
-      gravaLog(" " + relogio_ntp(1) + " - Arquivo " + nomeArquivo + " criado", logtxt, 3);
+      gravaLog(" " + relogio_ntp(1) + " - Arquivo " + nomeArquivo + " criado!", logtxt, 3);
     }
   }
   wFile.close();
