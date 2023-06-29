@@ -5,7 +5,6 @@
 #include <ArduinoJson.h>
 #include <DHT.h>
 #include <DHT_U.h>
-#include <ESPmDNS.h>
 #include <FS.h>
 #include <NTPClient.h>
 #include <SPIFFS.h>
@@ -14,9 +13,6 @@
 #include <WiFi.h>
 #include <WiFiUDP.h>
 #include <WiFiManager.h>
-#include <WebServer.h>
-#include <WiFiClient.h>
-#include <Update.h>
 #include <LiquidCrystal_I2C.h>
 #include <Adafruit_BMP280.h>
 //#include "EmonLib.h"           // USANDO PINO 36 NO SENSOR
@@ -24,8 +20,7 @@
 #include <Ticker.h>
 
 
-String VERSAO = "10.60 22/06/2023";
-const char* hostname = "esp32";
+String VERSAO = "10.55 29/06/2023";
 
 /*
  * VARIAVEIS DO SENSOR BMP280
@@ -42,6 +37,8 @@ const char* hostname = "esp32";
 /* INICIANDO TEMPORIZADORES TICKER */
 Ticker grava_leitura_dht;
 Ticker grava_leitura_dht_0;
+int valor_grava_leitura_dht = 1800000;
+int conta_temperatura_valor = 9;
 
 /*
  * VARIAVEIS DE PARAMETRIZAÇÃO
@@ -247,16 +244,6 @@ void setup() {
   addressMac = WiFi.macAddress();
   gravarArquivo(" " + relogio_ntp(1) + " MAC: " + addressMac, "log.txt");
   ipLocalString = String(ipHost[0]) + "." + String(ipHost[1]) + "." + String(ipHost[2]) + "." + String(ipHost[3]);
-  
-  /*use mdns for host name resolution*/
-  if (!MDNS.begin(hostname)) { //http://esp32.local
-    Serial.println("Error setting up MDNS responder!");
-    while (1) {
-      delay(1000);
-    }
-  }
-  Serial.println("mDNS responder started");
-
   server.begin();
 
   /*
@@ -353,7 +340,7 @@ void setup() {
   lcd.clear();
 
   grava_leitura_dht_0.once_ms(1000, gravaDhtArray);
-  grava_leitura_dht.attach_ms(1800000, gravaDhtArray);            //GRAVA NO ARRAY OS VALORES DE TEMPERATURA E UMIDADE NO ARRAY
+  grava_leitura_dht.attach_ms(valor_grava_leitura_dht, gravaDhtArray);            //GRAVA NO ARRAY OS VALORES DE TEMPERATURA E UMIDADE NO ARRAY
 
   gravarArquivo("\n\n +++ INICIANDO SISTEMA +++ Versão: " + VERSAO + "\n\n", "log.txt");
 

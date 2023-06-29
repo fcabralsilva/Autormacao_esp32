@@ -86,7 +86,7 @@ float sensorTemp(int sensor) {
 
 void gravaDhtArray(){
   contaLeituraDht++;
-  if(conta_temperatura <= 8)
+  if(conta_temperatura <= conta_temperatura_valor)
   {
     linha_tr_tabela = "<tr><td><span style=\"font-family:arial,helvetica,sans-serif;\">";
     linha_tr_tabela += relogio_ntp(1);
@@ -109,16 +109,25 @@ void gravaDhtArray(){
     linha_tr_tabela += "</span></td> </tr>";
     //temperatura[conta_temperatura] = linha_tr_tabela;
     // conta_temperatura++;
-    temperatura[0] = temperatura[1];
-    temperatura[1] = temperatura[2];
-    temperatura[2] = temperatura[3];
-    temperatura[3] = temperatura[4];
-    temperatura[4] = temperatura[5];
-    temperatura[5] = temperatura[6];
-    temperatura[6] = temperatura[7];
-    temperatura[7] = temperatura[8];
-    temperatura[8] = temperatura[9];
-    temperatura[9] = linha_tr_tabela;
+    // temperatura[0] = temperatura[1];
+    // temperatura[1] = temperatura[2];
+    // temperatura[2] = temperatura[3];
+    // temperatura[3] = temperatura[4];
+    // temperatura[4] = temperatura[5];
+    // temperatura[5] = temperatura[6];
+    // temperatura[6] = temperatura[7];
+    // temperatura[7] = temperatura[8];
+    // temperatura[8] = temperatura[9];
+    // temperatura[9] = linha_tr_tabela;
+    int b = 0;
+    for(int i=0; i< conta_temperatura -1;i++){
+      temperatura[i] = temperatura[i+1];
+      b++;
+    }
+    temperatura[b] = linha_tr_tabela;
+    
+    //Serial.println( " Valor:"+String(conta_temperatura) + String(temperatura[conta_temperatura]));
+
     // String inf_Temp_Umid = "";
     // for(int i = 0; i<= 8 ; i++ ){
     //     inf_Temp_Umid += temperatura[i];                // TRANSFORMANDO ARRAY EM STRING PARA SALVAR NA MEMORIA O HISTÓRICO

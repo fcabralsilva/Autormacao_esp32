@@ -7,7 +7,7 @@ const char WEB_DIV_CONTAINER[] PROGMEM   = "<div class=\"container shadow-lg p-3
 const char WEB_NAV_MENU[] PROGMEM        = "<ul class=\"nav nav-pills mb-3\" id=\"pills-tab\" role=\"tablist\"><li class=\"nav-item\"><a class=\"nav-link active\" id=\"pills-home-tab\" data-toggle=\"pill\" href=\"#pills-home\" role=\"tab\" aria-controls=\"pills-home\" aria-selected=\"true\">Home</a></li> <li class=\"nav-item\"><a class=\"nav-link\" id=\"pills-profile-tab\" data-toggle=\"pill\" href=\"#pills-profile\" role=\"tab\" aria-controls=\"pills-profile\" aria-selected=\"false\">Configuração</a></li></ul>";
 const char WEB_BOTAO_SUCCESS[] PROGMEM   = "<a href=\"?porta=\"{A}\" title=\"Porta:\"{B}\"><button type=\"button\"  class=\"btn btn-success\">\"{C}\"</button></a>";
 const char A_HREF[] PROGMEM              = "  <a href=\"?porta={A}&acao={G}&central={B}\" title=\"Porta:{C} Botão:{D}\"><button type=\"button\"  class=\"{E}\">{F}</button></a>";
-const char TABELA_TEMP_UMID[] PROGMEM    = "<table align=\"left\" border=\"0\" cellpadding=\"1\" cellspacing=\"0\" dir=\"ltr\" style=\"width: 400px\"> <thead> <tr style=\"background:#007bff; color:white\"> <th scope=\"col\" style=\"text-align: center;\"> <span style=\"font-family:arial,helvetica,sans-serif;\">Data Hora</span></th> <th scope=\"col\" style=\"text-align: center;\"> <span style=\"font-family:arial,helvetica,sans-serif;\">Temperatura °C</span></th> <th scope=\"col\" style=\"text-align: center;\"> <span style=\"font-family:arial,helvetica,sans-serif;\">Umidade %</span></th> </tr> </thead> <tbody>"; 
+const char TABELA_TEMP_UMID[] PROGMEM    = "<table align=\"left\" border=\"0\" cellpadding=\"1\" cellspacing=\"0\" dir=\"ltr\" style=\"\"> <thead> <tr style=\"background:#007bff; color:white\"> <th scope=\"col\" style=\"text-align: center;\"> <span style=\"font-family:arial,helvetica,sans-serif;\">Data Hora</span></th> <th scope=\"col\" style=\"text-align: center;\"> <span style=\"font-family:arial,helvetica,sans-serif;\">Temperatura °C</span></th> <th scope=\"col\" style=\"text-align: center;\"> <span style=\"font-family:arial,helvetica,sans-serif;\">Umidade %</span></th> </tr> </thead> <tbody>"; 
 //const char TABELA_TEMP_UMID_2[] PROGMEM  = "<tr> <td> <span style=\"font-family:arial,helvetica,sans-serif;\">15/06/2023 17:00</span></td> <td style=\"text-align: center;\"> <span style=\"font-family:arial,helvetica,sans-serif;\">25.0</span></td> <td style=\"text-align: center;\"> <span style=\"font-family:arial,helvetica,sans-serif;\">99</span></td> </tr>";
 const char TABELA_TEMP_UMID_3[] PROGMEM  = "</tbody> </table>";
 
@@ -84,7 +84,9 @@ String pagina() {
   buf += "</div>";
   
   buf += "<div><hr />";
+  buf += "<button class=\"btn btn-link\" type=\"button\" data-toggle=\"collapse\" data-target=\"#collapseSensor\" aria-expanded=\"false\" aria-controls=\"collapseSensor\">Historico</button></td>";
   buf += "  <div class=\"row col-sm-12\">";
+  buf += " <div class='collapse' id='collapseSensor' style='width:70%'> <div class='card card-body'> ";
   if(sistema_solar == 1)
   {
     buf += FPSTR(TABELA_TEMP_UMID);
@@ -93,6 +95,7 @@ String pagina() {
     }
     buf += FPSTR(TABELA_TEMP_UMID_3);
   }
+  buf += " </div> </div>";
   buf += "</div>";
   buf += "<hr />";
   /*
@@ -263,14 +266,10 @@ String pagina() {
   buf += "        <strong>LOG</strong> <select class='' style='width:100%x' name='log'> <option value='sim' " + selectedHTNL(conslog, "sim ") + "> Sim</option> <option value='nao' " + selectedHTNL(conslog, "nao ") + ">Não</option> </select> <select class='' style='width:100%x' name='nivel' title='Nível do log'> <option value='1' " + selectedHTNL(nivelLog, "1") + ">1</option> <option value='2' " + selectedHTNL(nivelLog, "2") + ">2</option> <option value='3' " + selectedHTNL(nivelLog, "3") + ">3</option> <option value='4' " + selectedHTNL(nivelLog, "4") + ">4</option> </select>";
   buf += "        <a href='?00013' title='APAGAR TODOS OS REGISTROS!'> x </a>";
   buf += "        <button class=\"btn btn-primary btn-sm\" type=\"button\" data-toggle=\"collapse\" data-target=\"#collapseExample\" aria-expanded=\"false\" aria-controls=\"collapseExample\">Log</button></td>";
-  //buf += "        <button class=\"btn btn-primary btn-sm\" type=\"button\" data-toggle=\"collapse\" data-target=\"#collapseExample2\" aria-expanded=\"false\" aria-controls=\"collapseExample2\">Comandos</button></td>";
   buf += "    </div>";
   buf += " <div class='collapse' id='collapseExample'> <div class='card card-body'> ";
   buf +=    lerLog();
   buf += " </div> </div>";
-//  buf += " <div class='collapse' id='collapseExample2'> <div class='card card-body'> ";
-//  buf +=    comandos_txt;
-//  buf += " </div> </div>";
   buf += "  </div>";
   buf += "  <hr>";
   buf +=  " <div class=\"row\">";
