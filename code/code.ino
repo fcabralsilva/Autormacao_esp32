@@ -20,7 +20,7 @@
 #include <Ticker.h>
 
 
-String VERSAO = "10.55 29/06/2023";
+String VERSAO = "10.70 10/10/2023";
 
 /*
  * VARIAVEIS DO SENSOR BMP280
@@ -34,11 +34,16 @@ String VERSAO = "10.55 29/06/2023";
 #define BUZZER                18              //SIRENE
 #define VOLT_CAL              115.0           //VALOR DE CALIBRAÇÃO (DEVE SER AJUSTADO EM PARALELO COM UM MULTÍMETRO)
 
-/* INICIANDO TEMPORIZADORES TICKER */
+/*  INICIANDO TEMPORIZADORES TICKER
+    VARIAVEIS DO AMBIENTE TICKER
+ */
 Ticker grava_leitura_dht;
 Ticker grava_leitura_dht_0;
-int valor_grava_leitura_dht = 1800000;
+Ticker enviaGet_ticker;
+int valor_grava_leitura_dht = 2500000;
 int conta_temperatura_valor = 9;
+
+
 
 /*
  * VARIAVEIS DE PARAMETRIZAÇÃO
@@ -56,6 +61,8 @@ boolean ler_dht = true;                       //HABILITA LEITURA DO SENSOR DHT
 #define DHTPIN                19              //PINO ENTRADA SENSOR DHT11
 #define DHTTYPE               DHT22           //TIPO DE SENSOR DHT22 OU DHT11
 unsigned long timeDht; 
+String temp_ext = "0.0";
+String umid_ext = "00";
 
 /*
  * VARIAVEIS DO SENSOR MQXX
@@ -228,7 +235,8 @@ void setup() {
   Serial.begin(115200);
   Serial.println("-----------------------------------------");
   Serial.println("");
-  /*
+
+   /*
    * CONECTANDO A REDE WIFI
    * INICIANDO AS VARIAVEIS MAIS UTEIS NO SISTEMA
    */
@@ -340,8 +348,11 @@ void setup() {
   lcd.clear();
 
   grava_leitura_dht_0.once_ms(1000, gravaDhtArray);
+  
   grava_leitura_dht.attach_ms(valor_grava_leitura_dht, gravaDhtArray);            //GRAVA NO ARRAY OS VALORES DE TEMPERATURA E UMIDADE NO ARRAY
-
+  
+  enviaGet_ticker.attach_ms(5000, enviaGet);
+  
   gravarArquivo("\n\n +++ INICIANDO SISTEMA +++ Versão: " + VERSAO + "\n\n", "log.txt");
 
 }
@@ -1102,6 +1113,17 @@ void loop() {
       String valor_hora_fim = s_hora + ":" + String(i_minutos);
       P_LEITURAS_MQ = 1;
     }
+
+    /*
+      ------------------------------------------------------------------------------
+      ARMAZENA TEMPERATURA DE SENSOR DHT EXTERNO
+      ------------------------------------------------------------------------------
+    */
+    if (requisicao == "00020") {
+      temp_ext = quebraString("temp", stringUrl);
+      umid_ext = quebraString("umid", stringUrl);
+    }
+    
     requisicao.remove(0);
 
     /*

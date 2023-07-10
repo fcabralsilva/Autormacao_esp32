@@ -41,26 +41,30 @@ String pagina() {
   buf += "<hr />";
   buf += "<div class=\"row\">";
   
-  //SENSOR DE TEMPERATURA
+  //SENSOR DE TEMPERATURA INTERNO
   buf += "<div class=\"col-sm-2\">";
   buf += "<h4>&#127777;<font size=\"5\"> ";
   buf += sensorTemp(2);
   buf += "</font><sup class=\"units\">&deg;c</sup></h4>";
+  buf += "<h7>&#127777;<font size=\"2\"> ";
+  buf += temp_ext;
+  buf += "</font><sup class=\"units\">&deg;c</sup></h7>";
+  buf += "<h7>&#128167;<font size=\"2\"> " + String(umid_ext) + "<sup class=\"units\">%</sup></h7>";
   buf += "</div>";
 
   //SENSOR DE UMIDADE DHTXX
   buf += "<div class=\"col-sm-2\">";
   int umid = sensorTemp(1);
-  buf += "<h3>&#128167; " + String(umid) + "<sup class=\"units\">%</sup></h3>";
+  buf += "<h3>&#128167;<font size=\"5\"> " + String(umid) + "<sup class=\"units\">%</sup></h3>";
   if (umid >= 60)
   {
-    buf += "<span class=\"badge badge-pill badge-success\" data-toggle=\"tooltip\" title=\"Nível recomendado\"> Recomendado </span>";
+    buf += "<span class=\"badge badge-pill badge-success\" data-toggle=\"tooltip\" title=\"Nível recomendado\"> . </span>";
   } else if (umid > 31 && umid < 60)
   {
-    buf += "<span class=\"badge badge-pill badge-warning\"> Cuidado </span>";
+    buf += "<span class=\"badge badge-pill badge-warning\"> ! </span>";
   } else if (umid <= 30)
   {
-    buf += "<span class=\"badge badge-pill badge-danger\"> Perigo </span>";
+    buf += "<span class=\"badge badge-pill badge-danger\"> ! </span>";
   }
   buf += "</div>";
   buf += "<div class=\"col-sm-2\">";
@@ -69,17 +73,16 @@ String pagina() {
   buf += "<h3>&#128293;" + String(GLP) + "/" + String(FUMACA) + "<sup class=\"units\">ppm</sup></h3>";
   if (glp >= limit_glp )
   {
-    buf += "<span class=\"badge badge-pill badge-danger\"> Perigo </span>";
+    buf += "<span class=\"badge badge-pill badge-danger\"> ! </span>";
   } else if (glp <= (limit_glp / 3))
   {
-    buf += "<span class=\"badge badge-pill badge-success\"> Recomendado </span>";
+    buf += "<span class=\"badge badge-pill badge-success\"> . </span>";
   }
   else {
-    buf += "<span class=\"badge badge-pill badge-warning\"> Cuidado </span>";
+    buf += "<span class=\"badge badge-pill badge-warning\"> ! </span>";
   }
   int limit_fu = String(LIMITE_MQ2_FU).toInt();
   int fu = FUMACA.toInt();
-  
   buf += "</div>";
   buf += "</div>";
   

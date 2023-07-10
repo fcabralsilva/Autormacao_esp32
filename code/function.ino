@@ -396,6 +396,36 @@ void gravarBanco (String buffer) {
   client.flush();
   client.stop();
 }
+
+void enviaGet() {
+  String dados_envia_get = "?00020&temp=";
+  dados_envia_get += String(sensorTemp(2));
+  dados_envia_get += "&umid=";
+  dados_envia_get += String(sensorTemp(1))+"&";
+
+  WiFiClient client = server.available();
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    gravaLog(" " + relogio_ntp(1) + " - E0105:Reconectando WIFI!", logtxt, 1);
+    WiFi.reconnect();
+  }
+
+  //pisca_led(LED_VERMELHO,false);
+  if(servidor != 0){
+    if ((client.connect(servidor, portaServidor) == true)){
+      client.println("GET /"+dados_envia_get);
+      gravaLog(" " + relogio_ntp(1) + " - BD: " + dados_envia_get, logtxt, 4);
+      client.println();
+      dados_envia_get = "";
+    } else {
+      gravaLog(" " + relogio_ntp(1) + " - E0104:Servidor Desconectado", logtxt, 1);
+      dados_envia_get = "";
+    }
+  }
+  dados_envia_get.remove(0);
+  client.flush();
+  client.stop();
+}
 //---------------------------------------
 
 
