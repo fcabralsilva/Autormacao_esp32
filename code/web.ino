@@ -1,5 +1,5 @@
 const char WEB_HEAD[] PROGMEM            = "<!DOCTYPE html><html lan8g=\"pt-br\"><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=no\"/><meta charset=\"utf-8\"><link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css\"><script src=\"https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js\"></script><title>{v}</title>";
-const char WEB_STYLE[] PROGMEM           = "<style type=\"text/css\">body .form-control{font-size:12px}input,button,select,optgroup,textarea {  margin: 5px;}.table td, .table th {padding:0px;}.th {width:100px;}.shadow-lg {box-shadow: 0px } #collapseExample {font-size:10px}</style>";
+const char WEB_STYLE[] PROGMEM           = "<style type=\"text/css\">body .form-control{font-size:12px}input,button,select,optgroup,textarea {  margin: 5px;}.table td, .table th {padding:0px;border:0px}.th {width:100px;}.shadow-lg {box-shadow: 0px } #collapseExample {font-size:10px}</style>";
 /*const char WEB_SCRIPT[] PROGMEM          = "<script>function c(l){document.getElementById('s').value=l.innerText||l.textContent;document.getElementById('p').focus();}</script>"; */
 const char WEB_HEAD_END[] PROGMEM        = "</head><body>";
 const char WEB_END[] PROGMEM             = "</div></body></html>";
@@ -38,58 +38,78 @@ String pagina() {
      PAINEL DE SENSORES
      --------------------------------
   */
-  buf += "<hr />";
   buf += "<div class=\"row\">";
   
   //SENSOR DE TEMPERATURA INTERNO
-  buf += "<div class=\"col-sm-2\">";
-  buf += "<h4>&#127777;<font size=\"5\"> ";
-  buf += sensorTemp(2);
-  buf += "</font><sup class=\"units\">&deg;c</sup></h4>";
-  buf += "<h7>&#127777;<font size=\"2\"> ";
-  buf += temp_ext;
-  buf += "</font><sup class=\"units\">&deg;c</sup></h7>";
-  buf += "<h7>&#128167;<font size=\"2\"> " + String(umid_ext) + "<sup class=\"units\">%</sup></h7>";
-  buf += "</div>";
+  //buf += "<div class=\"col-sm-2\">";
+  //buf += "<h4>&#127777;<font size=\"5\"> ";
+  //buf += sensorTemp(2);
+  //buf += "</font><sup class=\"units\">&deg;c</sup></h4>";
+  //buf += "<h7>&#127777;<font size=\"2\"> ";
+  //buf += temp_ext;
+  //buf += "</font><sup class=\"units\">&deg;c</sup></h7>";
+  //buf += "<h7>&#128167;<font size=\"2\"> " + String(umid_ext) + "<sup class=\"units\">%</sup></font></h7>";
+  //buf += "</div>";
 
   //SENSOR DE UMIDADE DHTXX
-  buf += "<div class=\"col-sm-2\">";
+  //buf += "<div class=\"col-sm-2\">";
   int umid = sensorTemp(1);
-  buf += "<h3>&#128167;<font size=\"5\"> " + String(umid) + "<sup class=\"units\">%</sup></h3>";
-  if (umid >= 60)
-  {
-    buf += "<span class=\"badge badge-pill badge-success\" data-toggle=\"tooltip\" title=\"Nível recomendado\"> . </span>";
-  } else if (umid > 31 && umid < 60)
-  {
-    buf += "<span class=\"badge badge-pill badge-warning\"> ! </span>";
-  } else if (umid <= 30)
-  {
-    buf += "<span class=\"badge badge-pill badge-danger\"> ! </span>";
-  }
-  buf += "</div>";
-  buf += "<div class=\"col-sm-2\">";
+  //buf += "<h3>&#128167;<font size=\"5\"> " + String(umid) + "<sup class=\"units\">%</sup></font></h3>";
+  // if (umid >= 60)
+  // {
+  //   buf += "<span class=\"badge badge-pill badge-success\" data-toggle=\"tooltip\" title=\"Nível recomendado\"> . </span>";
+  // } else if (umid > 31 && umid < 60)
+  // {
+  //   buf += "<span class=\"badge badge-pill badge-warning\"> ! </span>";
+  // } else if (umid <= 30)
+  // {
+  //   buf += "<span class=\"badge badge-pill badge-danger\"> ! </span>";
+  // }
+  //buf += "</div>";
+  //buf += "<div class=\"col-sm-2\">";
   int limit_glp = String(LIMITE_MQ2).toInt();
   int glp = GLP.toInt();
-  buf += "<h3>&#128293;" + String(GLP) + "/" + String(FUMACA) + "<sup class=\"units\">ppm</sup></h3>";
-  if (glp >= limit_glp )
-  {
-    buf += "<span class=\"badge badge-pill badge-danger\"> ! </span>";
-  } else if (glp <= (limit_glp / 3))
-  {
-    buf += "<span class=\"badge badge-pill badge-success\"> . </span>";
-  }
-  else {
-    buf += "<span class=\"badge badge-pill badge-warning\"> ! </span>";
-  }
+  //buf += "<h3>&#128293;" + String(GLP) + "/" + String(FUMACA) + "<sup class=\"units\">ppm</sup></h3>";
+  // if (glp >= limit_glp )
+  // {
+  //   buf += "<span class=\"badge badge-pill badge-danger\"> ! </span>";
+  // } else if (glp <= (limit_glp / 3))
+  // {
+  //   buf += "<span class=\"badge badge-pill badge-success\"> . </span>";
+  // }
+  // else {
+  //   buf += "<span class=\"badge badge-pill badge-warning\"> ! </span>";
+  // }
   int limit_fu = String(LIMITE_MQ2_FU).toInt();
   int fu = FUMACA.toInt();
-  buf += "</div>";
+  //buf += "</div>";
+
+buf +="<div class=\"table-responsive col\">";
+buf +=  "<table class=\"table\">";
+buf +=    "<tr>";
+buf +=    "<th>Local</th><th>Temp</th><th>Umid</th><th>Gases</th>";
+buf +=    "</tr>";
+buf +=    "<tr>";
+buf +=    "<td><button class=\"btn btn-link\" type=\"button\" data-toggle=\"collapse\" data-target=\"#collapseSensor\" aria-expanded=\"false\" aria-controls=\"collapseSensor\">COZINHA</button></td>";
+buf +=    "<td><font size=\"4\">&#127777 "+String(sensorTemp(2))+"</font><sup class=\"units\">°c</sup></td>";
+buf +=    "<td><font size=\"4\">&#128167 " + String(umid) + "</font><sup class=\"units\">%</sup></td>";
+buf +=    "<td><font size=\"4\">&#128293 " + String(GLP) + "/" + String(FUMACA) + "</font><sup class=\"units\">pmm</sup></td>";
+buf +=    "</tr>";
+buf +=    "<tr>";
+buf +=    "<td><button class=\"btn btn-link\" type=\"button\" data-toggle=\"collapse\" data-target=\"#collapseSensor\" aria-expanded=\"false\" aria-controls=\"collapseSensor\">EXTERNO</button></td>";
+buf +=    "<td><font size=\"4\">&#127777 "+String(temp_ext)+"</font><sup class=\"units\">°c</sup></td>";
+buf +=    "<td><font size=\"4\">&#128167 " + String(umid_ext) + "</font><sup class=\"units\">%</sup></td>";
+buf +=    "<td><font size=\"4\">&#128293 " + String(GLP) + "/" + String(FUMACA) + "</font><sup class=\"units\">pmm</sup></td>";
+buf +=    "</tr>";
+buf +=  "</table>";
+buf +="</div>";
+
   buf += "</div>";
   
-  buf += "<div><hr />";
-  buf += "<button class=\"btn btn-link\" type=\"button\" data-toggle=\"collapse\" data-target=\"#collapseSensor\" aria-expanded=\"false\" aria-controls=\"collapseSensor\">Historico</button></td>";
+  buf += "<div>";
+  //buf += "<button class=\"btn btn-link\" type=\"button\" data-toggle=\"collapse\" data-target=\"#collapseSensor\" aria-expanded=\"false\" aria-controls=\"collapseSensor\">Historico</button></td>";
   buf += "  <div class=\"row col-sm-12\">";
-  buf += " <div class='collapse' id='collapseSensor' style='width:70%'> <div class='card card-body'> ";
+  buf += " <div class='collapse' id='collapseSensor' style='width:100%'> <div class='card card-body'> ";
   if(sistema_solar == 1)
   {
     buf += FPSTR(TABELA_TEMP_UMID);
@@ -100,7 +120,7 @@ String pagina() {
   }
   buf += " </div> </div>";
   buf += "</div>";
-  buf += "<hr />";
+  
   /*
     --------------------------------
     FIM PAINEL SENSORES
@@ -270,7 +290,7 @@ String pagina() {
   buf += "        <a href='?00013' title='APAGAR TODOS OS REGISTROS!'> x </a>";
   buf += "        <button class=\"btn btn-primary btn-sm\" type=\"button\" data-toggle=\"collapse\" data-target=\"#collapseExample\" aria-expanded=\"false\" aria-controls=\"collapseExample\">Log</button></td>";
   buf += "    </div>";
-  buf += " <div class='collapse' id='collapseExample'> <div class='card card-body'> ";
+  buf += " <div class='collapse' id='collapseExample' style='width: 100%'> <div class='card card-body'> ";
   buf +=    lerLog();
   buf += " </div> </div>";
   buf += "  </div>";

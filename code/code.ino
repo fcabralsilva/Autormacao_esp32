@@ -20,7 +20,7 @@
 #include <Ticker.h>
 
 
-String VERSAO = "10.70 10/10/2023";
+String VERSAO = "10.80 11/10/2023";
 
 /*
  * VARIAVEIS DO SENSOR BMP280
