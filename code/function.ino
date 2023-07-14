@@ -381,7 +381,7 @@ void gravarBanco (String buffer) {
     WiFi.reconnect();
   }
   //pisca_led(LED_VERMELHO,false);
-  if(servidor != 0){
+  if(servidor != "0"){
     if ((client.connect(servidor, portaServidor) == true)){
       client.println("GET /web/gravar.php?" + buffer);
       gravaLog(" " + relogio_ntp(1) + " - BD: " + buffer, logtxt, 4);
@@ -411,14 +411,14 @@ void enviaGet() {
   }
 
   //pisca_led(LED_VERMELHO,false);
-  if(servidor != 0){
+  if(servidor == "0"){
     if ((client.connect(servidor, portaServidor) == true)){
       client.println("GET /"+dados_envia_get);
       gravaLog(" " + relogio_ntp(1) + " - BD: " + dados_envia_get, logtxt, 4);
       client.println();
       dados_envia_get = "";
     } else {
-      gravaLog(" " + relogio_ntp(1) + " - E0104:Servidor Desconectado", logtxt, 1);
+      gravaLog(" " + relogio_ntp(1) + " - E0110:Servidor Desconectado", logtxt, 1);
       dados_envia_get = "";
     }
   }
@@ -729,3 +729,10 @@ void printWifiData() {
   Serial.println("******************************");
 }
 
+String montaCentraisEsp(String temp, String umid, String fu_glp, String central){
+  String buff;
+
+ 
+
+  return buff;
+}

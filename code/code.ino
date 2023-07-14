@@ -20,7 +20,7 @@
 #include <Ticker.h>
 
 
-String VERSAO = "10.80 11/10/2023";
+String VERSAO = "10.90 14/07/2023";
 
 /*
  * VARIAVEIS DO SENSOR BMP280
@@ -63,6 +63,10 @@ boolean ler_dht = true;                       //HABILITA LEITURA DO SENSOR DHT
 unsigned long timeDht; 
 String temp_ext = "0.0";
 String umid_ext = "00";
+String glp_ = "0";
+String fu_ = "0";
+String nome_esp = "esp_none";
+int contar_array_esp=0;
 
 /*
  * VARIAVEIS DO SENSOR MQXX
@@ -1120,8 +1124,19 @@ void loop() {
       ------------------------------------------------------------------------------
     */
     if (requisicao == "00020") {
+      /*  
+        EXEMPLO DE MENSAGEM: http://192.168.0.12/?00020&temp=15.20&umid=99&glp=1&fu=1&esp=Area-Externa
+      */
       temp_ext = quebraString("temp", stringUrl);
       umid_ext = quebraString("umid", stringUrl);
+      nome_esp = quebraString("esp", stringUrl);
+      glp_ = quebraString("glp", stringUrl);
+      fu_ = quebraString("fu", stringUrl);
+      String centrais_esp_valores[3][3]; 
+
+      montaCentraisEsp(temp_ext,  umid_ext, "", nome_esp);
+      
+      
     }
     
     requisicao.remove(0);
