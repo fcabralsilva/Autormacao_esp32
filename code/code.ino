@@ -20,7 +20,7 @@
 #include <Ticker.h>
 
 
-String VERSAO = "10.90 14/07/2023";
+String VERSAO = "10.95 17/07/2023";
 
 /*
  * VARIAVEIS DO SENSOR BMP280
@@ -245,7 +245,7 @@ void setup() {
    * INICIANDO AS VARIAVEIS MAIS UTEIS NO SISTEMA
    */
   WiFiManager wifiManager;
-  wifiManager.setHostname("ESP_CENTRAL");
+  //wifiManager.setHostname("ESP_CENTRAL");
   wifiManager.setAPCallback(configModeCallback);
   wifiManager.setSaveConfigCallback(saveConfigCallback);
   if (!wifiManager.autoConnect()) {
@@ -356,6 +356,8 @@ void setup() {
   grava_leitura_dht.attach_ms(valor_grava_leitura_dht, gravaDhtArray);            //GRAVA NO ARRAY OS VALORES DE TEMPERATURA E UMIDADE NO ARRAY
   
   enviaGet_ticker.attach_ms(5000, enviaGet);
+
+  Serial.println("Hostname: "+String(WiFi.getHostname()));
   
   gravarArquivo("\n\n +++ INICIANDO SISTEMA +++ Versão: " + VERSAO + "\n\n", "log.txt");
 
@@ -379,6 +381,7 @@ void loop() {
     if (error) {
       gravaLog(" " + relogio_ntp(1) + " - E0101:Arquivo json: ", logtxt, 1);
       Serial.println(error.c_str());
+      gravarArquivo("{\"servidor\":\"" + String(ipHost) + "\",\"int_1\":\"R1\",\"tipo_1\":\"0\",\"sinal_1\":\"pulso\",\"h_i_1\":\"0000\",\"h_o_1\":\"0000\",\"int_2\":\"R2\",\"tipo_2\":\"0\",\"sinal_2\":\"pulso\",\"h_i_2\":\"0000\",\"h_o_2\":\"0000\",\"int_3\":\"R3\",\"tipo_3\":\"0\",\"sinal_3\":\"pulso\",\"h_i_3\":\"0000\",\"h_o_3\":\"0000\",\"int_4\":\"R4\",\"tipo_4\":\"0\",\"sinal_4\":\"pulso\",\"h_i_4\":\"0000\",\"h_o_4\":\"0000\",\"log\":\"sim\",\"nivel\":\"4\",\"v_mq\":\"20\",\"v_mq_fu\":\"50\",\"s_a\":\"123\"}", "param.txt");
       cont_ip_banco++;
       return;
     }

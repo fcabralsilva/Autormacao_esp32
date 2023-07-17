@@ -398,10 +398,18 @@ void gravarBanco (String buffer) {
 }
 
 void enviaGet() {
+
+  String tabela_;
+  for(int i = 0; i<=9 ; i++){
+    tabela_ += temperatura[i];           //LINHAS GERADAS DENTRO DA FUNÇÃO gravaDhtArray()
+  }
+
   String dados_envia_get = "?00020&temp=";
   dados_envia_get += String(sensorTemp(2));
   dados_envia_get += "&umid=";
-  dados_envia_get += String(sensorTemp(1))+"&";
+  dados_envia_get += String(sensorTemp(1));
+  dados_envia_get += "&glp="+String(GLP)+"&fu=" + String(FUMACA) + "&esp="+String(WiFi.getHostname());
+  dados_envia_get += "&tabela="+tabela_;
 
   WiFiClient client = server.available();
   if (WiFi.status() != WL_CONNECTED)
@@ -411,7 +419,7 @@ void enviaGet() {
   }
 
   //pisca_led(LED_VERMELHO,false);
-  if(servidor == "0"){
+  if(servidor != "0"){
     if ((client.connect(servidor, portaServidor) == true)){
       client.println("GET /"+dados_envia_get);
       gravaLog(" " + relogio_ntp(1) + " - BD: " + dados_envia_get, logtxt, 4);
