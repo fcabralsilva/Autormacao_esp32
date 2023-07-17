@@ -728,11 +728,3 @@ void printWifiData() {
   Serial.println(ESP.getFreeHeap());
   Serial.println("******************************");
 }
-
-String montaCentraisEsp(String temp, String umid, String fu_glp, String central){
-  String buff;
-
- 
-
-  return buff;
-}
