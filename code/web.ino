@@ -96,7 +96,7 @@ buf +=    "<td><font size=\"4\">&#128167 " + String(umid) + "</font><sup class=\
 buf +=    "<td><font size=\"4\">&#128293 " + String(GLP) + "/" + String(FUMACA) + "</font><sup class=\"units\">pmm</sup></td>";
 buf +=    "</tr>";
 buf +=    "<tr>";
-buf +=    "<td><button class=\"btn btn-link\" type=\"button\" data-toggle=\"collapse\" data-target=\"#collapseSensor\" aria-expanded=\"false\" aria-controls=\"collapseSensor\">"+ nome_esp +"</button></td>";
+buf +=    "<td><button class=\"btn btn-link\" type=\"button\" data-toggle=\"collapse\" data-target=\"#collapseSensor_2\" aria-expanded=\"false\" aria-controls=\"collapseSensor_2\">"+ nome_esp +"</button></td>";
 buf +=    "<td><font size=\"4\">&#127777 "+String(temp_ext)+"</font><sup class=\"units\">°c</sup></td>";
 buf +=    "<td><font size=\"4\">&#128167 " + String(umid_ext) + "</font><sup class=\"units\">%</sup></td>";
 buf +=    "<td><font size=\"4\">&#128293 " + String(glp_) + "/" + String(fu_) + "</font><sup class=\"units\">pmm</sup></td>";
@@ -120,13 +120,27 @@ buf +="</div>";
   }
   buf += " </div> </div>";
   buf += "</div>";
+
+  buf += "  <div class=\"row col-sm-12\">";
+  buf += " <div class='collapse' id='collapseSensor_2' style='width:100%'> <div class='card card-body'> ";
+  if(sistema_solar == 1)
+  {
+    buf += FPSTR(TABELA_TEMP_UMID);
+    
+      buf += tabela_sensores_ext;           //LINHAS GERADAS DENTRO DA FUNÇÃO gravaDhtArray()
+    
+    buf += FPSTR(TABELA_TEMP_UMID_3);
+  }
+  buf += " </div> </div>";
+  buf += "</div>";
   
   /*
     --------------------------------
     FIM PAINEL SENSORES
     --------------------------------
   */
-
+  
+ 
   /*
     --------------------------------
                 BOTÃO 1
@@ -232,6 +246,7 @@ buf +="</div>";
     buf.replace("{F}", String(botao4.nomeInter));
     conta_botao ++;
   }
+  
 
   /*
       --------------------------------

@@ -145,9 +145,6 @@ void sensorMQ() {
   if (millis() >= timeMq2 + 15000) {
     sensorMq2 = analogRead(PIN_MQ2);
 
-    digitalWrite(LED_AZUL, HIGH);
-    delay(100);
-    digitalWrite(LED_AZUL, LOW);
     GLP = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, GAS_LPG));
     FUMACA = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, SMOKE));
     CO = String(getQuantidadeGasMQ(leitura_MQ2(PIN_MQ2) / Ro, GAS_CO));

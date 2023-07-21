@@ -409,7 +409,7 @@ void enviaGet() {
   dados_envia_get += "&umid=";
   dados_envia_get += String(sensorTemp(1));
   dados_envia_get += "&glp="+String(GLP)+"&fu=" + String(FUMACA) + "&esp="+String(WiFi.getHostname());
-  dados_envia_get += "&tabela="+tabela_;
+  dados_envia_get += "&tabela="+tabela_+"&";
 
   WiFiClient client = server.available();
   if (WiFi.status() != WL_CONNECTED)
@@ -426,7 +426,7 @@ void enviaGet() {
       client.println();
       dados_envia_get = "";
     } else {
-      gravaLog(" " + relogio_ntp(1) + " - E0110:Servidor Desconectado", logtxt, 1);
+      //gravaLog(" " + relogio_ntp(1) + " - E0110:Servidor Desconectado", logtxt, 1);
       dados_envia_get = "";
     }
   }
@@ -487,7 +487,7 @@ float MQCalibration(int mq_pin)   //funcao que calibra o sensor em um ambiente l
     Serial.print(".");
     valor += calcularResistencia(analogRead(mq_pin));
     delay(500);
-    digitalWrite(2, !digitalRead(2));//Faz o LED piscar (inverte o estado).
+    //digitalWrite(2, !digitalRead(2));//Faz o LED piscar (inverte o estado).
   }
   Serial.println("");
   digitalWrite(2, false);
@@ -503,7 +503,7 @@ float leitura_MQ2(int mq_pin)
   for (i = 0; i < ITERACOES_LEITURA; i++)
   {
     rs += calcularResistencia(analogRead(mq_pin));
-    digitalWrite(2, !digitalRead(2));//Faz o LED piscar (inverte o estado).
+    //digitalWrite(2, !digitalRead(2));//Faz o LED piscar (inverte o estado).
   }
   digitalWrite(2, false);
   rs = rs / ITERACOES_LEITURA;

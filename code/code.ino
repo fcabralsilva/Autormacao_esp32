@@ -20,7 +20,7 @@
 #include <Ticker.h>
 
 
-String VERSAO = "10.95 17/07/2023";
+String VERSAO = "10.99 21/07/2023";
 
 /*
  * VARIAVEIS DO SENSOR BMP280
@@ -66,6 +66,7 @@ String umid_ext = "00";
 String glp_ = "0";
 String fu_ = "0";
 String nome_esp = "esp_none";
+String tabela_sensores_ext = "0";
 int contar_array_esp=0;
 
 /*
@@ -368,7 +369,7 @@ void loop() {
 
   WiFiManager wifiManager;
 
-  pisca_led(LED_VERDE, true);
+  pisca_led(2, true);
 
   //capturaIr();
 
@@ -1135,6 +1136,8 @@ void loop() {
       nome_esp = quebraString("esp", stringUrl);
       glp_ = quebraString("glp", stringUrl);
       fu_ = quebraString("fu", stringUrl);
+      tabela_sensores_ext = quebraString("tabela", stringUrl);
+      Serial.println(tabela_sensores_ext);
       String centrais_esp_valores[3][3]; 
 
       montaCentraisEsp(temp_ext,  umid_ext, "", nome_esp);
