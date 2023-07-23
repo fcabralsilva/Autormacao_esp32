@@ -388,7 +388,7 @@ void gravarBanco (String buffer) {
       client.println();
       buffer = "";
     } else {
-      gravaLog(" " + relogio_ntp(1) + " - E0104:Servidor Desconectado", logtxt, 1);
+      //gravaLog(" " + relogio_ntp(1) + " - E0104:Servidor Desconectado", logtxt, 1);
       buffer = "";
     }
   }
@@ -737,10 +737,29 @@ void printWifiData() {
   Serial.println("******************************");
 }
 
-String montaCentraisEsp(String temp, String umid, String fu_glp, String central){
-  String buff;
+void montaCentraisEsp(String central_, String tabela_) {
+  // Procurar por uma posição vazia ou pela variável 'central_' no array
+  int posicao = -1; // Inicializamos a posição com -1 para indicar que não encontramos a variável ainda
 
- 
+  for (int i = 0; i <= 4; i++) {
+    if (centrais_esp_valores[i][0] == central_) { // Encontrou a variável 'central_'
+      posicao = i;
+      break; // Saímos do loop, pois encontramos a variável
+    } else if (centrais_esp_valores[i][0] == "") { // Encontrou uma posição vazia
+      posicao = i;
+      break; // Saímos do loop, pois encontramos uma posição vazia
+    }
+  }
 
-  return buff;
+  // Se 'posicao' for diferente de -1, significa que encontramos a variável 'central_' ou uma posição vazia
+  if (posicao != -1) {
+    Serial.println("Posição encontrada = " + String(posicao));
+    centrais_esp_valores[posicao][0] = central_; // Atribui o valor de 'central_' ao primeiro elemento do array
+    centrais_esp_valores[posicao][1] = tabela_; // Atribui o valor de 'tabela_' ao segundo elemento do array
+  } else {
+    Serial.println("Sem posição vazia e central não encontrada");
+    // Aqui você pode tomar alguma ação caso o array esteja cheio e a variável 'central_' não tenha sido encontrada.
+    // Por exemplo, pode-se imprimir uma mensagem de erro ou fazer algo específico para essa situação.
+  }
 }
+

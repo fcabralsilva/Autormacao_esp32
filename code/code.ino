@@ -20,7 +20,7 @@
 #include <Ticker.h>
 
 
-String VERSAO = "10.99 21/07/2023";
+String VERSAO = "11.00 22/07/2023";
 
 /*
  * VARIAVEIS DO SENSOR BMP280
@@ -95,6 +95,7 @@ int conta_temperatura = 0, contaLeituraDht = 0;
 String temperatura[10];
 String linha_tr_tabela;
 float somaLeituraDht =        0.00;
+String centrais_esp_valores[3][2];
 
 /*
  * LEDS DE SINALIZAÇÃO
@@ -1137,10 +1138,10 @@ void loop() {
       glp_ = quebraString("glp", stringUrl);
       fu_ = quebraString("fu", stringUrl);
       tabela_sensores_ext = quebraString("tabela", stringUrl);
-      Serial.println(tabela_sensores_ext);
-      String centrais_esp_valores[3][3]; 
+      //Serial.println(tabela_sensores_ext);----
+       
 
-      montaCentraisEsp(temp_ext,  umid_ext, "", nome_esp);
+      montaCentraisEsp(nome_esp,tabela_sensores_ext);
       
       
     }
