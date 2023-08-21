@@ -20,7 +20,7 @@
 #include <Ticker.h>
 
 
-String VERSAO = "11.00 22/07/2023";
+String VERSAO = "11.02 21/08/2023";
 
 /*
  * VARIAVEIS DO SENSOR BMP280
@@ -136,9 +136,9 @@ struct botao1 {
   const char* modelo = "interruptor";
   const char* nomeInter = "Com1";
   const char* tipo = "0";
-  const char* agenda_in;
-  const char* agenda_out;
-  const char* timer;
+  const char* agenda_in="0000";
+  const char* agenda_out="0000";
+  const char* timer="0000";
   int pin_pir_1 = 32;
   int led_pir_1 = 2;
   unsigned long tempo_pir_1;
@@ -152,8 +152,8 @@ struct botao2 {
   const char* modelo = "interruptor";
   const char* tipo = "0";
   const char* nomeInter = "Com2";
-  const char* agenda_in;
-  const char* agenda_out;
+  const char* agenda_in="0000";
+  const char* agenda_out="0000";
 } botao2;
 
 struct botao3 {
@@ -163,8 +163,8 @@ struct botao3 {
   const char* tipo = "0";
   const char* modelo = "interruptor";
   const char* nomeInter = "Com3";
-  const char* agenda_in;
-  const char* agenda_out;
+  const char* agenda_in="0000";
+  const char* agenda_out="0000";
 } botao3;
 
 struct botao4 {
@@ -174,8 +174,8 @@ struct botao4 {
   const char* tipo = "0";
   const char* modelo = "interruptor";
   const char* nomeInter = "Com4";
-  const char* agenda_in;
-  const char* agenda_out;
+  const char* agenda_in="0000";
+  const char* agenda_out="0000";
 } botao4;
 
 int i_timer_valor, estado_atual = 0, estado_antes = 0;
@@ -199,7 +199,7 @@ String buff, URL, serv, buf;
  */
 const char* json;
 int cont_ip_banco =             0;
-const char* conslog;
+const char* conslog = "0";
 
 int freq = 2000, channel = 0, resolution = 8, n = 0;
 byte grau[8] = {
@@ -275,16 +275,16 @@ void setup() {
   pinMode(PIN_AP, INPUT_PULLUP);
   pinMode(botao1.rele, OUTPUT);
   pinMode(botao1.entrada, INPUT_PULLUP);
-  digitalWrite(botao1.rele, LOW);
+  //digitalWrite(botao1.rele, LOW);
   pinMode(botao2.rele, OUTPUT);
   pinMode(botao2.entrada, INPUT_PULLUP);
-  digitalWrite(botao2.rele, LOW);
+  //digitalWrite(botao2.rele, LOW);
   pinMode(botao3.rele, OUTPUT);
   pinMode(botao3.entrada, INPUT_PULLUP);
-  digitalWrite(botao3.rele, LOW);
+  //digitalWrite(botao3.rele, LOW);
   pinMode(botao4.rele, OUTPUT);
   pinMode(botao4.entrada, INPUT_PULLUP);
-  digitalWrite(botao4.rele, LOW);
+  //digitalWrite(botao4.rele, LOW);
   pinMode(BUZZER, OUTPUT);
   digitalWrite(BUZZER, LOW);
   pinMode(LED_VERDE, OUTPUT);
@@ -298,7 +298,7 @@ void setup() {
    * INICIANDO SISTEMA DE ARQUIVOS 
    */
   openFS();
-  criarArquivo("/param.txt");
+  //criarArquivo("/param.txt");
   criarArquivo("/log.txt");
 
   /*
@@ -334,24 +334,24 @@ void setup() {
   //---------------------------------------
   //    INICIALIZA O DISPLAY LCD
   //---------------------------------------
-  lcd.init();                           // INICIALIZA O DISPLAY LCD
-  lcd.setBacklight(HIGH);
-  lcd.createChar(0, grau);
-  ledcSetup(channel, freq, resolution);
-  ledcAttachPin(5, channel);
-  lcd.setCursor(0, 0);
-  lcd.print("    BEM VINDO   ");        //SETA A POSIÇÃO EM QUE O CURSOR INCIALIZA(LINHA 1)
-  lcd.setCursor(0, 1);
-  lcd.print(VERSAO);                    //SETA A POSIÇÃO EM QUE O CURSOR RECEBE O TEXTO A SER MOSTRADO(LINHA 2)
-  digitalWrite(BUZZER, HIGH);
-  delay(500);
-  digitalWrite(BUZZER, LOW);
-  delay(2500);
-  lcd.clear();
-  lcd.setCursor(2, 1);
-  lcd.print(ipLocalString);             //SETA A POSIÇÃO EM QUE O CURSOR RECEBE O TEXTO A SER MOSTRADO(LINHA 2)
-  delay(2500);
-  lcd.clear();
+  // lcd.init();                           // INICIALIZA O DISPLAY LCD
+  // lcd.setBacklight(HIGH);
+  // lcd.createChar(0, grau);
+  // ledcSetup(channel, freq, resolution);
+  // ledcAttachPin(5, channel);
+  // lcd.setCursor(0, 0);
+  // lcd.print("    BEM VINDO   ");        //SETA A POSIÇÃO EM QUE O CURSOR INCIALIZA(LINHA 1)
+  // lcd.setCursor(0, 1);
+  // lcd.print(VERSAO);                    //SETA A POSIÇÃO EM QUE O CURSOR RECEBE O TEXTO A SER MOSTRADO(LINHA 2)
+  // digitalWrite(BUZZER, HIGH);
+  // delay(500);
+  // digitalWrite(BUZZER, LOW);
+  // delay(2500);
+  // lcd.clear();
+  // lcd.setCursor(2, 1);
+  // lcd.print(ipLocalString);             //SETA A POSIÇÃO EM QUE O CURSOR RECEBE O TEXTO A SER MOSTRADO(LINHA 2)
+  // delay(2500);
+  // lcd.clear();
 
   grava_leitura_dht_0.once_ms(1000, gravaDhtArray);
   
@@ -377,13 +377,15 @@ void loop() {
   while (cont_ip_banco < 1) {
     // FAZENDO LEITURA DE PARAMETROS DO SISTEMA
     openFS();
-    StaticJsonDocument<680> doc;
+    StaticJsonDocument<700> doc;
     json = lerArquivoParam().c_str();
     DeserializationError error = deserializeJson(doc, json);
     if (error) {
       gravaLog(" " + relogio_ntp(1) + " - E0101:Arquivo json: ", logtxt, 1);
       Serial.println(error.c_str());
-      gravarArquivo("{\"servidor\":\"" + String(ipHost) + "\",\"int_1\":\"R1\",\"tipo_1\":\"0\",\"sinal_1\":\"pulso\",\"h_i_1\":\"0000\",\"h_o_1\":\"0000\",\"int_2\":\"R2\",\"tipo_2\":\"0\",\"sinal_2\":\"pulso\",\"h_i_2\":\"0000\",\"h_o_2\":\"0000\",\"int_3\":\"R3\",\"tipo_3\":\"0\",\"sinal_3\":\"pulso\",\"h_i_3\":\"0000\",\"h_o_3\":\"0000\",\"int_4\":\"R4\",\"tipo_4\":\"0\",\"sinal_4\":\"pulso\",\"h_i_4\":\"0000\",\"h_o_4\":\"0000\",\"log\":\"sim\",\"nivel\":\"4\",\"v_mq\":\"20\",\"v_mq_fu\":\"50\",\"s_a\":\"123\"}", "param.txt");
+      //gravarArquivo("{\"servidor\":\"" + String(ipHost) + "\",\"int_1\":\"R1\",\"tipo_1\":\"0\",\"sinal_1\":\"pulso\",\"h_i_1\":\"0000\",\"h_o_1\":\"0000\",\"int_2\":\"R2\",\"tipo_2\":\"0\",\"sinal_2\":\"pulso\",\"h_i_2\":\"0000\",\"h_o_2\":\"0000\",\"int_3\":\"R3\",\"tipo_3\":\"0\",\"sinal_3\":\"pulso\",\"h_i_3\":\"0000\",\"h_o_3\":\"0000\",\"int_4\":\"R4\",\"tipo_4\":\"0\",\"sinal_4\":\"pulso\",\"h_i_4\":\"0000\",\"h_o_4\":\"0000\",\"log\":\"sim\",\"nivel\":\"4\",\"v_mq\":\"20\",\"v_mq_fu\":\"50\",\"s_a\":\"123\"}", "param.txt");
+      gravarArquivo("{\"servidor\":\"0\",\"int_1\":\"R1\",\"tipo_1\":\"0\",\"sinal_1\":\"pulso\",\"h_i_1\":\"0000\",\"h_o_1\":\"0000\",\"int_2\":\"R2\",\"tipo_2\":\"0\",\"sinal_2\":\"pulso\",\"h_i_2\":\"0000\",\"h_o_2\":\"0000\",\"int_3\":\"R3\",\"tipo_3\":\"0\",\"sinal_3\":\"pulso\",\"h_i_3\":\"0000\",\"h_o_3\":\"0000\",\"int_4\":\"R4\",\"tipo_4\":\"0\",\"sinal_4\":\"pulso\",\"h_i_4\":\"0000\",\"h_o_4\":\"0000\",\"log\":\"sim\",\"nivel\":\"4\",\"v_mq\":\"999\",\"v_mq_fu\":\"999\"}", "param.txt");
+
       cont_ip_banco++;
       return;
     }
