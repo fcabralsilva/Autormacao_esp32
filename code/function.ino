@@ -78,7 +78,7 @@ String leStringSerial() {
       }
   */
 }
-String gpio_html (int numero, int botao_entrada, int botao_rele, String botao_nomeInter, const char* botao_tipo, const char* botao_modelo, const char*botao_agenda_in, const char*botao_agenda_out)
+String gpio_html (int numero, int botao_entrada, int botao_rele, String botao_nomeInter, const char* botao_tipo, const char* botao_modelo)
 {
   String buff;
   buff += "<div class=\"row\">";
@@ -92,12 +92,12 @@ String gpio_html (int numero, int botao_entrada, int botao_rele, String botao_no
   buff += "      <strong>Tipo </strong><select   style=\"width:100px\" name=\"sinal_" + String(numero) + "\"><option value=\"pulso\" " + selectedHTNL(botao_modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao_modelo, "interruptor") + ">Interrup.</option><option value=\"pir\" " + selectedHTNL(botao_modelo, "pir") + ">Presença</option></select>";
   buff += "   </div>";
   buff += "   <div class=\"col-sm-4\">";
-  buff += "     <strong>Agenda </strong>";
-  String input_text_ = "<input maxlength=\"2\" style=\"width:26px\" type=\"text\"";
-  buff += input_text_ + "name=\"hora" + String(numero) + "_in_1\" value=\"" + opcao_agenda(botao_agenda_in, botao_agenda_out, 1) + "\">:";
-  buff += input_text_ + "name=\"hora" + String(numero) + "_in_2\" value=\"" + opcao_agenda(botao_agenda_in, botao_agenda_out, 2) + "\">-";
-  buff += input_text_ + "name=\"hora" + String(numero) + "_out_1\" value=\"" + opcao_agenda(botao_agenda_in, botao_agenda_out, 3) + "\">:";
-  buff += input_text_ + "name=\"hora" + String(numero) + "_out_2\" value=\"" + opcao_agenda(botao_agenda_in, botao_agenda_out, 4) + "\">";
+  // buff += "     <strong>Agenda </strong>";
+  // String input_text_ = "<input maxlength=\"2\" style=\"width:26px\" type=\"text\"";
+  // buff += input_text_ + "name=\"hora" + String(numero) + "_in_1\" value=\"" + opcao_agenda(botao_agenda_in, botao_agenda_out, 1) + "\">:";
+  // buff += input_text_ + "name=\"hora" + String(numero) + "_in_2\" value=\"" + opcao_agenda(botao_agenda_in, botao_agenda_out, 2) + "\">-";
+  // buff += input_text_ + "name=\"hora" + String(numero) + "_out_1\" value=\"" + opcao_agenda(botao_agenda_in, botao_agenda_out, 3) + "\">:";
+  // buff += input_text_ + "name=\"hora" + String(numero) + "_out_2\" value=\"" + opcao_agenda(botao_agenda_in, botao_agenda_out, 4) + "\">";
   buff += "   </div>";
 //  buff += "   <div class=\"col-sm-2\">";
 //  buff += "     <strong>Timer</strong>";

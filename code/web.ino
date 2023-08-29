@@ -293,10 +293,10 @@ buf +="</div>";
   buf +=  " </div>";
   buf +=  "<hr>";
 
-  buf += gpio_html (1, botao1.entrada, botao1.rele, botao1.nomeInter, botao1.tipo, botao1.modelo, botao1.agenda_in, botao1.agenda_out);
-  buf += gpio_html (2, botao2.entrada, botao2.rele, botao2.nomeInter, botao2.tipo, botao2.modelo, botao2.agenda_in, botao2.agenda_out);
-  buf += gpio_html (3, botao3.entrada, botao3.rele, botao3.nomeInter, botao3.tipo, botao3.modelo, botao3.agenda_in, botao3.agenda_out);
-  buf += gpio_html (4, botao4.entrada, botao4.rele, botao4.nomeInter, botao4.tipo, botao4.modelo, botao4.agenda_in, botao4.agenda_out);
+  buf += gpio_html (1, botao1.entrada, botao1.rele, botao1.nomeInter, botao1.tipo, botao1.modelo);
+  buf += gpio_html (2, botao2.entrada, botao2.rele, botao2.nomeInter, botao2.tipo, botao2.modelo);
+  buf += gpio_html (3, botao3.entrada, botao3.rele, botao3.nomeInter, botao3.tipo, botao3.modelo);
+  buf += gpio_html (4, botao4.entrada, botao4.rele, botao4.nomeInter, botao4.tipo, botao4.modelo);
   buf +=  "<hr>";
 
   buf +=  " <div class=\"row\">";

@@ -20,7 +20,7 @@
 #include <Ticker.h>
 
 
-String VERSAO = "11.02 21/08/2023";
+String VERSAO = "11.10 29/08/2023";
 
 /*
  * VARIAVEIS DO SENSOR BMP280
@@ -84,7 +84,7 @@ float LPGCurve[3] =           { 2.3, 0.20, -0.47 };
 float COCurve[3] =            { 2.3, 0.72, -0.34 };
 float SmokeCurve[3] =         { 2.3, 0.53, -0.44 };
 float Ro =                    10;
-String GLP, FUMACA, CO;
+String GLP = "0", FUMACA = "0", CO = "0";
 const char *LIMITE_MQ2 = "99", *LIMITE_MQ2_FU = "99";
 int P_LEITURAS_MQ =           0;
 unsigned long timeMq2;
@@ -136,9 +136,9 @@ struct botao1 {
   const char* modelo = "interruptor";
   const char* nomeInter = "Com1";
   const char* tipo = "0";
-  const char* agenda_in="0000";
-  const char* agenda_out="0000";
-  const char* timer="0000";
+  //const char* agenda_in="0000";
+  //const char* agenda_out="0000";
+  //const char* timer="0000";
   int pin_pir_1 = 32;
   int led_pir_1 = 2;
   unsigned long tempo_pir_1;
@@ -152,8 +152,8 @@ struct botao2 {
   const char* modelo = "interruptor";
   const char* tipo = "0";
   const char* nomeInter = "Com2";
-  const char* agenda_in="0000";
-  const char* agenda_out="0000";
+  //const char* agenda_in="0000";
+  //const char* agenda_out="0000";
 } botao2;
 
 struct botao3 {
@@ -163,8 +163,8 @@ struct botao3 {
   const char* tipo = "0";
   const char* modelo = "interruptor";
   const char* nomeInter = "Com3";
-  const char* agenda_in="0000";
-  const char* agenda_out="0000";
+  //const char* agenda_in="0000";
+  //const char* agenda_out="0000";
 } botao3;
 
 struct botao4 {
@@ -174,8 +174,8 @@ struct botao4 {
   const char* tipo = "0";
   const char* modelo = "interruptor";
   const char* nomeInter = "Com4";
-  const char* agenda_in="0000";
-  const char* agenda_out="0000";
+  //const char* agenda_in="0000";
+  //const char* agenda_out="0000";
 } botao4;
 
 int i_timer_valor, estado_atual = 0, estado_antes = 0;
@@ -199,7 +199,7 @@ String buff, URL, serv, buf;
  */
 const char* json;
 int cont_ip_banco =             0;
-const char* conslog = "0";
+const char* conslog =           "0";
 
 int freq = 2000, channel = 0, resolution = 8, n = 0;
 byte grau[8] = {
@@ -212,9 +212,6 @@ byte grau[8] = {
   B00000000,
   B00000000,
 };
-
-//const String comandos_txt = "<p><strong>PORTAS ENTRADA SA&Iacute;DA</strong></p><p>entrada 1 = 32, rele 1 = 33<br />entrada 2 = 25, rele 2 = 18<br />entrada 3 = 14, rele 3 = 27<br />entrada 4 = 12, rele 4 = 13</p><p><strong><span class=\"pl-c1\">LED'S PARA MONITORAMENTO</span></strong></p><p><span class=\"pl-c1\">LED_AZUL&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 2<br />LED_VERDE&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;4<br />LED_VERMELHO 16</span></p><p><strong><span class=\"pl-c1\">SENSORES</span></strong></p><p><span class=\"pl-c1\">BUZZER&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 5<br />PIN_MQ2&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;34<br />DHTPIN&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;19</span></p><p><strong>REINCIAR CENTRAL POR COMANDA HTTP</strong>&nbsp;</p><p>HTTP://IP_HOST/?00000</p><p><strong>REINICIAS CONFIGURAÇÕES WIFI</strong>&nbsp;</p><p>HTTP://IP_HOST/?00002</p><p><strong>EXEMPLO NA CHAMADA WEB DESLIGAR LAMPADA</strong>&nbsp;</p><p>HTTP://IP_HOST/?porta=NN&amp;acao=(liga ou&nbsp;desligar)&amp;central=IP_HOST</p><p><strong>CALIBRAR SENSOR MQ2</strong></p><p>HTTP://IP_HOST/?0001</p><p><strong>APAGAR ARQUIVO DE LOG MANUALMENTE</strong></p><p>HTTP://IP_HOST/?00013</p><p><strong>APLICAR CONFIGURA&Ccedil;&Otilde;ES MINIMAS PARA FUNCIONAMENTO DA CENTRAL</strong></p><p>HTTP://IP_HOST/?00014</p><p><strong>DESLIGAR TODOS AS PORTAS OUTPUT DA CENTRAL</strong></p><p>HTTP://IP_HOST/?00015</p><p><strong>APLICAR AS CONFIGURA&Ccedil;&Otilde;ES AP&Oacute;S SEREM GRAVADAS NA CENTRAL</strong>&nbsp;</p><p>HTTP://IP_HOST/?00016</p>";
-//float corrente_s1 = 0.00, tensao_s1 = 0.00, corrente_s2 = 0.00, tensao_s2 = 0.00, corrente_s3 = 0.00, tensao_s3 = 0.00;
 
 Adafruit_BMP280 bmp;                      //  I2C Adafruit_BMP280
 
@@ -264,10 +261,6 @@ void setup() {
   * INICIANDO NTPClient PARA DATA E HORA NO ESP
   */
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-  //ntp.begin();
-  //ntp.forceUpdate();
-  //relogio_ntp(0);
-
 
   /*  
    *  INICIALIZANDO PORTAS DE ENTRADA E SAIDA
@@ -394,24 +387,24 @@ void loop() {
     botao1.nomeInter = root["i_1"];
     botao1.tipo = root["ti_1"];
     botao1.modelo = root["s_1"];
-    botao1.agenda_in = root["h_i_1"];
-    botao1.agenda_out = root["h_o_1"];
-    botao1.timer = root["t_1"];
+    //botao1.agenda_in = root["h_i_1"];
+    //botao1.agenda_out = root["h_o_1"];
+    //botao1.timer = root["t_1"];
     botao2.nomeInter = root["i_2"];
     botao2.tipo = root["ti_2"];
     botao2.modelo = root["s_2"];
-    botao2.agenda_in = root["h_i_2"];
-    botao2.agenda_out = root["h_o_2"];
+    //botao2.agenda_in = root["h_i_2"];
+    //botao2.agenda_out = root["h_o_2"];
     botao3.nomeInter = root["i_3"];
     botao3.tipo = root["ti_3"];
     botao3.modelo = root["s_3"];
-    botao3.agenda_in = root["h_i_3"];
-    botao3.agenda_out = root["h_o_3"];
+    //botao3.agenda_in = root["h_i_3"];
+    //botao3.agenda_out = root["h_o_3"];
     botao4.nomeInter = root["i_4"];
     botao4.tipo = root["ti_4"];
     botao4.modelo = root["s_4"];
-    botao4.agenda_in = root["h_i_4"];
-    botao4.agenda_out = root["h_o_4"];
+    //botao4.agenda_in = root["h_i_4"];
+    //botao4.agenda_out = root["h_o_4"];
     conslog = root["l"];
     logtxt = String(conslog);
     nivelLog = root["n"];
@@ -507,14 +500,14 @@ void loop() {
      INICIO DA FUNÇÃO AGENDAMENTO
     --------------------------------------
   */
-  if ((relogio_ntp(3) == botao1.agenda_in) && (botao1.estado == false)) {
-    acionaPorta(botao1.rele, "", "liga");
-    botao1.estado = true;
-  }
-  if ((relogio_ntp(3) == botao1.agenda_out) && (botao1.estado == true)) {
-    acionaPorta(botao1.rele, "", "desl");
-    botao1.estado = false;
-  }
+  // if ((relogio_ntp(3) == botao1.agenda_in) && (botao1.estado == false)) {
+  //   acionaPorta(botao1.rele, "", "liga");
+  //   botao1.estado = true;
+  // }
+  // if ((relogio_ntp(3) == botao1.agenda_out) && (botao1.estado == true)) {
+  //   acionaPorta(botao1.rele, "", "desl");
+  //   botao1.estado = false;
+  // }
   /*
     ------------------------------------------------
     FIM DA FUNÇÃO AGENDAMENTO
@@ -523,22 +516,22 @@ void loop() {
     VERIFICA SE EXISTE VALOR DE TIMER CONFIGURADO
     ------------------------------------------------
   */
-  String s_timer_valor = String(botao1.timer);
-  if (s_timer_valor.toInt() > 0) {
-    if (cont_timer == 1) {
-      i_timer_valor = s_timer_valor.toInt();
-      cont_timer = 0;
-    }
-    if (botao1.estado) {
-      int i_timer = i_timer_valor--;
-      Serial.println("timer configurado : " + String(i_timer));
-      delay(1000);
-      if (i_timer_valor == 0) {
-        acionaPorta(botao1.rele, "", "desl");
-        cont_timer = 0;
-      }
-    }
-  }
+  // String s_timer_valor = String(botao1.timer);
+  // if (s_timer_valor.toInt() > 0) {
+  //   if (cont_timer == 1) {
+  //     i_timer_valor = s_timer_valor.toInt();
+  //     cont_timer = 0;
+  //   }
+  //   if (botao1.estado) {
+  //     int i_timer = i_timer_valor--;
+  //     Serial.println("timer configurado : " + String(i_timer));
+  //     delay(1000);
+  //     if (i_timer_valor == 0) {
+  //       acionaPorta(botao1.rele, "", "desl");
+  //       cont_timer = 0;
+  //     }
+  //   }
+  // }
   /*
     ---------------------------------------
     INICIO DA FUNÇÃO BOTÃO POR PULSO
@@ -654,14 +647,14 @@ void loop() {
     INICIO DA FUNÇÃO AGENDAMENTO
     --------------------------------------
   */
-  if ((relogio_ntp(3) == botao2.agenda_in) && (botao2.estado == false)) {
-    acionaPorta(botao2.rele, "", "liga");
-    botao2.estado = true;
-  }
-  if ((relogio_ntp(3) == botao2.agenda_out) && (botao2.estado == true)) {
-    acionaPorta(botao2.rele, "", "desl");
-    botao2.estado = false;
-  }
+  // if ((relogio_ntp(3) == botao2.agenda_in) && (botao2.estado == false)) {
+  //   acionaPorta(botao2.rele, "", "liga");
+  //   botao2.estado = true;
+  // }
+  // if ((relogio_ntp(3) == botao2.agenda_out) && (botao2.estado == true)) {
+  //   acionaPorta(botao2.rele, "", "desl");
+  //   botao2.estado = false;
+  // }
   /*
     ---------------------------------------
     FIM DA FUNÇÃO AGENDAMENTO
