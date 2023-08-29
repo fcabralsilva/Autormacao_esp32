@@ -20,7 +20,7 @@
 #include <Ticker.h>
 
 
-String VERSAO = "11.10 29/08/2023";
+String VERSAO = "11.20 29/08/2023";
 
 /*
  * VARIAVEIS DO SENSOR BMP280
@@ -350,7 +350,7 @@ void setup() {
   
   grava_leitura_dht.attach_ms(valor_grava_leitura_dht, gravaDhtArray);            //GRAVA NO ARRAY OS VALORES DE TEMPERATURA E UMIDADE NO ARRAY
   
-  enviaGet_ticker.attach_ms(5000, enviaGet);
+  enviaGet_ticker.attach_ms(15000, enviaGet);
 
   Serial.println("Hostname: "+String(WiFi.getHostname()));
   

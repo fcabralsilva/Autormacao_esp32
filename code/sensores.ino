@@ -29,7 +29,7 @@ float tensao_dc(int SENSOR_T_DC) {
 }
 /*
   --------------------------------
-  ROTINA DO SENSOR DHT11
+  ROTINA DO SENSOR DHT XX
   --------------------------------
 */
 float sensorTemp(int sensor) {
@@ -38,37 +38,40 @@ float sensorTemp(int sensor) {
   if (millis() >= timeDht + (50000) || ler_dht == true) {
     if ((umidade_dht_f < 101 || temperatura_dht_f < 70) || (umidade_dht_f > 200 || temperatura_dht_f > 200)) {
       /*
-      * LEITURA DA TEMPERATURA DHTXX
+      * LEITURA DA TEMPERATURA E UMIDADE DHTXX
       */
       dht.temperature().getEvent(&event);
-      if (isnan(event.temperature)) {
-        gravaLog(" " + relogio_ntp(1) + " - E0109:DHT" + String(DHTTYPE) + "ERRO LEITURA TEMPERATURA", logtxt, 1);
+      dht.humidity().getEvent(&event);
+      if (isnan(event.temperature) || isnan(event.relative_humidity) ) {
+        gravaLog(" " + relogio_ntp(1) + " - E0109:DHT" + String(DHTTYPE) + " ERRO DE LEITURAS", logtxt, 1);
         temperatura_dht_f = 0.0;
+        umidade_dht_f = 0.0;
       } else {
         temperatura_dht_f = event.temperature;
+        umidade_dht_f = event.relative_humidity;
       }
       /*
        * LEITURA DA UMIDADE DHTXX
        */
-      dht.humidity().getEvent(&event);
-      if (isnan(event.relative_humidity)) {
-        gravaLog(" " + relogio_ntp(1) + " - E0109:DHT" + String(DHTTYPE) + "ERRO LEITURA UMIDADE", logtxt, 1);
-        umidade_dht_f = 0.0;
-      } else {
-        umidade_dht_f = event.relative_humidity;
-      }
+      // dht.humidity().getEvent(&event);
+      // if (isnan(event.relative_humidity)) {
+      //   gravaLog(" " + relogio_ntp(1) + " - E0109:DHT" + String(DHTTYPE) + "ERRO LEITURA UMIDADE", logtxt, 1);
+      //   umidade_dht_f = 0.0;
+      // } else {
+      //   umidade_dht_f = event.relative_humidity;
+      // }
     } else {
-      gravaLog(" " + relogio_ntp(1) + " - E0109:DHT" + String(DHTTYPE), logtxt, 1);
+      gravaLog(" " + relogio_ntp(1) + " - E0109-01:DHT" + String(DHTTYPE), logtxt, 1);
     }
     /*
      * VERIFICAR SE HOUVE ERRO DE LEITURA
      */
     //Verifique se alguma leitura falhou e saia mais cedo (para tentar novamente)
-    if (isnan(umidade_dht_f) || isnan(temperatura_dht_f)) {
+    //if (isnan(umidade_dht_f) || isnan(temperatura_dht_f)) {
       //gravaLog(" " + relogio_ntp(1) + " - E0109-1:DHT" + String(DHTTYPE), logtxt, 1);
-    } else {
+    //} else {
       //gravaLog(" " + relogio_ntp(1) + " - T:" + String(int(temperatura_dht_f)) + " U:" + String(int(umidade_dht_f)), logtxt, 4);
-    }
+    //}
     timeDht = millis();
   }
 

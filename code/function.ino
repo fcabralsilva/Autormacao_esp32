@@ -3,19 +3,19 @@
 */
 int capturaIr() {
   int valorLido = 0;
-  
- if (IrReceiver.decode()) {
-      //Serial.print("Hex: ");
-      //Serial.println(IrReceiver.decodedIRData.decodedRawData, HEX); // Imprimir dados brutos "antigos"
-      //Serial.print("Dec: ");
-      //Serial.println(IrReceiver.decodedIRData.decodedRawData, DEC); // Imprimir dados brutos "antigos"
-      /* USE NEW 3.x FUNCTIONS */
-      // Serial.print("Linha 2: ");
-      //IrReceiver.printIRResultShort(&Serial); // Imprimir dados recebidos completos em uma linha
-      // Serial.print("Linha3: ");
-      //IrReceiver.printIRSendUsage(&Serial);   // Imprima o extrato necessário para enviar esses dados
-      valorLido = Serial.println(IrReceiver.decodedIRData.decodedRawData, DEC);
-      IrReceiver.resume(); // Habilita o recebimento do próximo valor
+
+  if (IrReceiver.decode()) {
+    //Serial.print("Hex: ");
+    //Serial.println(IrReceiver.decodedIRData.decodedRawData, HEX); // Imprimir dados brutos "antigos"
+    //Serial.print("Dec: ");
+    //Serial.println(IrReceiver.decodedIRData.decodedRawData, DEC); // Imprimir dados brutos "antigos"
+    /* USE NEW 3.x FUNCTIONS */
+    // Serial.print("Linha 2: ");
+    //IrReceiver.printIRResultShort(&Serial); // Imprimir dados recebidos completos em uma linha
+    // Serial.print("Linha3: ");
+    //IrReceiver.printIRSendUsage(&Serial);   // Imprima o extrato necessário para enviar esses dados
+    valorLido = Serial.println(IrReceiver.decodedIRData.decodedRawData, DEC);
+    IrReceiver.resume();  // Habilita o recebimento do próximo valor
   }
 
   return valorLido;
@@ -78,16 +78,15 @@ String leStringSerial() {
       }
   */
 }
-String gpio_html (int numero, int botao_entrada, int botao_rele, String botao_nomeInter, const char* botao_tipo, const char* botao_modelo)
-{
+String gpio_html(int numero, int botao_entrada, int botao_rele, String botao_nomeInter, const char* botao_tipo, const char* botao_modelo) {
   String buff;
   buff += "<div class=\"row\">";
   buff += "   <div class=\"col-sm-2\">";
   buff += "     <strong>Porta </strong><sup><font color=\"green\">" + String(botao_entrada) + "</font> / <font color=\"blue\">" + String(botao_rele) + "</font></sup><input maxlength=\"10\" style=\"width:100px\" type=\"text\"   name=\"int_" + String(numero) + "\" value=\"" + String(botao_nomeInter) + "\">";
   buff += "   </div>";
-//  buff += "   <div class=\"col-sm-2\">";
-//  buff += "      <strong> Sinal </strong><select   style=\"width:80px\"  name=\"tipo_" + String(numero) + "\"><option value=\"0\" " + selectedHTNL(botao_tipo, "0") + "> - </option><option value=\"1\" " + selectedHTNL(botao_tipo, "1") + "> + </option></select>";
-//  buff += "   </div>";
+  //  buff += "   <div class=\"col-sm-2\">";
+  //  buff += "      <strong> Sinal </strong><select   style=\"width:80px\"  name=\"tipo_" + String(numero) + "\"><option value=\"0\" " + selectedHTNL(botao_tipo, "0") + "> - </option><option value=\"1\" " + selectedHTNL(botao_tipo, "1") + "> + </option></select>";
+  //  buff += "   </div>";
   buff += "   <div class=\"col-sm-2\">";
   buff += "      <strong>Tipo </strong><select   style=\"width:100px\" name=\"sinal_" + String(numero) + "\"><option value=\"pulso\" " + selectedHTNL(botao_modelo, "pulso") + "> Pulso</option><option value=\"interruptor\" " + selectedHTNL(botao_modelo, "interruptor") + ">Interrup.</option><option value=\"pir\" " + selectedHTNL(botao_modelo, "pir") + ">Presença</option></select>";
   buff += "   </div>";
@@ -99,21 +98,18 @@ String gpio_html (int numero, int botao_entrada, int botao_rele, String botao_no
   // buff += input_text_ + "name=\"hora" + String(numero) + "_out_1\" value=\"" + opcao_agenda(botao_agenda_in, botao_agenda_out, 3) + "\">:";
   // buff += input_text_ + "name=\"hora" + String(numero) + "_out_2\" value=\"" + opcao_agenda(botao_agenda_in, botao_agenda_out, 4) + "\">";
   buff += "   </div>";
-//  buff += "   <div class=\"col-sm-2\">";
-//  buff += "     <strong>Timer</strong>";
-//  buff += "     <input maxlength=\"4\" style=\"width:80px\" type=\"text\" name=\"timer_" + String(numero) + "\">";
-//  buff += "   </div>";
+  //  buff += "   <div class=\"col-sm-2\">";
+  //  buff += "     <strong>Timer</strong>";
+  //  buff += "     <input maxlength=\"4\" style=\"width:80px\" type=\"text\" name=\"timer_" + String(numero) + "\">";
+  //  buff += "   </div>";
   buff += "</div>";
   return buff;
   buff.remove(0);
 }
 
-boolean status_porta(int numero_Int, int rele, boolean estado, String _acao)
-{
-  if (numero_Int == rele)
-  {
-    if (_acao == "liga")
-    {
+boolean status_porta(int numero_Int, int rele, boolean estado, String _acao) {
+  if (numero_Int == rele) {
+    if (_acao == "liga") {
       estado = true;
     } else {
       estado = false;
@@ -121,76 +117,75 @@ boolean status_porta(int numero_Int, int rele, boolean estado, String _acao)
   }
   return estado;
 }
-String opcao_agenda(const char *in, const char *out, int saida)
-{
-  String resultado;
-  if (saida == 1) {
-    resultado = String(in).substring(0, 2);
-  }
-  if (saida == 2) {
-    resultado = String(in).substring(2, 4);
-  }
-  if (saida == 3) {
-    resultado = String(out).substring(0, 2);
-  }
-  if (saida == 4) {
-    resultado = String(out).substring(2, 4);
-  }
-  return resultado;
+// String opcao_agenda(const char *in, const char *out, int saida)
+// {
+//   String resultado;
+//   if (saida == 1) {
+//     resultado = String(in).substring(0, 2);
+//   }
+//   if (saida == 2) {
+//     resultado = String(in).substring(2, 4);
+//   }
+//   if (saida == 3) {
+//     resultado = String(out).substring(0, 2);
+//   }
+//   if (saida == 4) {
+//     resultado = String(out).substring(2, 4);
+//   }
+//   return resultado;
 
-}
+// }
 
-boolean agendamento(int gpio, String hora_ini, String hora_fim, String hora_atual, boolean estado )
-{
-  boolean estado_fim;
-  /*
-    char agenda[2][12] = {"21:04:00", "21:05:00"};
-    String timer = timeClient.getFormattedTime();
-    agendamento(led, agenda[0], agenda[1], timer);
-  */
-  if ((hora_atual == hora_ini) && (estado == false) )
-  {
-    acionaPorta(gpio, "", "liga");
-    estado_fim = true;
-  }
-  if ((hora_atual == hora_fim) && (estado == true))
-  {
-    acionaPorta(gpio, "", "desl");
-    estado_fim = false;
-  }
-  hora_ini      = "";
-  hora_fim      = "";
-  hora_atual    = "";
-  return estado_fim;
-}
+// boolean agendamento(int gpio, String hora_ini, String hora_fim, String hora_atual, boolean estado )
+// {
+//   boolean estado_fim;
+//   /*
+//     char agenda[2][12] = {"21:04:00", "21:05:00"};
+//     String timer = timeClient.getFormattedTime();
+//     agendamento(led, agenda[0], agenda[1], timer);
+//   */
+//   if ((hora_atual == hora_ini) && (estado == false) )
+//   {
+//     acionaPorta(gpio, "", "liga");
+//     estado_fim = true;
+//   }
+//   if ((hora_atual == hora_fim) && (estado == true))
+//   {
+//     acionaPorta(gpio, "", "desl");
+//     estado_fim = false;
+//   }
+//   hora_ini      = "";
+//   hora_fim      = "";
+//   hora_atual    = "";
+//   return estado_fim;
+// }
 
-void arduino_ota()
-{
+void arduino_ota() {
   ArduinoOTA
-  .onStart([]() {
-    String type;
-    if (ArduinoOTA.getCommand() == U_FLASH)
-      type = "sketch";
-    else // U_SPIFFS
-      type = "filesystem";
+    .onStart([]() {
+      String type;
+      if (ArduinoOTA.getCommand() == U_FLASH)
+        type = "sketch";
+      else  // U_SPIFFS
+        type = "filesystem";
 
-    // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
-    Serial.println("Start updating " + type);
-  })
-  .onEnd([]() {
-    Serial.println("\nEnd");
-  })
-  .onProgress([](unsigned int progress, unsigned int total) {
-    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-  })
-  .onError([](ota_error_t error) {
-    Serial.printf("Error[%u]: ", error);
-    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-    else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-    else if (error == OTA_END_ERROR) Serial.println("End Failed");
-  });
+      // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+      Serial.println("Start updating " + type);
+    })
+    .onEnd([]() {
+      Serial.println("\nEnd");
+    })
+    .onProgress([](unsigned int progress, unsigned int total) {
+      Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+    })
+    .onError([](ota_error_t error) {
+      Serial.printf("Error[%u]: ", error);
+      if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+      else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+      else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+      else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+      else if (error == OTA_END_ERROR) Serial.println("End Failed");
+    });
 }
 
 // String relogio_ntp(int retorno)
@@ -235,67 +230,54 @@ void arduino_ota()
 //   return data_formatada;
 // }
 
-String relogio_ntp(int retorno){
+String relogio_ntp(int retorno) {
   struct tm data;
   char data_formatada[64];
-  
-  if(!getLocalTime(&data)){
+
+  if (!getLocalTime(&data)) {
     Serial.println(" Falha para obter data e hora!");
   }
 
   //strftime(data_formatada, 64, "%d/%m/%y %H:%M:%S", &timeinfo);
-if (retorno == 1)
-  {
-    strftime(data_formatada, 64, "%d/%m/%y %H:%M:%S", &data);//Cria uma String formatada da estrutura "data"
+  if (retorno == 1) {
+    strftime(data_formatada, 64, "%d/%m/%y %H:%M:%S", &data);  //Cria uma String formatada da estrutura "data"
   }
-  if (retorno == 2)
-  {
-    strftime(data_formatada, 64, "%d/%m/%Y", &data);//Cria uma String formatada da estrutura "data"
+  if (retorno == 2) {
+    strftime(data_formatada, 64, "%d/%m/%Y", &data);  //Cria uma String formatada da estrutura "data"
   }
-  if (retorno == 3)
-  {
-    strftime(data_formatada, 64, "%H%M", &data);//Cria uma String formatada da estrutura "data"
+  if (retorno == 3) {
+    strftime(data_formatada, 64, "%H%M", &data);  //Cria uma String formatada da estrutura "data"
   }
-  if (retorno == 4)
-  {
-    strftime(data_formatada, 64, "%H:%M", &data);//Cria uma String formatada da estrutura "data"
+  if (retorno == 4) {
+    strftime(data_formatada, 64, "%H:%M", &data);  //Cria uma String formatada da estrutura "data"
   }
   return data_formatada;
 }
 
 
-void pisca_led(int LED, boolean estado)
-{
-  if (estado == true)
-  {
-    if (millis() - milis > interval)
-    {
+void pisca_led(int LED, boolean estado) {
+  if (estado == true) {
+    if (millis() - milis > interval) {
       milis = millis();
       digitalWrite(LED, !digitalRead(LED));
     }
-  } else
-  {
+  } else {
     digitalWrite(LED, LOW);
   }
 }
 
-void gravaLog(String mensagem, String permissao, int nivel)
-{
-  for (int i = 0; i <= 0 ; i++ )
-  {
-    if (permissao == "sim")
-    {
-      if ( String(nivel) <= String(nivelLog))
-      {
-        gravarArquivo(mensagem, "log.txt");                                                                                                                                                        
+void gravaLog(String mensagem, String permissao, int nivel) {
+  for (int i = 0; i <= 0; i++) {
+    if (permissao == "sim") {
+      if (String(nivel) <= String(nivelLog)) {
+        gravarArquivo(mensagem, "log.txt");
       }
     }
   }
   mensagem.remove(0);
 }
 
-String selectedHTNL(const char* tipo, String comp )
-{
+String selectedHTNL(const char* tipo, String comp) {
   String select;
   String s_tipo = String(tipo);
   //String s_comp = String(comp);
@@ -307,8 +289,7 @@ String selectedHTNL(const char* tipo, String comp )
   comp.remove(0);
 }
 
-String quebraString(String txtMsg, String string)
-{
+String quebraString(String txtMsg, String string) {
   unsigned int tamanho = txtMsg.length();
   int inicio_string = string.indexOf(txtMsg) + tamanho + 1;
   int final_string = string.indexOf("&", inicio_string);
@@ -325,9 +306,9 @@ String quebraString(String txtMsg, String string)
 //---------------------------------------
 void acionaPorta(int numeroF, String portaF, String acaoF) {
   gravaLog(" " + relogio_ntp(1) + " - Comando:" + String(numeroF) + "/" + acaoF, logtxt, 4);
-  String acao_porta,linha;
+  String acao_porta, linha;
   if (acaoF == "liga") {
-    digitalWrite(numeroF, HIGH );
+    digitalWrite(numeroF, HIGH);
     acao_porta = "&acao=liga&central=";
   } else if (acaoF == "desl") {
     digitalWrite(numeroF, LOW);
@@ -373,16 +354,15 @@ void acionaPorta(int numeroF, String portaF, String acaoF) {
 //---------------------------------------
 //    FUNÇÃO PARA GRAVAR NO BANCO
 //---------------------------------------
-void gravarBanco (String buffer) {
+void gravarBanco(String buffer) {
   WiFiClient client = server.available();
-  if (WiFi.status() != WL_CONNECTED)
-  {
+  if (WiFi.status() != WL_CONNECTED) {
     gravaLog(" " + relogio_ntp(1) + " - E0105:Reconectando WIFI!", logtxt, 1);
     WiFi.reconnect();
   }
   //pisca_led(LED_VERMELHO,false);
-  if(servidor != "0"){
-    if ((client.connect(servidor, portaServidor) == true)){
+  if (servidor != "0") {
+    if ((client.connect(servidor, portaServidor) == true)) {
       client.println("GET /web/gravar.php?" + buffer);
       gravaLog(" " + relogio_ntp(1) + " - BD: " + buffer, logtxt, 4);
       client.println();
@@ -398,41 +378,48 @@ void gravarBanco (String buffer) {
 }
 
 void enviaGet() {
-
+  sensors_event_t event;
   String tabela_;
-  for(int i = 0; i<=9 ; i++){
-    tabela_ += temperatura[i];           //LINHAS GERADAS DENTRO DA FUNÇÃO gravaDhtArray()
-  }
+  dht.temperature().getEvent(&event);
+  dht.humidity().getEvent(&event);
+  if (isnan(event.temperature) || isnan(event.relative_humidity)) {
+    gravaLog(" " + relogio_ntp(1) + " - E0200:DHT" + String(DHTTYPE) + " ERRO - enviaGet()", logtxt, 1);
 
-  String dados_envia_get = "?00020&temp=";
-  dados_envia_get += String(sensorTemp(2));
-  dados_envia_get += "&umid=";
-  dados_envia_get += String(sensorTemp(1));
-  dados_envia_get += "&glp="+String(GLP)+"&fu=" + String(FUMACA) + "&esp="+String(WiFi.getHostname());
-  dados_envia_get += "&tabela="+tabela_+"&";
+  } else {
 
-  WiFiClient client = server.available();
-  if (WiFi.status() != WL_CONNECTED)
-  {
-    gravaLog(" " + relogio_ntp(1) + " - E0105:Reconectando WIFI!", logtxt, 1);
-    WiFi.reconnect();
-  }
-
-  //pisca_led(LED_VERMELHO,false);
-  if(servidor != "0"){
-    if ((client.connect(servidor, portaServidor) == true)){
-      client.println("GET /"+dados_envia_get);
-      gravaLog(" " + relogio_ntp(1) + " - BD: " + dados_envia_get, logtxt, 4);
-      client.println();
-      dados_envia_get = "";
-    } else {
-      //gravaLog(" " + relogio_ntp(1) + " - E0110:Servidor Desconectado", logtxt, 1);
-      dados_envia_get = "";
+    for (int i = 0; i <= 9; i++) {
+      tabela_ += temperatura[i];  //LINHAS GERADAS DENTRO DA FUNÇÃO gravaDhtArray()
     }
+
+    String dados_envia_get = "?00020&temp=";
+    dados_envia_get += String(sensorTemp(2));
+    dados_envia_get += "&umid=";
+    dados_envia_get += String(sensorTemp(1));
+    dados_envia_get += "&glp=" + String(GLP) + "&fu=" + String(FUMACA) + "&esp=" + String(WiFi.getHostname());
+    dados_envia_get += "&tabela=" + tabela_ + "&";
+
+    WiFiClient client = server.available();
+    if (WiFi.status() != WL_CONNECTED) {
+      gravaLog(" " + relogio_ntp(1) + " - E0105:Reconectando WIFI!", logtxt, 1);
+      WiFi.reconnect();
+    }
+
+    //pisca_led(LED_VERMELHO,false);
+    if (servidor != "0") {
+      if ((client.connect(servidor, portaServidor) == true)) {
+        client.println("GET /" + dados_envia_get);
+        gravaLog(" " + relogio_ntp(1) + " - BD: " + dados_envia_get, logtxt, 4);
+        client.println();
+        dados_envia_get = "";
+      } else {
+        //gravaLog(" " + relogio_ntp(1) + " - E0110:Servidor Desconectado", logtxt, 1);
+        dados_envia_get = "";
+      }
+    }
+    dados_envia_get.remove(0);
+    client.flush();
+    client.stop();
   }
-  dados_envia_get.remove(0);
-  client.flush();
-  client.stop();
 }
 //---------------------------------------
 
@@ -440,21 +427,17 @@ void enviaGet() {
 //---------------------------------------
 //    FUNÇÃO DA SIRENE
 //---------------------------------------
-void sirene(boolean valor)
-{
+void sirene(boolean valor) {
   unsigned long time_sirene;
-  if (valor == true)
-  {
-    if (millis() - time_sirene > 1000)
-    {
+  if (valor == true) {
+    if (millis() - time_sirene > 1000) {
       digitalWrite(BUZZER, true);
       time_sirene = millis();
     } else {
       digitalWrite(BUZZER, false);
     }
   }
-  if (valor == false)
-  {
+  if (valor == false) {
     digitalWrite(BUZZER, false);
   }
 }
@@ -462,8 +445,7 @@ void sirene(boolean valor)
 //---------------------------------------
 //    FUNÇOES DO MQ / SENSOR DE GAS
 //---------------------------------------
-void calibrarSensor()
-{
+void calibrarSensor() {
   sensorMq2 = analogRead(PIN_MQ2);
   Serial.println(sensorMq2);
   //CALIBRACAO INCIAL DO SENSOR DE GAS
@@ -473,17 +455,17 @@ void calibrarSensor()
   gravarArquivo(" " + relogio_ntp(1) + "\n - Calibrado 'Ro' = " + String(Ro) + " kohm", "log.txt");
 }
 
-float calcularResistencia(int tensao)   //funcao que recebe o tensao (dado cru) e calcula a resistencia efetuada pelo sensor. O sensor e a resistência de carga forma um divisor de tensão.
+float calcularResistencia(int tensao)  //funcao que recebe o tensao (dado cru) e calcula a resistencia efetuada pelo sensor. O sensor e a resistência de carga forma um divisor de tensão.
 {
   return (((float)VRL_VALOR * (4095 - tensao) / tensao));
 }
 
-float MQCalibration(int mq_pin)   //funcao que calibra o sensor em um ambiente limpo utilizando a resistencia do sensor em ar limpo 9.83
+float MQCalibration(int mq_pin)  //funcao que calibra o sensor em um ambiente limpo utilizando a resistencia do sensor em ar limpo 9.83
 {
   int i;
   float valor = 0;
   pisca_led(LED_VERDE, false);
-  for (i = 0; i < ITERACOES_CALIBRACAO; i++) { //sao adquiridas diversas amostras e calculada a media para diminuir o efeito de possiveis oscilacoes durante a calibracao
+  for (i = 0; i < ITERACOES_CALIBRACAO; i++) {  //sao adquiridas diversas amostras e calculada a media para diminuir o efeito de possiveis oscilacoes durante a calibracao
     Serial.print(".");
     valor += calcularResistencia(analogRead(mq_pin));
     delay(500);
@@ -492,16 +474,14 @@ float MQCalibration(int mq_pin)   //funcao que calibra o sensor em um ambiente l
   Serial.println("");
   digitalWrite(2, false);
   valor = valor / ITERACOES_CALIBRACAO;
-  valor = valor / RO_FATOR_AR_LIMPO; //o valor lido dividido pelo R0 do ar limpo resulta no R0 do ambiente
+  valor = valor / RO_FATOR_AR_LIMPO;  //o valor lido dividido pelo R0 do ar limpo resulta no R0 do ambiente
   return valor;
 }
-float leitura_MQ2(int mq_pin)
-{
+float leitura_MQ2(int mq_pin) {
   int i;
   float rs = 0;
   pisca_led(LED_VERDE, false);
-  for (i = 0; i < ITERACOES_LEITURA; i++)
-  {
+  for (i = 0; i < ITERACOES_LEITURA; i++) {
     rs += calcularResistencia(analogRead(mq_pin));
     //digitalWrite(2, !digitalRead(2));//Faz o LED piscar (inverte o estado).
   }
@@ -509,21 +489,20 @@ float leitura_MQ2(int mq_pin)
   rs = rs / ITERACOES_LEITURA;
   return rs;
 }
-int getQuantidadeGasMQ(float rs_ro, int gas_id)
-{
-  if ( gas_id == 0 ) {
+int getQuantidadeGasMQ(float rs_ro, int gas_id) {
+  if (gas_id == 0) {
     return calculaGasPPM(rs_ro, LPGCurve);
-  } else if ( gas_id == 1 ) {
+  } else if (gas_id == 1) {
     return calculaGasPPM(rs_ro, COCurve);
-  } else if ( gas_id == 2 ) {
+  } else if (gas_id == 2) {
     return calculaGasPPM(rs_ro, SmokeCurve);
   }
 
   return 0;
 }
-int  calculaGasPPM(float rs_ro, float * pcurve) //Rs/R0 é fornecido para calcular a concentracao em PPM do gas em questao. O calculo eh em potencia de 10 para sair da logaritmica
+int calculaGasPPM(float rs_ro, float* pcurve)  //Rs/R0 é fornecido para calcular a concentracao em PPM do gas em questao. O calculo eh em potencia de 10 para sair da logaritmica
 {
-  return (pow(10, ( ((log(rs_ro) - pcurve[1]) / pcurve[2]) + pcurve[0])));
+  return (pow(10, (((log(rs_ro) - pcurve[1]) / pcurve[2]) + pcurve[0])));
 }
 
 //---------------------------------------
@@ -535,8 +514,7 @@ void formatFS() {
 void criarArquivo(String nomeArquivo) {
   File wFile;
   //Cria o arquivo se ele não existir
-  if (SPIFFS.exists(nomeArquivo)) 
-  {
+  if (SPIFFS.exists(nomeArquivo)) {
     gravaLog(" " + relogio_ntp(1) + " - Arquivo " + nomeArquivo + " ok!", logtxt, 1);
   } else {
     wFile = SPIFFS.open(nomeArquivo, "w+");
@@ -565,10 +543,9 @@ void deletarArquivo(String arquivo) {
 void gravarArquivo(String msg, String arq) {
   //Abre o arquivo para adição (append)
   //Inclue sempre a escrita na ultima linha do arquivo
-  if (arq == "log.txt")
-  {
+  if (arq == "log.txt") {
     File logg = SPIFFS.open("/log.txt", "a+");
-    int s = logg.size(); // verificar tamanho do arquivo
+    int s = logg.size();  // verificar tamanho do arquivo
     if (s >= 10000) {
       deletarArquivo("/log.txt");
       criarArquivo("/log.txt");
@@ -584,8 +561,7 @@ void gravarArquivo(String msg, String arq) {
     logg.close();
   }
 
-  if (arq == "param.txt")
-  {
+  if (arq == "param.txt") {
     File param1 = SPIFFS.open("/param.txt", "a+");
     if (!param1) {
       gravaLog(" " + relogio_ntp(1) + " - E0106:Abrir arquivo " + arq, logtxt, 1);
@@ -595,12 +571,12 @@ void gravarArquivo(String msg, String arq) {
     }
     param1.close();
   }
-  if(arq == "sensor_dht.txt"){
+  if (arq == "sensor_dht.txt") {
     criarArquivo("sensor_dht.txt");
-    File sensor_dht = SPIFFS.open("/sensor_dht.txt","a+");
-    if(!sensor_dht){
+    File sensor_dht = SPIFFS.open("/sensor_dht.txt", "a+");
+    if (!sensor_dht) {
       gravaLog(" " + relogio_ntp(1) + " - E0106:Abrir arquivo " + arq, logtxt, 1);
-    }else {
+    } else {
       sensor_dht.println(msg);
       //gravaLog(" " + relogio_ntp(1) + " - Gravando: " + msg, logtxt, 3);
     }
@@ -614,7 +590,7 @@ String lerLog() {
   //Faz a leitura do arquivo
   //String buff;
   File ARQUIVO = SPIFFS.open("/log.txt", "r");
-  int tamanhoLog = ARQUIVO.size(); // verificar tamanho do arquivo
+  int tamanhoLog = ARQUIVO.size();  // verificar tamanho do arquivo
   buff = "Log : " + String(tamanhoLog) + "<br />";
   while (ARQUIVO.available()) {
     String line = ARQUIVO.readStringUntil('\n');
@@ -649,21 +625,20 @@ void openFS() {
 }
 
 //callback que indica que o ESP entrou no modo AP
-void configModeCallback (WiFiManager * myWiFiManager) {
+void configModeCallback(WiFiManager* myWiFiManager) {
   Serial.println(" Entrou no modo de configuração ");
-  Serial.println(WiFi.softAPIP()); //imprime o IP do AP
-  Serial.println(myWiFiManager->getConfigPortalSSID()); //imprime o SSID criado da rede
-
+  Serial.println(WiFi.softAPIP());                       //imprime o IP do AP
+  Serial.println(myWiFiManager->getConfigPortalSSID());  //imprime o SSID criado da rede
 }
 
 //callback que indica que salvamos uma nova rede para se conectar (modo estação)
-void saveConfigCallback () {
+void saveConfigCallback() {
   //  Serial.println("Should save config");
   Serial.println(" Configuração salva ");
-  Serial.println(WiFi.softAPIP()); //imprime o IP do AP
+  Serial.println(WiFi.softAPIP());  //imprime o IP do AP
 }
 
-void listDir(fs::FS & fs, const char * dirname, uint8_t levels) {
+void listDir(fs::FS& fs, const char* dirname, uint8_t levels) {
   Serial.printf("Dir.: %s\r\n", dirname);
 
   File root = fs.open(dirname);
@@ -727,7 +702,7 @@ void printWifiData() {
   Serial.print(" Roteador: ");
   Serial.println(gateway);
   Serial.print(" WIFI: ");
-  Serial.println(WiFi .SSID());
+  Serial.println(WiFi.SSID());
   Serial.print(" Sinal: ");
   Serial.print(WiFi.RSSI());
   Serial.println(" dBm");
@@ -739,27 +714,26 @@ void printWifiData() {
 
 void montaCentraisEsp(String central_, String tabela_) {
   // Procurar por uma posição vazia ou pela variável 'central_' no array
-  int posicao = -1; // Inicializamos a posição com -1 para indicar que não encontramos a variável ainda
+  int posicao = -1;  // Inicializamos a posição com -1 para indicar que não encontramos a variável ainda
 
   for (int i = 0; i <= 4; i++) {
-    if (centrais_esp_valores[i][0] == central_) { // Encontrou a variável 'central_'
+    if (centrais_esp_valores[i][0] == central_) {  // Encontrou a variável 'central_'
       posicao = i;
-      break; // Saímos do loop, pois encontramos a variável
-    } else if (centrais_esp_valores[i][0] == "") { // Encontrou uma posição vazia
+      break;                                        // Saímos do loop, pois encontramos a variável
+    } else if (centrais_esp_valores[i][0] == "") {  // Encontrou uma posição vazia
       posicao = i;
-      break; // Saímos do loop, pois encontramos uma posição vazia
+      break;  // Saímos do loop, pois encontramos uma posição vazia
     }
   }
 
   // Se 'posicao' for diferente de -1, significa que encontramos a variável 'central_' ou uma posição vazia
   if (posicao != -1) {
     Serial.println("Posição encontrada = " + String(posicao));
-    centrais_esp_valores[posicao][0] = central_; // Atribui o valor de 'central_' ao primeiro elemento do array
-    centrais_esp_valores[posicao][1] = tabela_; // Atribui o valor de 'tabela_' ao segundo elemento do array
+    centrais_esp_valores[posicao][0] = central_;  // Atribui o valor de 'central_' ao primeiro elemento do array
+    centrais_esp_valores[posicao][1] = tabela_;   // Atribui o valor de 'tabela_' ao segundo elemento do array
   } else {
     Serial.println("Sem posição vazia e central não encontrada");
     // Aqui você pode tomar alguma ação caso o array esteja cheio e a variável 'central_' não tenha sido encontrada.
     // Por exemplo, pode-se imprimir uma mensagem de erro ou fazer algo específico para essa situação.
   }
 }
-
