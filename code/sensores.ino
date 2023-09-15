@@ -43,7 +43,7 @@ float sensorTemp(int sensor) {
       dht.temperature().getEvent(&event);
       dht.humidity().getEvent(&event);
       if (isnan(event.temperature) || isnan(event.relative_humidity) ) {
-        gravaLog(" " + relogio_ntp(1) + " - E0109:DHT" + String(DHTTYPE) + " ERRO DE LEITURAS", logtxt, 1);
+        gravaLog(" " + relogio_ntp(1) + " - E0109:DHT" + String(DHTTYPE) + " ERRO DE LEITURAS", logtxt, 3);
         temperatura_dht_f = 0.0;
         umidade_dht_f = 0.0;
       } else {

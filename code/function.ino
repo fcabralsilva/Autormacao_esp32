@@ -383,7 +383,7 @@ void enviaGet() {
   dht.temperature().getEvent(&event);
   dht.humidity().getEvent(&event);
   if (isnan(event.temperature) || isnan(event.relative_humidity)) {
-    gravaLog(" " + relogio_ntp(1) + " - E0200:DHT" + String(DHTTYPE) + " ERRO - enviaGet()", logtxt, 1);
+    gravaLog(" " + relogio_ntp(1) + " - E0200:DHT" + String(DHTTYPE) + " ERRO - enviaGet()", logtxt, 3);
 
   } else {
 
