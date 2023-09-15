@@ -50,6 +50,7 @@ float sensorTemp(int sensor) {
         temperatura_dht_f = event.temperature;
         umidade_dht_f = event.relative_humidity;
       }
+      
       /*
        * LEITURA DA UMIDADE DHTXX
        */

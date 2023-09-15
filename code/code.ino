@@ -22,6 +22,7 @@
 
 String VERSAO = "11.21 15/09/2023";
 
+
 /*
  * VARIAVEIS DO SENSOR BMP280
  */

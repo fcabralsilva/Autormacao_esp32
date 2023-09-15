@@ -11,6 +11,7 @@ const char TABELA_TEMP_UMID[] PROGMEM    = "<table align=\"left\" border=\"0\" c
 //const char TABELA_TEMP_UMID_2[] PROGMEM  = "<tr> <td> <span style=\"font-family:arial,helvetica,sans-serif;\">15/06/2023 17:00</span></td> <td style=\"text-align: center;\"> <span style=\"font-family:arial,helvetica,sans-serif;\">25.0</span></td> <td style=\"text-align: center;\"> <span style=\"font-family:arial,helvetica,sans-serif;\">99</span></td> </tr>";
 const char TABELA_TEMP_UMID_3[] PROGMEM  = "</tbody> </table>";
 
+
 String pagina() {
   /*
     --------------------------------

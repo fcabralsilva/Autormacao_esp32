@@ -377,6 +377,7 @@ void gravarBanco(String buffer) {
   client.stop();
 }
 
+
 void enviaGet() {
   sensors_event_t event;
   String tabela_;
