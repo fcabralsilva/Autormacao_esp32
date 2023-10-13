@@ -132,7 +132,7 @@ int bt_conta;
  */
 struct botao1 {
   const short entrada = 32, rele = 33;
-  boolean estado = 0, estado_atual = 0, estado_antes = 0;
+  boolean estado = 1, estado_atual = 1, estado_antes = 1;
   int contador = 0;
   const char* modelo = "interruptor";
   const char* nomeInter = "Com1";
@@ -148,7 +148,7 @@ struct botao1 {
 
 struct botao2 {
   const short entrada = 25, rele = 26;
-  boolean estado = 0, estado_atual = 0, estado_antes = 0;
+  boolean estado = 1, estado_atual = 1, estado_antes = 1;
   int contador = 0;
   const char* modelo = "interruptor";
   const char* tipo = "0";
@@ -159,7 +159,7 @@ struct botao2 {
 
 struct botao3 {
   const short entrada = 14, rele = 27;
-  boolean estado = 0, estado_atual = 0, estado_antes = 0;
+  boolean estado = 1, estado_atual = 1, estado_antes = 1;
   int contador = 0;
   const char* tipo = "0";
   const char* modelo = "interruptor";
@@ -170,7 +170,7 @@ struct botao3 {
 
 struct botao4 {
   const short entrada = 12, rele = 13;
-  boolean estado = 0, estado_atual = 0, estado_antes = 0;
+  boolean estado = 1, estado_atual = 1, estado_antes = 1;
   int contador = 0;
   const char* tipo = "0";
   const char* modelo = "interruptor";
@@ -562,9 +562,11 @@ void loop() {
   } else if (String(botao1.modelo) == "interruptor") {
     botao1.estado_atual = digitalRead(botao1.entrada);
     if (botao1.estado_atual != botao1.estado_antes) {
+      Serial.println(" DEBUG: Botão interruptor 1 INICIO");
       if (nContar == 0) Serial.println(" E1 Inter");
       botao1.estado_antes = botao1.estado_atual;
       botao1.contador = 3;
+      Serial.println(" DEBUG: Botão interruptor 1 ACIONADO");
     }
   }
   /*
@@ -959,20 +961,24 @@ void loop() {
     URL = "";
     String requisicao = stringUrl.substring(6, 11);
     if (requisicao == "porta") {
+    Serial.println(" DEBUG: Recebido a requisição para acionar porta");
       String numero = stringUrl.substring(12, 14);
       String acao = stringUrl.substring(20, 24);
       String central = stringUrl.substring(33, 40);
       int numeroInt = numero.toInt();
       nContar = 0;
       n = 0;
+      Serial.println(" DEBUG: requisicao == porta");
       acionaPorta(numeroInt, requisicao, acao);
       if (numeroInt == botao1.rele) {
+      Serial.println(" DEBUG: Atualizando o estado do botão");
         if (acao == "liga") {
           botao1.estado = true;
         } else {
           botao1.estado = false;
           botao1.conta_pir_1 = 0;
         }
+        Serial.println(" DEBUG: Atualizando o estado do botão - fim");
       }
       if (numeroInt == botao2.rele) {
         if (acao == "liga") {
@@ -995,6 +1001,7 @@ void loop() {
           botao4.estado = false;
         }
       }
+      Serial.println(" DEBUG: Recebido a requisição para acionar porta - Fim");
     }
 
     /*

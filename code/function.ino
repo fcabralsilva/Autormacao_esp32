@@ -305,6 +305,7 @@ String quebraString(String txtMsg, String string) {
 //    GPIO
 //---------------------------------------
 void acionaPorta(int numeroF, String portaF, String acaoF) {
+  Serial.println(" DEBUG: Recebido solicitação de acionaPorta()");
   gravaLog(" " + relogio_ntp(1) + " - Comando:" + String(numeroF) + "/" + acaoF, logtxt, 4);
   String acao_porta, linha;
   if (acaoF == "liga") {
@@ -323,6 +324,7 @@ void acionaPorta(int numeroF, String portaF, String acaoF) {
   linha = "porta=" + String(numeroF) + acao_porta + ipLocalString;
   gravarBanco(linha);
   linha = "";
+  Serial.println(" DEBUG: Fim solicitação de acionaPorta()");
 }
 
 /* String teste_conexao() {
